@@ -18,7 +18,6 @@
             COMPILE
         -->
 
-
         <dependency>
             <groupId>org.fcrepo</groupId>
             <artifactId>fcrepo-client-impl</artifactId>
@@ -67,13 +66,6 @@
             <scope>test</scope>
         </dependency>
 
-<!--
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
-        </dependency>
--->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -91,5 +83,31 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-assertions</id>
+                        <goals>
+                            <goal>generate-assertions</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <entryPointClassPackage>ch.unil.spring.data.fcrepo4.assertj</entryPointClassPackage>
+                            <classes>
+                                <class>org.fcrepo.client.FedoraResource</class>
+                                <class>org.fcrepo.client.FedoraObject</class>
+                                <class>org.fcrepo.client.FedoraDatastream</class>
+                            </classes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
