@@ -10,6 +10,8 @@
 
     <properties>
         <spring.version>4.1.6.RELEASE</spring.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <dependencies>
@@ -28,6 +30,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.0.0</version>
         </dependency>
 
         <!--
@@ -67,17 +75,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>2.0.0</version>
-            <scope>test</scope>
-        </dependency>
-
-
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
 
@@ -86,28 +93,60 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18.1</version>
                 <executions>
                     <execution>
-                        <id>generate-assertions</id>
+                        <phase>test</phase>
                         <goals>
-                            <goal>generate-assertions</goal>
+                            <goal>integration-test</goal>
                         </goals>
-                        <phase>generate-test-sources</phase>
-                        <configuration>
-                            <entryPointClassPackage>ch.unil.spring.data.fcrepo4.assertj</entryPointClassPackage>
-                            <classes>
-                                <class>org.fcrepo.client.FedoraResource</class>
-                                <class>org.fcrepo.client.FedoraObject</class>
-                                <class>org.fcrepo.client.FedoraDatastream</class>
-                            </classes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>assertj-plugin</id>
+            <build>
+                 <plugins>
+                     <plugin>
+                         <groupId>org.assertj</groupId>
+                         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+                         <version>1.6.0</version>
+                         <executions>
+                             <execution>
+                                 <id>generate-assertions</id>
+                                 <goals>
+                                     <goal>generate-assertions</goal>
+                                 </goals>
+                                 <phase>generate-test-sources</phase>
+                                 <configuration>
+                                     <entryPointClassPackage>ch.unil.spring.data.fcrepo4.assertj</entryPointClassPackage>
+                                     <classes>
+                                         <class>org.fcrepo.client.FedoraResource</class>
+                                         <class>org.fcrepo.client.FedoraObject</class>
+                                         <class>org.fcrepo.client.FedoraDatastream</class>
+                                     </classes>
+                                 </configuration>
+                             </execution>
+                         </executions>
+                     </plugin>
+                 </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
