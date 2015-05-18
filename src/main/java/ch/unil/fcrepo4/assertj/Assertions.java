@@ -1,6 +1,7 @@
 package ch.unil.fcrepo4.assertj;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
 import org.fcrepo.client.FedoraResource;
 
 /**
@@ -16,4 +17,7 @@ public class Assertions extends org.assertj.core.api.Assertions {
         return new NodeAssert(node);
     }
 
+    public static TripleAssert assertThat(Triple triple) {
+        return new TripleAssert(triple);
+    }
 }
