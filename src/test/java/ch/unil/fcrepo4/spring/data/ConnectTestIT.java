@@ -1,4 +1,4 @@
-package ch.unil.spring.data.fcrepo4;
+package ch.unil.fcrepo4.spring.data;
 
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
