@@ -1,8 +1,9 @@
 package ch.unil.fcrepo4.spring.data;
 
+import ch.unil.fcrepo4.utils.Utils;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
-import org.fcrepo.client.impl.ReadOnlyFedoraRepositoryImpl;
+import org.fcrepo.client.impl.FedoraRepositoryImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +37,18 @@ public class ConnectTestIT {
     private Environment env;
 
     @Test
-    public void testReadObject() throws Exception {
+    public void testCreateObject() throws Exception {
         // read an existing object from Fedora
         String repoUrl = env.getProperty("fedora.repository.url");
         // read-only access
-        FedoraRepository repository = new ReadOnlyFedoraRepositoryImpl(repoUrl);
+        FedoraRepository repository = new FedoraRepositoryImpl(repoUrl);
         FedoraObject fo = repository.findOrCreateObject("/test");
         assertThat(fo)
                 .isNotNull()
                 .hasName("test")
                 .createdBefore(LocalDateTime.now().toInstant(ZoneOffset.UTC))
         ;
+        Utils.triplesStream(fo.getProperties()).forEach(System.out::println);
     }
 
 }

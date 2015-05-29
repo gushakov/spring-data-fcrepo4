@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core.mapping.annotation;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.RandomUuidCreator;
-import ch.unil.fcrepo4.spring.data.core.mapping.UuidCreator;
+import ch.unil.fcrepo4.spring.data.core.mapping.DefaultPathCreator;
+import ch.unil.fcrepo4.spring.data.core.mapping.PathCreator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Persistent;
 
@@ -16,5 +16,5 @@ import java.lang.annotation.*;
 @Persistent
 @Id
 public @interface Uuid {
-    Class<? extends UuidCreator> creator() default RandomUuidCreator.class;
+    Class<? extends PathCreator> pathCreator() default DefaultPathCreator.class;
 }

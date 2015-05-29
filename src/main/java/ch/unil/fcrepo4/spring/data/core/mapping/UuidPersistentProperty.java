@@ -14,8 +14,21 @@ public class UuidPersistentProperty extends GenericFedoraPersistentProperty {
 
     private Uuid uuidAnnot;
 
+    private PathCreator pathCreator;
+
     public UuidPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-        this.uuidAnnot = findAnnotation(Uuid.class);
+        Uuid annot = findAnnotation(Uuid.class);
+        this.uuidAnnot = annot;
+        try {
+           this.pathCreator = annot.pathCreator().newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public PathCreator getPathCreator() {
+        return pathCreator;
     }
 }

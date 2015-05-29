@@ -1,6 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mapping.context.AbstractMappingContext;
@@ -31,6 +32,16 @@ public class FedoraMappingContext extends AbstractMappingContext<GenericFedoraPe
 
     @Override
     protected FedoraPersistentProperty createPersistentProperty(Field field, PropertyDescriptor descriptor, GenericFedoraPersistenceEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
-        return null;
+        final FedoraPersistentProperty prop;
+
+        if (field != null && field.getAnnotation(Uuid.class) != null){
+            logger.debug("Found Uuid annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+            prop = new UuidPersistentProperty(field, descriptor, owner, simpleTypeHolder);
+        }
+        else {
+            prop = new GenericFedoraPersistentProperty(field, descriptor, owner, simpleTypeHolder);
+        }
+
+        return prop;
     }
 }
