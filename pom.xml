@@ -106,10 +106,33 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.7</version>
                 <configuration>
                     <overwrite>true</overwrite>
                 </configuration>
+                <executions>
+                    <!--
+                    copy test/etc/fuseki to target/etc/fuseki, it will contain the empty in-memory database
+                    with the name "test", is expected by the indexer when connecting to the fuseki service,
+                    also see FUSEKI_BASE variable set in the cargo configuration below
+                    -->
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/etc/fuseki</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/test/etc/fuseki</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -144,6 +167,15 @@
     </build>
 
 
+    <!--
+Cargo config based on
+    http://stackoverflow.com/questions/8820977/maven-cargo-plugin-embedded-tomcat-7-configuration
+    http://kaczanowscy.pl/tomek/2013-01/cargo-maven-two-tomcats
+See fuseki configuration at
+    http://jena.apache.org/documentation/fuseki2/fuseki-configuration.html
+-->
+
+
     <profiles>
         <profile>
             <id>tomcat7x</id>
@@ -151,10 +183,16 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <container.ajp.port>9009</container.ajp.port>
-                <container.servlet.port>9090</container.servlet.port>
+
             </properties>
             <dependencies>
+                <dependency>
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-fuseki-war</artifactId>
+                    <version>2.0.0</version>
+                    <type>war</type>
+                    <scope>test</scope>
+                </dependency>
                 <dependency>
                     <groupId>org.fcrepo</groupId>
                     <artifactId>fcrepo-webapp</artifactId>
@@ -162,53 +200,216 @@
                     <type>war</type>
                     <scope>test</scope>
                 </dependency>
+                <dependency>
+                    <groupId>org.fcrepo</groupId>
+                    <artifactId>fcrepo-message-consumer-webapp</artifactId>
+                    <version>4.2.0</version>
+                    <type>war</type>
+                    <scope>test</scope>
+                </dependency>
             </dependencies>
             <build>
                 <plugins>
-                    <!--
-Based on http://stackoverflow.com/questions/8820977/maven-cargo-plugin-embedded-tomcat-7-configuration
--->
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>reserve-network-port</id>
+                                <goals>
+                                    <goal>reserve-network-port</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <portNames>
+                                        <portName>triplestore.ajp.port</portName>
+                                        <portName>triplestore.servlet.port</portName>
+                                        <portName>triplestore.rmi.port</portName>
+                                        <portName>fedora.ajp.port</portName>
+                                        <portName>fedora.servlet.port</portName>
+                                        <portName>fedora.rmi.port</portName>
+                                        <portName>indexer.ajp.port</portName>
+                                        <portName>indexer.servlet.port</portName>
+                                        <portName>indexer.rmi.port</portName>
+                                    </portNames>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>
                         <artifactId>cargo-maven2-plugin</artifactId>
                         <version>1.4.14</version>
-                        <configuration>
-                            <container>
-                                <containerId>tomcat7x</containerId>
-                                <artifactInstaller>
-                                    <groupId>org.apache.tomcat</groupId>
-                                    <artifactId>tomcat</artifactId>
-                                    <version>7.0.62</version>
-                                </artifactInstaller>
-                            </container>
-                            <configuration>
-                                <properties>
-                                    <cargo.tomcat.ajp.port>${container.ajp.port}</cargo.tomcat.ajp.port>
-                                    <cargo.servlet.port>${container.servlet.port}</cargo.servlet.port>
-                                </properties>
-                            </configuration>
-                            <deployables>
-                                <deployable>
-                                    <groupId>org.fcrepo</groupId>
-                                    <artifactId>fcrepo-webapp</artifactId>
-                                    <type>war</type>
-                                </deployable>
-                            </deployables>
-                        </configuration>
                         <executions>
                             <execution>
-                                <id>tomcat-start</id>
+                                <id>triplestore-start</id>
                                 <goals>
                                     <goal>start</goal>
                                 </goals>
                                 <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <container>
+                                        <containerId>tomcat7x</containerId>
+                                        <artifactInstaller>
+                                            <groupId>org.apache.tomcat</groupId>
+                                            <artifactId>tomcat</artifactId>
+                                            <version>7.0.62</version>
+                                        </artifactInstaller>
+                                        <systemProperties>
+                                            <FUSEKI_BASE>${project.build.directory}/etc/fuseki</FUSEKI_BASE>
+                                        </systemProperties>
+                                    </container>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.tomcat.ajp.port>${triplestore.ajp.port}</cargo.tomcat.ajp.port>
+                                            <cargo.servlet.port>${triplestore.servlet.port}</cargo.servlet.port>
+                                            <cargo.rmi.port>${triplestore.rmi.port}</cargo.rmi.port>
+                                        </properties>
+                                        <home>${project.build.directory}/triplestore</home>
+                                    </configuration>
+                                    <deployables>
+                                        <deployable>
+                                            <groupId>org.apache.jena</groupId>
+                                            <artifactId>jena-fuseki-war</artifactId>
+                                            <type>war</type>
+                                            <properties>
+                                                <context>ROOT</context>
+                                            </properties>
+                                        </deployable>
+                                    </deployables>
+                                </configuration>
                             </execution>
                             <execution>
-                                <id>tomcat-stop</id>
+                                <id>fedora-start</id>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <container>
+                                        <containerId>tomcat7x</containerId>
+                                        <artifactInstaller>
+                                            <groupId>org.apache.tomcat</groupId>
+                                            <artifactId>tomcat</artifactId>
+                                            <version>7.0.62</version>
+                                        </artifactInstaller>
+                                    </container>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.tomcat.ajp.port>${fedora.ajp.port}</cargo.tomcat.ajp.port>
+                                            <cargo.servlet.port>${fedora.servlet.port}</cargo.servlet.port>
+                                            <cargo.rmi.port>${fedora.rmi.port}</cargo.rmi.port>
+                                        </properties>
+                                        <home>${project.build.directory}/fedora</home>
+                                    </configuration>
+                                    <deployables>
+                                        <deployable>
+                                            <groupId>org.fcrepo</groupId>
+                                            <artifactId>fcrepo-webapp</artifactId>
+                                            <type>war</type>
+                                            <properties>
+                                                <context>ROOT</context>
+                                            </properties>
+                                        </deployable>
+                                    </deployables>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>indexer-start</id>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <container>
+                                        <containerId>tomcat7x</containerId>
+                                        <artifactInstaller>
+                                            <groupId>org.apache.tomcat</groupId>
+                                            <artifactId>tomcat</artifactId>
+                                            <version>7.0.62</version>
+                                        </artifactInstaller>
+                                        <systemProperties>
+                                            <fcrepo.port>${fedora.servlet.port}</fcrepo.port>
+                                            <fuseki.port>${triplestore.servlet.port}</fuseki.port>
+                                            <fuseki.dynamic.test.port>${triplestore.servlet.port}
+                                            </fuseki.dynamic.test.port>
+                                        </systemProperties>
+                                    </container>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.tomcat.ajp.port>${indexer.ajp.port}</cargo.tomcat.ajp.port>
+                                            <cargo.servlet.port>${indexer.servlet.port}</cargo.servlet.port>
+                                            <cargo.rmi.port>${indexer.rmi.port}</cargo.rmi.port>
+                                        </properties>
+                                        <home>${project.build.directory}/indexer</home>
+                                    </configuration>
+                                    <deployables>
+                                        <deployable>
+                                            <groupId>org.fcrepo</groupId>
+                                            <artifactId>fcrepo-message-consumer-webapp</artifactId>
+                                            <type>war</type>
+                                            <properties>
+                                                <context>ROOT</context>
+                                            </properties>
+                                        </deployable>
+                                    </deployables>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>indexer-stop</id>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <container>
+                                        <containerId>tomcat7x</containerId>
+                                    </container>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.servlet.port>${indexer.servlet.port}</cargo.servlet.port>
+                                        </properties>
+                                        <home>${project.build.directory}/indexer</home>
+                                    </configuration>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>fedora-stop</id>
                                 <goals>
                                     <goal>stop</goal>
                                 </goals>
                                 <phase>post-integration-test</phase>
+                                <configuration>
+                                    <container>
+                                        <containerId>tomcat7x</containerId>
+                                    </container>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.servlet.port>${fedora.servlet.port}</cargo.servlet.port>
+                                        </properties>
+                                        <home>${project.build.directory}/fedora</home>
+                                    </configuration>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>triplestore-stop</id>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <container>
+                                        <containerId>tomcat7x</containerId>
+                                    </container>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.servlet.port>${triplestore.servlet.port}</cargo.servlet.port>
+                                        </properties>
+                                        <home>${project.build.directory}/triplestore</home>
+                                    </configuration>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

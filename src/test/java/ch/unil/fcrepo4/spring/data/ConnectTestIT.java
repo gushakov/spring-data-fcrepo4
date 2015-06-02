@@ -51,4 +51,23 @@ public class ConnectTestIT {
         Utils.triplesStream(fo.getProperties()).forEach(System.out::println);
     }
 
+    @Test
+    public void testIndex() throws Exception {
+        // read an existing object from Fedora
+        String repoUrl = env.getProperty("fedora.repository.url");
+        // read-only access
+        FedoraRepository repository = new FedoraRepositoryImpl(repoUrl);
+        FedoraObject fo = repository.findOrCreateObject("/test/foobar");
+        fo.updateProperties("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX indexing: <http://fedora.info/definitions/v4/indexing#>\n" +
+                "  \n" +
+                "DELETE { }\n" +
+                "INSERT { \n" +
+                "  <> indexing:hasIndexingTransformation \"default\"; \n" +
+                "  rdf:type indexing:Indexable; \n" +
+                "  dc:title \"Indexing title foobar\" }\n" +
+                "WHERE { }");
+    }
+
 }
