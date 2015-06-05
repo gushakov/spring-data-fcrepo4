@@ -6,11 +6,6 @@ import org.fcrepo.client.FedoraResource;
 
 import java.time.Instant;
 
-/*
-Note: code is largely based on the equivalent class generated with "assertj-assertions-generator-maven-plugin" version 1.6.0
-for the org.fcrepo.client.FedoraResource class.
- */
-
 /**
  * Provides custom assertions for {@linkplain FedoraResource}. Uses {@code java.time} API for date and time assertions.
  *

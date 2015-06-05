@@ -1,9 +1,5 @@
 package ch.unil.fcrepo4.spring.data.core;
 
-/*
-    Based on org.springframework.data.solr.core.SolrTemplate
- */
-
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import org.fcrepo.client.FedoraRepository;

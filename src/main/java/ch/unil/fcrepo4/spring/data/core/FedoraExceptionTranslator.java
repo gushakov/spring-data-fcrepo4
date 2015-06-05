@@ -4,10 +4,6 @@ import org.fcrepo.client.FedoraException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 
-/*
-Based on org.springframework.data.solr.core.SolrExceptionTranslator
- */
-
 /**
  * @author gushakov
  */
