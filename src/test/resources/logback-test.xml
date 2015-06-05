@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.data" level="INFO"/>
     <logger name="ch.unil.fcrepo4" level="DEBUG"/>
 

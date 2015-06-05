@@ -1,7 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.convert;
 
 import ch.unil.fcrepo4.spring.data.core.Constants;
-import ch.unil.fcrepo4.spring.data.core.mapping.ConcatenatingPathCreator;
 import ch.unil.fcrepo4.spring.data.core.mapping.DefaultPathCreator;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;

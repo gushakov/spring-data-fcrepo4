@@ -1,4 +1,6 @@
-package ch.unil.fcrepo4.spring.data.core.mapping;
+package ch.unil.fcrepo4.spring.data.core.convert;
+
+import ch.unil.fcrepo4.spring.data.core.mapping.PathCreator;
 
 /**
  * @author gushakov

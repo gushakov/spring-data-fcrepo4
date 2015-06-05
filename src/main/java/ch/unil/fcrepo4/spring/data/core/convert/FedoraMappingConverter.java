@@ -12,6 +12,7 @@ import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.model.BeanWrapper;
 import org.springframework.data.mapping.model.MappingException;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
@@ -23,7 +24,7 @@ import org.springframework.util.Assert;
 public class FedoraMappingConverter implements FedoraConverter {
     private FedoraRepository repository;
 
-    private FedoraMappingContext mappingContext;
+    private MappingContext<? extends FedoraPersistentEntity<?>, FedoraPersistentProperty> mappingContext;
 
     private SimpleTypeHolder simpleTypeHolder;
 
@@ -39,6 +40,8 @@ public class FedoraMappingConverter implements FedoraConverter {
         this.simpleTypeHolder = new SimpleTypeHolder();
     }
 
+
+
     @Override
     public <T> T read(Class<T> type, FedoraObject source) {
         return null;
@@ -46,11 +49,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     @Override
     public void write(Object source, FedoraObject sink) {
-        Assert.notNull(sink);
-        if (source == null) {
-            return;
-        }
-
+        // TODO: write properties here
     }
 
     protected FedoraObject prepareFedoraObjectForWrite(Object source) {
@@ -109,5 +108,15 @@ public class FedoraMappingConverter implements FedoraConverter {
         final FedoraObject fedoraObject = prepareFedoraObjectForWrite(source);
         write(source, fedoraObject);
         return fedoraObject;
+    }
+
+    @Override
+    public MappingContext<? extends FedoraPersistentEntity<?>, FedoraPersistentProperty> getMappingContext() {
+        return mappingContext;
+    }
+
+    @Override
+    public ConversionService getConversionService() {
+        return conversionService;
     }
 }
