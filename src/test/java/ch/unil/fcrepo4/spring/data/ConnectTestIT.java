@@ -38,9 +38,7 @@ public class ConnectTestIT {
 
     @Test
     public void testCreateObject() throws Exception {
-        // read an existing object from Fedora
         String repoUrl = env.getProperty("fedora.repository.url");
-        // read-only access
         FedoraRepository repository = new FedoraRepositoryImpl(repoUrl);
         FedoraObject fo = repository.findOrCreateObject("/test");
         assertThat(fo)
@@ -53,9 +51,7 @@ public class ConnectTestIT {
 
     @Test
     public void testIndex() throws Exception {
-        // read an existing object from Fedora
         String repoUrl = env.getProperty("fedora.repository.url");
-        // read-only access
         FedoraRepository repository = new FedoraRepositoryImpl(repoUrl);
         FedoraObject fo = repository.findOrCreateObject("/test/foobar");
         fo.updateProperties("PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +

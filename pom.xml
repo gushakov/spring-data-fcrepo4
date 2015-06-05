@@ -12,6 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipITs>false</skipITs>
+        <indexer.start.mode>run</indexer.start.mode>
     </properties>
 
     <dependencies>
@@ -407,7 +408,7 @@ See fuseki configuration at
                             <execution>
                                 <id>indexer-start</id>
                                 <goals>
-                                    <goal>start</goal>
+                                    <goal>${indexer.start.mode}</goal>
                                 </goals>
                                 <phase>pre-integration-test</phase>
                                 <configuration>
