@@ -1,5 +1,7 @@
 package ch.unil.fcrepo4.spring.data;
 
+import ch.unil.fcrepo4.spring.data.core.query.SelectQueryBuilder;
+import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseStringType;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -9,6 +11,10 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.*;
+import com.hp.hpl.jena.sparql.expr.aggregate.AggCount;
+import com.hp.hpl.jena.sparql.expr.aggregate.AggregatorFactory;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraObjectImpl;
@@ -18,7 +24,7 @@ import org.junit.Test;
 /**
  * @author gushakov
  */
-public class ArqQueryTest {
+public class SparqlQueryTest {
 
     @Test
     public void testQuery() throws Exception {
@@ -33,7 +39,7 @@ public class ArqQueryTest {
         Model model = ModelFactory.createModelForGraph(graph);
 
         Query query = QueryFactory.create("SELECT ?x\n" +
-                "WHERE { ?x  <http://fedora.info/definitions/v4/repository#uuid>  \"4e2ed909-3c35-4b49-9c09-f07e7d076af4\" }");
+                "WHERE { ?x  <http://fedora.info/definitions/v4/repository#uuid>  \"969de1b6-b91d-44e2-80a8-eb03edf49ac0\" }");
 
         try(QueryExecution queryExecution = QueryExecutionFactory.create(query, model)){
             ResultSet results = queryExecution.execSelect();
@@ -69,6 +75,53 @@ public class ArqQueryTest {
             RDFNode s = querySolution.get("s");
             System.out.println(s);
         }
+    }
+
+    @Test
+    public void testSparqlQuery() throws Exception {
+        Triple triple1 = Triple.create(Var.alloc("p"), NodeFactory.createURI("http://foobar#name"), NodeFactory.createLiteral("George", new XSDBaseStringType("string")));
+        Expr expr = new E_LessThan(new ExprVar("o"), new NodeValueInteger(10));
+        Query query = new SelectQueryBuilder()
+                .select("p")
+                .from(triple1)
+//                .where(expr)
+                .build();
+        System.out.println(query);
+
+        // test with local Fuseki server
+
+        try(QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://localhost:3030/ds/sparql", query.toString())){
+            ResultSet results = queryExecution.execSelect();
+            while (results.hasNext()){
+                QuerySolution querySolution = results.nextSolution();
+                RDFNode s = querySolution.get("p");
+                System.out.println(s);
+            }
+        }
+
+    }
+
+    @Test
+    public void testSparqlQueryCount() throws Exception {
+        Triple triple1 = Triple.create(Var.alloc("s"), NodeFactory.createURI("http://foobar#id"), Var.ANON);
+        Query query = new SelectQueryBuilder()
+                .count(true)
+                .from(triple1)
+                .build();
+
+        System.out.println(query);
+
+        // test with local Fuseki server
+
+        try(QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://localhost:3030/ds/sparql", query.toString())){
+            ResultSet results = queryExecution.execSelect();
+            while (results.hasNext()){
+                QuerySolution querySolution = results.nextSolution();
+                RDFNode s = querySolution.get("count");
+                System.out.println(s);
+            }
+        }
+
     }
 
 }
