@@ -1,9 +1,10 @@
 package ch.unil.fcrepo4.spring.data;
 
+import static ch.unil.fcrepo4.spring.data.core.query.SelectQueryBuilder.*;
+
+import ch.unil.fcrepo4.spring.data.core.query.PrefixMap;
 import ch.unil.fcrepo4.spring.data.core.query.SelectQueryBuilder;
-import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseStringType;
 import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.*;
@@ -11,9 +12,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.expr.*;
-import com.hp.hpl.jena.sparql.expr.aggregate.AggCount;
-import com.hp.hpl.jena.sparql.expr.aggregate.AggregatorFactory;
+import com.hp.hpl.jena.sparql.expr.E_LessThan;
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import org.fcrepo.client.FedoraRepository;
@@ -79,6 +80,7 @@ public class SparqlQueryTest {
 
     @Test
     public void testSparqlQuery() throws Exception {
+/*
         Triple triple1 = Triple.create(Var.alloc("p"), NodeFactory.createURI("http://foobar#name"), NodeFactory.createLiteral("George", new XSDBaseStringType("string")));
         Expr expr = new E_LessThan(new ExprVar("o"), new NodeValueInteger(10));
         Query query = new SelectQueryBuilder()
@@ -98,15 +100,31 @@ public class SparqlQueryTest {
                 System.out.println(s);
             }
         }
+*/
 
     }
 
     @Test
     public void testSparqlQueryCount() throws Exception {
-        Triple triple1 = Triple.create(Var.alloc("s"), NodeFactory.createURI("http://foobar#id"), Var.ANON);
+        Triple triple1 = Triple.create(Var.alloc("s"), NodeFactory.createURI("http://foobar#id"), Var.alloc("v"));
+        Triple triple2 = Triple.create(Var.alloc("t"), NodeFactory.createURI("http://foobar#id"), Var.alloc("u"));
+        Expr expr1 = new E_LessThan(new ExprVar("v"), new NodeValueInteger(5));
+        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("t", "http://foobar#"))
+                .select("s")
+                .from("s", "t:foo", 5)
+                .from("u", "t:bar", "wam")
+                .from("u", "s:toto", "waz")
+                .where(expr1)
+                .build();
+        System.out.println(query);
+
+/*
+        Triple triple1 = Triple.create(Var.alloc("s"), NodeFactory.createURI("http://foobar#id"), Var.alloc("v"));
         Query query = new SelectQueryBuilder()
                 .count(true)
                 .from(triple1)
+                .where(new E_LessThan(new ExprVar("v"), new NodeValueInteger(5)))
+
                 .build();
 
         System.out.println(query);
@@ -121,6 +139,7 @@ public class SparqlQueryTest {
                 System.out.println(s);
             }
         }
+*/
 
     }
 
