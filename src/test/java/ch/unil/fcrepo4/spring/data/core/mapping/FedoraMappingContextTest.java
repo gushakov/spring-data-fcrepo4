@@ -52,7 +52,6 @@ public class FedoraMappingContextTest {
         UuidPersistentProperty uuidProp2 = (UuidPersistentProperty) entity2.getPersistentProperty(Uuid.class);
         assertThat(uuidProp2).isNotNull();
         assertThat(uuidProp2.isUUID).isTrue();
-        System.out.println("|||||||||||||TESTING TRAVIS||||||||||||||||||||");
     }
 
 }
