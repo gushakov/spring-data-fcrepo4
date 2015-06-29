@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraObjectImpl;
@@ -13,8 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.UUID;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -56,7 +54,7 @@ public class FedoraTemplateTest {
 
     @FedoraObject
     static class Bean1 {
-        @Uuid
+        @Path
         String uuid = "foo-bar";
     }
 

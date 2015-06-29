@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
@@ -46,13 +46,13 @@ public class FedoraTemplateTestIT {
 
     @FedoraObject
     static class Bean1 {
-        @Uuid
+        @Path
         String uuid = "foo-bar-101";
     }
 
     @FedoraObject
     static class Bean2 {
-        @Uuid
+        @Path
         String uuid = "102|103";
     }
 

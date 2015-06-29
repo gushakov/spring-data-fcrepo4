@@ -1,7 +1,5 @@
 package ch.unil.fcrepo4.spring.data;
 
-import static ch.unil.fcrepo4.spring.data.core.query.SelectQueryBuilder.*;
-
 import ch.unil.fcrepo4.spring.data.core.query.PrefixMap;
 import ch.unil.fcrepo4.spring.data.core.query.SelectQueryBuilder;
 import com.hp.hpl.jena.graph.Graph;
@@ -20,6 +18,7 @@ import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraObjectImpl;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -28,6 +27,7 @@ import org.junit.Test;
 public class SparqlQueryTest {
 
     @Test
+    @Ignore
     public void testQuery() throws Exception {
 
         // from https://jena.apache.org/documentation/query/app_api.html
@@ -50,6 +50,7 @@ public class SparqlQueryTest {
     }
 
     @Test
+    @Ignore
     public void testQueryBuilder() throws Exception {
         Triple triple = Triple.create(Var.alloc("s"), NodeFactory.createURI("info:fedora/test/foo"), NodeFactory.createLiteral("bar"));
         Query query = QueryFactory.make();
@@ -79,35 +80,7 @@ public class SparqlQueryTest {
     }
 
     @Test
-    public void testSparqlQuery() throws Exception {
-/*
-        Triple triple1 = Triple.create(Var.alloc("p"), NodeFactory.createURI("http://foobar#name"), NodeFactory.createLiteral("George", new XSDBaseStringType("string")));
-        Expr expr = new E_LessThan(new ExprVar("o"), new NodeValueInteger(10));
-        Query query = new SelectQueryBuilder()
-                .select("p")
-                .from(triple1)
-//                .where(expr)
-                .build();
-        System.out.println(query);
-
-        // test with local Fuseki server
-
-        try(QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://localhost:3030/ds/sparql", query.toString())){
-            ResultSet results = queryExecution.execSelect();
-            while (results.hasNext()){
-                QuerySolution querySolution = results.nextSolution();
-                RDFNode s = querySolution.get("p");
-                System.out.println(s);
-            }
-        }
-*/
-
-    }
-
-    @Test
     public void testSparqlQueryCount() throws Exception {
-        Triple triple1 = Triple.create(Var.alloc("s"), NodeFactory.createURI("http://foobar#id"), Var.alloc("v"));
-        Triple triple2 = Triple.create(Var.alloc("t"), NodeFactory.createURI("http://foobar#id"), Var.alloc("u"));
         Expr expr1 = new E_LessThan(new ExprVar("v"), new NodeValueInteger(5));
         Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("t", "http://foobar#"))
                 .select("s")
@@ -117,30 +90,6 @@ public class SparqlQueryTest {
                 .where(expr1)
                 .build();
         System.out.println(query);
-
-/*
-        Triple triple1 = Triple.create(Var.alloc("s"), NodeFactory.createURI("http://foobar#id"), Var.alloc("v"));
-        Query query = new SelectQueryBuilder()
-                .count(true)
-                .from(triple1)
-                .where(new E_LessThan(new ExprVar("v"), new NodeValueInteger(5)))
-
-                .build();
-
-        System.out.println(query);
-
-        // test with local Fuseki server
-
-        try(QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://localhost:3030/ds/sparql", query.toString())){
-            ResultSet results = queryExecution.execSelect();
-            while (results.hasNext()){
-                QuerySolution querySolution = results.nextSolution();
-                RDFNode s = querySolution.get("count");
-                System.out.println(s);
-            }
-        }
-*/
-
     }
 
 }

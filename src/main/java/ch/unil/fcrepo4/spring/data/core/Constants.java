@@ -7,6 +7,11 @@ package ch.unil.fcrepo4.spring.data.core;
 public class Constants {
 
     /**
+     * Separator for JCR paths.
+     */
+    public static final String PATH_SEPARATOR = "/";
+
+    /**
      * Placeholder indicating the default (missing) value of the optional argument of an annotation.
      */
     public static final String DEFAULT_ANNOTATION_STRING_VALUE_TOKEN = "##default";

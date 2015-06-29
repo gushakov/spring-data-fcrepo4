@@ -6,6 +6,7 @@ import org.springframework.data.mapping.model.SimpleTypeHolder;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 /**
  * @author gushakov
@@ -14,21 +15,17 @@ public class UuidPersistentProperty extends GenericFedoraPersistentProperty {
 
     private Uuid uuidAnnot;
 
-    private PathCreator pathCreator;
+    boolean isUUID = false;
 
     public UuidPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-        Uuid annot = findAnnotation(Uuid.class);
-        this.uuidAnnot = annot;
-        try {
-           this.pathCreator = annot.pathCreator().newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        this.uuidAnnot = findAnnotation(Uuid.class);
+        if (UUID.class.isAssignableFrom(field.getType())){
+            this.isUUID = true;
         }
-
     }
 
-    public PathCreator getPathCreator() {
-        return pathCreator;
+    public boolean isUUID() {
+        return isUUID;
     }
 }

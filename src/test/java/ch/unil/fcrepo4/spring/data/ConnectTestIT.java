@@ -4,6 +4,7 @@ import ch.unil.fcrepo4.utils.Utils;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
+import org.fcrepo.kernel.RdfLexicon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class ConnectTestIT {
                 .createdBefore(LocalDateTime.now().toInstant(ZoneOffset.UTC))
         ;
         Utils.triplesStream(fo.getProperties()).forEach(System.out::println);
+        System.out.println(Utils.getFedoraObjectProperty(fo, "uuid"));
     }
 
     @Test
