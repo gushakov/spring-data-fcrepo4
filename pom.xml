@@ -187,11 +187,152 @@ See fuseki configuration at
 
 
     <profiles>
+        <profile>
+            <id>cargo-fedora-integration-tests</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.fcrepo</groupId>
+                    <artifactId>fcrepo-webapp</artifactId>
+                    <version>4.2.0</version>
+                    <type>war</type>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.10</version>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.fcrepo</groupId>
+                                            <artifactId>fcrepo-webapp</artifactId>
+                                            <version>4.2.0</version>
+                                            <type>war</type>
+                                            <overWrite>true</overWrite>
+                                            <outputDirectory>${project.build.directory}/fedora-webapp</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.7</version>
+                        <executions>
+
+                            <!-- Register custom node types with Fedora -->
+                            <execution>
+                                <id>copy-fedora-node-types</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/fedora-webapp/WEB-INF/classes</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${basedir}/src/test/etc</directory>
+                                            <filtering>false</filtering>
+                                            <includes>
+                                                <include>fedora-node-types.cnd</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                    <overwrite>true</overwrite>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>1.4.14</version>
+                        <configuration>
+                            <container>
+                                <containerId>tomcat7x</containerId>
+                                <artifactInstaller>
+                                    <groupId>org.apache.tomcat</groupId>
+                                    <artifactId>tomcat</artifactId>
+                                    <version>7.0.62</version>
+                                </artifactInstaller>
+                            </container>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>fedora-start</id>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.tomcat.ajp.port>${fedora.ajp.port}</cargo.tomcat.ajp.port>
+                                            <cargo.servlet.port>${fedora.servlet.port}</cargo.servlet.port>
+                                            <cargo.rmi.port>${fedora.rmi.port}</cargo.rmi.port>
+                                        </properties>
+                                        <home>${project.build.directory}/fedora</home>
+                                    </configuration>
+                                    <deployables>
+                                        <deployable>
+                                            <groupId>org.fcrepo</groupId>
+                                            <artifactId>fcrepo-webapp</artifactId>
+                                            <type>war</type>
+                                            <location>${project.build.directory}/fedora-webapp</location>
+                                            <properties>
+                                                <context>ROOT</context>
+                                            </properties>
+                                        </deployable>
+                                    </deployables>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>fedora-stop</id>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                                <phase>post-integration-test</phase>
+                                <configuration>
+                                    <configuration>
+                                        <properties>
+                                            <cargo.tomcat.ajp.port>${fedora.ajp.port}</cargo.tomcat.ajp.port>
+                                            <cargo.servlet.port>${fedora.servlet.port}</cargo.servlet.port>
+                                            <cargo.rmi.port>${fedora.rmi.port}</cargo.rmi.port>
+                                        </properties>
+                                        <home>${project.build.directory}/fedora</home>
+                                    </configuration>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
         <profile>
             <id>cargo-integration-tests</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>

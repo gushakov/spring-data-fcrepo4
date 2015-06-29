@@ -55,7 +55,7 @@ public class FedoraTemplateTest {
     @FedoraObject
     static class Bean1 {
         @Path
-        String uuid = "foo-bar";
+        String path = "/foo/bar";
     }
 
     @Test

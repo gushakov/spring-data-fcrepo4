@@ -24,10 +24,10 @@ import org.junit.Test;
 /**
  * @author gushakov
  */
+@Ignore
 public class SparqlQueryTest {
 
     @Test
-    @Ignore
     public void testQuery() throws Exception {
 
         // from https://jena.apache.org/documentation/query/app_api.html
@@ -50,7 +50,6 @@ public class SparqlQueryTest {
     }
 
     @Test
-    @Ignore
     public void testQueryBuilder() throws Exception {
         Triple triple = Triple.create(Var.alloc("s"), NodeFactory.createURI("info:fedora/test/foo"), NodeFactory.createLiteral("bar"));
         Query query = QueryFactory.make();

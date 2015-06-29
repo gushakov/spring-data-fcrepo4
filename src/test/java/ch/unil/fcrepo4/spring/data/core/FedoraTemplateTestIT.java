@@ -47,13 +47,13 @@ public class FedoraTemplateTestIT {
     @FedoraObject
     static class Bean1 {
         @Path
-        String uuid = "foo-bar-101";
+        String path = "foo-bar-101";
     }
 
     @FedoraObject
     static class Bean2 {
         @Path
-        String uuid = "102|103";
+        String path = "102|103";
     }
 
     @Autowired
@@ -64,7 +64,7 @@ public class FedoraTemplateTestIT {
          fedoraTemplate.save(new Bean1());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSave2() throws Exception {
          fedoraTemplate.save(new Bean2());
     }
