@@ -1,4 +1,11 @@
 language: java
+
 jdk:
     - oraclejdk8
-script: "mvn verify"
+
+before_install:
+    - "export $JAVA_OPTS"
+    - "export JAVA_OPTS=-Xmx512"
+
+script:
+    - mvn verify
