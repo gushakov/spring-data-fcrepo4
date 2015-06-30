@@ -6,7 +6,7 @@ Spring Data module for persisting and querying annotated POJOs to Fedora Commons
 
 ## Acknowledgements
 
-This project is heavily based on the code from the following projects
+This project is heavily based on the code from the following projects (including configuration files: Maven, Travis CI, etc.)
 
  * [fcrepo4-client](https://github.com/fcrepo4-labs/fcrepo4-client)
 
