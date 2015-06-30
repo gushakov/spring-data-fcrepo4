@@ -1,6 +1,8 @@
 ### Spring Data Fedora Commons Repository (v. 4.x)
 
-Provides an implementation of Spring Data SPI for persisting and querying annotated Java objects to Fedora repository.
+https://travis-ci.org/gushakov/spring-data-fcrepo4.svg?branch=master
+
+Spring Data module for persisting and querying annotated POJOs to Fedora Commons repository (v. 4.x).
 
 #### Acknowledgements
 
