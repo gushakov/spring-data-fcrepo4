@@ -1,6 +1,6 @@
 ### Spring Data Fedora Commons Repository (v. 4.x)
 
-https://travis-ci.org/gushakov/spring-data-fcrepo4.svg?branch=master
+![Build status](https://travis-ci.org/gushakov/spring-data-fcrepo4.svg?branch=master)
 
 Spring Data module for persisting and querying annotated POJOs to Fedora Commons repository (v. 4.x).
 
