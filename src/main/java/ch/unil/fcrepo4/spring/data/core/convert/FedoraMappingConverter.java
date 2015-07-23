@@ -12,8 +12,13 @@ import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import ch.unil.fcrepo4.utils.Utils;
+import com.hp.hpl.jena.graph.NodeFactory;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
 import org.fcrepo.kernel.RdfLexicon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.task.TaskExecutor;
@@ -21,7 +26,6 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.model.MappingException;
-import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 
@@ -31,13 +35,17 @@ import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * @author gushakov
  */
 public class FedoraMappingConverter implements FedoraConverter {
+    private static final Logger logger = LoggerFactory.getLogger(FedoraMappingConverter.class);
+
     private FedoraRepository repository;
 
     private MappingContext<? extends FedoraPersistentEntity<?>, FedoraPersistentProperty> mappingContext;
@@ -67,8 +75,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     @Override
     public void write(Object source, FedoraObject sink) {
-        // write properties
-
+        writeSimpleProperties(source, (FedoraObjectPersistentEntity<?>) getFedoraPersistentEntity(source), sink);
     }
 
     @Override
@@ -78,7 +85,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         FedoraObject fedoraObject = createFedoraObject(source, (FedoraObjectPersistentEntity<?>) entity);
         readFedoraObjectProperties(source, (FedoraObjectPersistentEntity<?>) entity, fedoraObject);
         writeDatastreams(source, (FedoraObjectPersistentEntity<?>) entity, fedoraObject);
-        write(source, fedoraObject);
+        writeSimpleProperties(source, (FedoraObjectPersistentEntity<?>) entity, fedoraObject);
         return fedoraObject;
     }
 
@@ -227,7 +234,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         content.setContentType(dsProp.getMimetype());
         Object dsContent = entity.getPropertyAccessor(source).getProperty(dsProp);
         if (dsContent != null) {
-            if (dsProp.getMimetype().equals(Constants.DATASTREAM_MIME_TYPE_TEXT_XML)) {
+            if (dsProp.getMimetype().equals(Constants.MIME_TYPE_TEXT_XML)) {
 
                 Marshaller marshaller;
                 try {
@@ -283,5 +290,26 @@ public class FedoraMappingConverter implements FedoraConverter {
             throw new RuntimeException(e);
         }
 
+    }
+
+    protected void writeSimpleProperties(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject sink) {
+        PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(source);
+        final List<String> inserts = new ArrayList<>();
+        entity.doWithProperties((PersistentProperty<?> property) -> {
+            if (property instanceof SimpleFedoraPersistentProperty) {
+                SimpleFedoraPersistentProperty simpleProp = (SimpleFedoraPersistentProperty) property;
+                Object propValue = propsAccessor.getProperty(simpleProp);
+                inserts.add("<> <" + simpleProp.getUri() + "> "
+                        + Utils.encodeLiteralValue(propValue, simpleProp.getType()));
+            }
+        });
+        if (inserts.size() > 0) {
+            logger.debug("Update: {}", "INSERT DATA { " + StringUtils.join(inserts, " . ") + " . }");
+            try {
+                sink.updateProperties("INSERT DATA { " + StringUtils.join(inserts, " . ") + " . }");
+            } catch (FedoraException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

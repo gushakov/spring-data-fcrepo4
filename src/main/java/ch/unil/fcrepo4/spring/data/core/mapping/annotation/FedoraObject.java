@@ -13,5 +13,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Persistent
 public @interface FedoraObject {
-    String namespace() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
+    String namespace() default Constants.DEFAULT_NAMESPACE;
+    String uriNs() default Constants.TEST_FEDORA_URI_NAMESPACE;
 }

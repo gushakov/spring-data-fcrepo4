@@ -2,13 +2,15 @@ package ch.unil.fcrepo4.spring.data.core.convert;
 
 import ch.unil.fcrepo4.jaxb.foobar.FoobarType;
 import ch.unil.fcrepo4.jaxb.foobar.ObjectFactory;
+import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
+import ch.unil.fcrepo4.utils.Utils;
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import org.apache.commons.io.IOUtils;
-import org.fcrepo.client.FedoraContent;
-import org.fcrepo.client.FedoraDatastream;
-import org.fcrepo.client.FedoraRepository;
+import org.fcrepo.client.*;
 import org.fcrepo.client.impl.FedoraDatastreamImpl;
 import org.fcrepo.client.impl.FedoraObjectImpl;
 import org.fcrepo.client.utils.HttpHelper;
@@ -25,13 +27,18 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
+
 
 /*
 Based on org.fcrepo.client.impl.FedoraObjectImplTest
@@ -57,6 +64,15 @@ public class FedoraMappingConverterTest {
 
         @Datastream(jaxbContextPath = "ch.unil.fcrepo4.jaxb.foobar")
         JAXBElement<FoobarType> foobarDs;
+
+        @Property
+        int number = 1;
+
+        @Property
+        Integer anotherNumber = 2;
+
+        @Property
+        String baz = "baz";
     }
 
     @Mock
@@ -76,10 +92,11 @@ public class FedoraMappingConverterTest {
                             List<Triple> triples = new ArrayList<Triple>();
                             switch (path) {
                                 case "/test" + PATH_1:
-                                    triples.add(new Triple(NodeFactory.createURI("http://localhost:9090/rest/test" + PATH_1),
+                                    Node uri = NodeFactory.createURI("http://localhost:9090/rest/test" + PATH_1);
+                                    triples.add(new Triple(uri,
                                             NodeFactory.createURI(RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI()),
                                             NodeFactory.createLiteral("df0ce28e-2ec7-4c96-8b21-235a98a0da74")));
-                                    triples.add(new Triple(NodeFactory.createURI("http://localhost:9090/rest/test" + PATH_1),
+                                    triples.add(new Triple(uri,
                                             NodeFactory.createURI(RdfLexicon.CREATED_DATE.getURI()),
                                             NodeFactory.createLiteral("2015-07-23T08:18:21.327Z")));
                                     break;
@@ -87,6 +104,7 @@ public class FedoraMappingConverterTest {
                             org.fcrepo.client.FedoraObject fo = spy(new FedoraObjectImpl(mockRepository, mockHelper, (String) invocation.getArguments()[0]));
                             doReturn(triples.iterator())
                                     .when(fo).getProperties();
+                            doNothing().when(fo).updateProperties(anyString());
                             return fo;
                         }
 
@@ -139,6 +157,17 @@ public class FedoraMappingConverterTest {
 
         org.fcrepo.client.FedoraObject fo = mappingConverter.write(source);
         verify(mockRepository).createDatastream(eq("/test" + PATH_1 + "/foobards"), any());
+    }
+
+    @Test
+    public void testPropertyInt() throws Exception {
+        FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
+        Bean1 source = new Bean1();
+        org.fcrepo.client.FedoraObject fo = mappingConverter.write(source);
+        verify(fo).updateProperties(contains("<> <" +
+                Constants.TEST_FEDORA_URI_NAMESPACE +
+                "number> " +
+                Utils.encodeLiteralValue(source.number, int.class)));
     }
 
 }

@@ -87,7 +87,7 @@ public class FedoraMappingContextTest {
         GenericFedoraPersistenceEntity<?> entity = context.getPersistentEntity(Bean3.class);
         DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) entity.getPersistentProperty("foobarDs");
         assertThat(dsProp).isNotNull();
-        assertThat(dsProp.getMimetype()).isEqualTo(Constants.DATASTREAM_MIME_TYPE_TEXT_XML);
+        assertThat(dsProp.getMimetype()).isEqualTo(Constants.MIME_TYPE_TEXT_XML);
         assertThat(dsProp.getJaxbContextPath()).isEqualTo("ch.unil.fcrepo4.jaxb.foobar");
         assertThat(dsProp.getPath()).isEqualTo("foobards");
     }

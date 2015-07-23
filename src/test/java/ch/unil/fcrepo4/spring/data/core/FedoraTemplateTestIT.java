@@ -5,6 +5,10 @@ import ch.unil.fcrepo4.jaxb.foobar.ObjectFactory;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Datastream;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
+import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
+import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.vocabulary.XSD;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
@@ -20,6 +24,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.xml.bind.JAXBElement;
 import java.util.UUID;
+
+import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -72,7 +78,10 @@ public class FedoraTemplateTestIT {
     @FedoraObject
     static class Bean4 {
         @Path
-        String path = null;
+        String path = UUID.randomUUID().toString();
+
+        @Property
+        int number = 1;
     }
 
     @Autowired
@@ -103,6 +112,15 @@ public class FedoraTemplateTestIT {
         foobarType.setBar(2);
         bean.foobarDs = jaxbFactory.createFoobar(foobarType);
         fedoraTemplate.save(bean);
+    }
+
+    @Test
+    public void testSavePropertyInt() throws Exception {
+        Bean4 bean4 = new Bean4();
+        fedoraTemplate.save(bean4);
+        assertThat(repository.getObject("/test/"+bean4.path).getProperties())
+        .contains(NodeFactory.createURI(Constants.TEST_FEDORA_URI_NAMESPACE+"number"),
+                NodeFactory.createLiteral(""+bean4.number, new XSDBaseNumericType(XSD.integer.getLocalName())));
     }
 
 }

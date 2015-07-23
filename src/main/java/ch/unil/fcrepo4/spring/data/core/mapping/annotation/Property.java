@@ -12,8 +12,7 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Persistent
-public @interface Datastream {
-    String path() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
-    String mimetype() default Constants.MIME_TYPE_TEXT_XML;
-    String jaxbContextPath() default "";
+public @interface Property {
+    String localName() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
+    String uriNs() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
 }

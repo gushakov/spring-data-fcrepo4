@@ -27,10 +27,56 @@ public class TriplesIteratorAssert extends IterableAssert<Triple> {
         List<Node> subjects = new ArrayList<>();
         for (Triple triple : actual) {
             Node subject = triple.getSubject();
-            if (subject.isURI() && subject.getNameSpace().equals(namespace)){
+            if (subject.isURI() && subject.getNameSpace().equals(namespace)) {
                 subjects.add(subject);
             }
         }
         return new NodesIterableAssert(subjects);
+    }
+
+    public TriplesIteratorAssert contains(Triple anotherTriple) {
+        isNotNull();
+        boolean found = false;
+
+        for (Triple triple : actual) {
+            if (!triple.getSubject().isURI()
+                    || !triple.getPredicate().isURI()
+                    || !triple.getObject().isLiteral()) {
+                continue;
+            }
+            if (triple.getSubject().getURI().equals(anotherTriple.getSubject().getURI())
+                    && triple.getPredicate().getURI().equals(anotherTriple.getPredicate().getURI())
+                    && triple.getObject().getLiteralLexicalForm().equals(anotherTriple.getObject().getLiteralLexicalForm())
+                    ) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            failWithMessage("Cannot find triple %s", anotherTriple);
+        }
+        return this;
+    }
+
+    public TriplesIteratorAssert contains(Node predicate, Node literalValue) {
+        isNotNull();
+        boolean found = false;
+
+        for (Triple triple : actual) {
+            if (!triple.getPredicate().isURI()
+                    || !triple.getObject().isLiteral()) {
+                continue;
+            }
+            if (triple.getPredicate().getURI().equals(predicate.getURI())
+                    && triple.getObject().getLiteralLexicalForm().equals(literalValue.getLiteralLexicalForm())
+                    ) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            failWithMessage("Cannot find triple with predicate %s and literal value %s", predicate, literalValue);
+        }
+        return this;
     }
 }
