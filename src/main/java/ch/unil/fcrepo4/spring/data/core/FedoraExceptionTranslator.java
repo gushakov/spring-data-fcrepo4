@@ -11,6 +11,11 @@ public class FedoraExceptionTranslator implements PersistenceExceptionTranslator
     @Override
     public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
         if (ex.getCause() instanceof FedoraException){
+
+            System.out.println("||||||||||||||||||||||||||||||||||||");
+            System.out.println("||  TRANSLATED FEDORA EXCEPTION   ||");
+            System.out.println("||||||||||||||||||||||||||||||||||||");
+
             // TODO: specify exception type
             return new UncategorizedFedoraException(ex.getMessage(), ex);
         }

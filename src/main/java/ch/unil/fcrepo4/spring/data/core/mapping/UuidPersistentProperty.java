@@ -13,19 +13,11 @@ import java.util.UUID;
  */
 public class UuidPersistentProperty extends GenericFedoraPersistentProperty {
 
-    private Uuid uuidAnnot;
-
-    boolean isUUID = false;
-
     public UuidPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-        this.uuidAnnot = findAnnotation(Uuid.class);
-        if (UUID.class.isAssignableFrom(field.getType())){
-            this.isUUID = true;
-        }
     }
 
     public boolean isUUID() {
-        return isUUID;
+        return UUID.class.isAssignableFrom(getField().getType());
     }
 }

@@ -14,8 +14,6 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  * @author gushakov
  */
 public class FedoraTemplate implements FedoraOperations, InitializingBean, ApplicationContextAware {
-    private static final PersistenceExceptionTranslator EXCEPTION_TRANSLATOR = new FedoraExceptionTranslator();
-
     private ApplicationContext applicationContext;
 
     private FedoraConverter fedoraConverter;

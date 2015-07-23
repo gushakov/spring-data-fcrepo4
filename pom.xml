@@ -55,6 +55,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.0.0</version>
@@ -187,6 +192,44 @@ See fuseki configuration at
 
 
     <profiles>
+        <profile>
+            <id>test-generate-jaxb</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jvnet.jaxb2.maven2</groupId>
+                        <artifactId>maven-jaxb2-plugin</artifactId>
+                        <version>0.11.0</version>
+                        <executions>
+                            <execution>
+                                <id>compile-xsd</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <phase>generate-test-sources</phase>
+                                <configuration>
+                                    <schemaDirectory>src/test/resources/xsd</schemaDirectory>
+                                    <schemaIncludes>
+                                        <include>foobar.xsd</include>
+                                    </schemaIncludes>
+                                    <schemaLanguage>XMLSchema</schemaLanguage>
+                                    <forceRegenerate>false</forceRegenerate>
+                                    <generateDirectory>${project.build.directory}/generated-test-sources/xjc
+                                    </generateDirectory>
+                                    <generatePackage>ch.unil.fcrepo4.jaxb.foobar</generatePackage>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+
+
         <profile>
             <id>cargo-fedora-integration-tests</id>
             <activation>

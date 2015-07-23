@@ -1,8 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mapping.context.AbstractMappingContext;
@@ -21,11 +19,10 @@ public class FedoraMappingContext extends AbstractMappingContext<GenericFedoraPe
     @Override
     protected <T> GenericFedoraPersistenceEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {
         final GenericFedoraPersistenceEntity<?> entity;
-        if (typeInformation.getRawTypeInformation().getType().getAnnotation(FedoraObject.class) != null){
+        if (typeInformation.getRawTypeInformation().getType().getAnnotation(FedoraObject.class) != null) {
             logger.debug("Creating Fedora object persistent entity from type {}", typeInformation.getRawTypeInformation().getType().getSimpleName());
             entity = new FedoraObjectPersistentEntity<>(typeInformation);
-        }
-        else {
+        } else {
             entity = new GenericFedoraPersistenceEntity<>(typeInformation);
         }
         return entity;
@@ -35,15 +32,23 @@ public class FedoraMappingContext extends AbstractMappingContext<GenericFedoraPe
     protected FedoraPersistentProperty createPersistentProperty(Field field, PropertyDescriptor descriptor, GenericFedoraPersistenceEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
         final FedoraPersistentProperty prop;
 
-        if (field != null && field.getAnnotation(Path.class) != null){
-            logger.debug("Found Path annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+        if (field != null && field.getAnnotation(Path.class) != null) {
+            logger.debug("Found " + Path.class.getSimpleName() +
+                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
             prop = new PathPersistentProperty(field, descriptor, owner, simpleTypeHolder);
-        }
-        else if (field != null && field.getAnnotation(Uuid.class) != null) {
-            logger.debug("Found Uuid annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+        } else if (field != null && field.getAnnotation(Uuid.class) != null) {
+            logger.debug("Found " + Uuid.class.getSimpleName() +
+                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
             prop = new UuidPersistentProperty(field, descriptor, owner, simpleTypeHolder);
-        }
-        else {
+        } else if (field != null && field.getAnnotation(Created.class) != null) {
+            logger.debug("Found " + Created.class.getSimpleName() +
+                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+            prop = new CreatedPersistentProperty(field, descriptor, owner, simpleTypeHolder);
+        } else if (field != null && field.getAnnotation(Datastream.class) != null) {
+            logger.debug("Found " + Datastream.class.getSimpleName() +
+                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+            prop = new DatastreamPersistentProperty(field, descriptor, owner, simpleTypeHolder);
+        } else {
             prop = new GenericFedoraPersistentProperty(field, descriptor, owner, simpleTypeHolder);
         }
 

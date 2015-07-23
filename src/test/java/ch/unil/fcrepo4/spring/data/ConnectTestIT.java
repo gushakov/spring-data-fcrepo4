@@ -48,7 +48,7 @@ public class ConnectTestIT {
                 .createdBefore(LocalDateTime.now().toInstant(ZoneOffset.UTC))
         ;
         Utils.triplesStream(fo.getProperties()).forEach(System.out::println);
-        System.out.println(Utils.getFedoraObjectProperty(fo, "uuid"));
+        System.out.println(Utils.getFedoraObjectProperty(fo, RdfLexicon.HAS_PRIMARY_IDENTIFIER.getLocalName()));
     }
 
     @Test

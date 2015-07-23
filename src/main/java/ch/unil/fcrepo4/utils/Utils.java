@@ -5,6 +5,7 @@ import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.kernel.RdfLexicon;
 
+import java.io.PipedInputStream;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
