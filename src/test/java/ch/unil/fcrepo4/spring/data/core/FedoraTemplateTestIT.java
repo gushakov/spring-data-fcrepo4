@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBElement;
 import java.util.UUID;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -67,7 +68,7 @@ public class FedoraTemplateTestIT {
     }
 
     @FedoraObject
-    static class Bean3 {
+    public static class Bean3 {
         @Path
         String path = UUID.randomUUID().toString();
 
@@ -112,6 +113,7 @@ public class FedoraTemplateTestIT {
         foobarType.setBar(2);
         bean.foobarDs = jaxbFactory.createFoobar(foobarType);
         fedoraTemplate.save(bean);
+        System.out.println(bean.path);
     }
 
     @Test
@@ -121,6 +123,24 @@ public class FedoraTemplateTestIT {
         assertThat(repository.getObject("/test/"+bean4.path).getProperties())
         .contains(NodeFactory.createURI(Constants.TEST_FEDORA_URI_NAMESPACE+"number"),
                 NodeFactory.createLiteral(""+bean4.number, new XSDBaseNumericType(XSD.integer.getLocalName())));
+    }
+
+    @Test
+    public void testLoadXmlDatastream() throws Exception {
+        Bean3 beanSave = new Bean3();
+        ObjectFactory jaxbFactory = new ObjectFactory();
+        FoobarType foobarType = jaxbFactory.createFoobarType();
+        foobarType.setFoo("wam");
+        foobarType.setBar(3);
+        beanSave.foobarDs = jaxbFactory.createFoobar(foobarType);
+        fedoraTemplate.save(beanSave);
+        System.out.println(beanSave.path);
+        Bean3 beanLoad = fedoraTemplate.load("/test/" + beanSave.path, Bean3.class);
+        assertThat(beanLoad).isNotNull();
+        assertThat(beanLoad.foobarDs).isNotNull();
+        assertThat(beanLoad.foobarDs.getValue()).isNotNull();
+        assertThat(beanLoad.foobarDs.getValue().getFoo()).isEqualTo("wam");
+        assertThat(beanLoad.foobarDs.getValue().getBar()).isEqualTo(3);
     }
 
 }

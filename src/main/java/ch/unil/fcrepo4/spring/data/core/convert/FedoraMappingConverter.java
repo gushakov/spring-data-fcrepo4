@@ -12,38 +12,42 @@ import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import ch.unil.fcrepo4.utils.Utils;
-import com.hp.hpl.jena.graph.NodeFactory;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
 import org.fcrepo.kernel.RdfLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.model.MappingException;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author gushakov
  */
-public class FedoraMappingConverter implements FedoraConverter {
+public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
     private static final Logger logger = LoggerFactory.getLogger(FedoraMappingConverter.class);
 
     private FedoraRepository repository;
@@ -52,7 +56,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     private ConversionService conversionService;
 
-    private TaskExecutor jaxbMarshallingTaskExecutor;
+    private ExecutorService threadPool;
 
     public FedoraMappingConverter(FedoraRepository repository) {
         Assert.notNull(repository);
@@ -61,21 +65,26 @@ public class FedoraMappingConverter implements FedoraConverter {
         context.afterPropertiesSet();
         this.mappingContext = context;
         this.conversionService = new DefaultConversionService();
-        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(2);
-        taskExecutor.setMaxPoolSize(4);
-        taskExecutor.initialize();
-        this.jaxbMarshallingTaskExecutor = taskExecutor;
+        this.threadPool = Executors.newFixedThreadPool(4);
     }
 
     @Override
-    public <T> T read(Class<T> type, FedoraObject source) {
-        return null;
+    public <T> T read(Class<T> type, FedoraObject fedoraObject) {
+        FedoraObjectPersistentEntity<?> entity = (FedoraObjectPersistentEntity<?>) getFedoraPersistentEntity(type);
+        T bean;
+        try {
+            bean = type.newInstance();
+            readFedoraObjectProperties(bean, entity, fedoraObject);
+            readDatastreams(bean, entity, fedoraObject);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return bean;
     }
 
     @Override
-    public void write(Object source, FedoraObject sink) {
-        writeSimpleProperties(source, (FedoraObjectPersistentEntity<?>) getFedoraPersistentEntity(source), sink);
+    public void write(Object source, FedoraObject fedoraObject) {
+        writeSimpleProperties(source, (FedoraObjectPersistentEntity<?>) getFedoraPersistentEntity(source), fedoraObject);
     }
 
     @Override
@@ -84,8 +93,8 @@ public class FedoraMappingConverter implements FedoraConverter {
         FedoraPersistentEntity<?> entity = getFedoraPersistentEntity(source);
         FedoraObject fedoraObject = createFedoraObject(source, (FedoraObjectPersistentEntity<?>) entity);
         readFedoraObjectProperties(source, (FedoraObjectPersistentEntity<?>) entity, fedoraObject);
-        writeDatastreams(source, (FedoraObjectPersistentEntity<?>) entity, fedoraObject);
         writeSimpleProperties(source, (FedoraObjectPersistentEntity<?>) entity, fedoraObject);
+        writeDatastreams(source, (FedoraObjectPersistentEntity<?>) entity, fedoraObject);
         return fedoraObject;
     }
 
@@ -112,6 +121,22 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
 
         return entity;
+    }
+
+    private FedoraPersistentEntity<?> getFedoraPersistentEntity(Class<?> beanType) {
+
+        FedoraPersistentEntity<?> entity = mappingContext.getPersistentEntity(beanType);
+
+        if (entity == null) {
+            throw new MappingException("Cannot find entity for " + beanType.getName());
+        }
+
+        if (!FedoraObjectPersistentEntity.class.isAssignableFrom(entity.getClass())) {
+            throw new MappingException("Entity " + entity.getName() + " is not of type FedoraObjectPersistentEntity");
+        }
+
+        return entity;
+
     }
 
     protected void readFedoraObjectProperties(Object bean, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
@@ -215,7 +240,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     }
 
-    protected void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject sink) {
+    protected void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
         entity.doWithProperties((PersistentProperty<?> property) -> {
             if (property instanceof DatastreamPersistentProperty) {
                 DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) property;
@@ -223,13 +248,26 @@ public class FedoraMappingConverter implements FedoraConverter {
                 if (dsProp.getPath().matches("\\s*")) {
                     throw new MappingException("Datastream path cannot be empty");
                 }
-                createDatastream(source, entity, sink, dsProp);
+                createDatastream(source, entity, fedoraObject, dsProp);
             }
         });
     }
 
-    protected FedoraDatastream createDatastream(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject sink, DatastreamPersistentProperty dsProp) {
+    protected void readDatastreams(Object bean, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
+        PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
+        entity.doWithProperties((PersistentProperty<?> property) -> {
+            if (property instanceof DatastreamPersistentProperty) {
+                DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) property;
+                if (dsProp.getPath().matches("\\s*")) {
+                    throw new MappingException("Datastream path cannot be empty");
+                }
+                Object dsContent = readDatastream(fedoraObject, dsProp);
+                propsAccessor.setProperty(dsProp, dsContent);
+            }
+        });
+    }
 
+    protected FedoraDatastream createDatastream(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
         FedoraContent content = new FedoraContent();
         content.setContentType(dsProp.getMimetype());
         Object dsContent = entity.getPropertyAccessor(source).getProperty(dsProp);
@@ -248,7 +286,10 @@ public class FedoraMappingConverter implements FedoraConverter {
                 content.setContent(pipedIs);
                 try {
                     final PipedOutputStream pipedOs = new PipedOutputStream(pipedIs);
-                    jaxbMarshallingTaskExecutor.execute(() -> {
+
+                    // see http://stackoverflow.com/a/1250655
+
+                    threadPool.execute(() -> {
                         try {
                             marshaller.marshal(dsContent, new StreamResult(pipedOs));
                         } catch (JAXBException e) {
@@ -262,10 +303,10 @@ public class FedoraMappingConverter implements FedoraConverter {
                             }
                         }
                     });
+
                 } catch (IOException e) {
                     throw new MappingException(e.getMessage(), e);
                 }
-
 
             } else {
                 if (!(dsContent instanceof InputStream)) {
@@ -277,7 +318,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
 
         try {
-            String dsPath = sink.getPath() + "/" + dsProp.getPath().replaceFirst("^/*", "");
+            String dsPath = fedoraObject.getPath() + "/" + dsProp.getPath().replaceFirst("^/*", "");
             if (repository.exists(dsPath)) {
                 FedoraDatastream datastream = repository.getDatastream(dsPath);
                 datastream.updateContent(content);
@@ -292,7 +333,50 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     }
 
-    protected void writeSimpleProperties(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject sink) {
+    protected Object readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
+
+        try {
+            String dsPath = fedoraObject.getPath() + "/" + dsProp.getPath().replaceFirst("^/*", "");
+            if (repository.exists(dsPath)) {
+                FedoraDatastream datastream = repository.getDatastream(dsPath);
+
+                //FIXME: datastream.getContentType() returns null
+
+                String mimeType = datastream.getContentType();
+                if (mimeType == null) {
+                    mimeType = (String) Utils.getProperty(datastream.getProperties(), RdfLexicon.HAS_MIME_TYPE);
+                }
+
+                if (mimeType == null) {
+                    throw new RuntimeException("Cannot determine mimetype of datastream " + dsPath);
+                }
+
+                if (mimeType.equals(Constants.MIME_TYPE_TEXT_XML)) {
+
+                    Unmarshaller unmarshaller;
+                    try {
+                        JAXBContext jc = JAXBContext.newInstance(dsProp.getJaxbContextPath());
+                        unmarshaller = jc.createUnmarshaller();
+                        return unmarshaller.unmarshal(datastream.getContent());
+                    } catch (JAXBException e) {
+                        throw new MappingException(e.getMessage(), e);
+                    }
+
+                } else {
+                    return datastream.getContent();
+                }
+
+
+            } else {
+                throw new RuntimeException("No datastream with path " + dsPath);
+            }
+
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void writeSimpleProperties(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(source);
         final List<String> inserts = new ArrayList<>();
         entity.doWithProperties((PersistentProperty<?> property) -> {
@@ -306,10 +390,17 @@ public class FedoraMappingConverter implements FedoraConverter {
         if (inserts.size() > 0) {
             logger.debug("Update: {}", "INSERT DATA { " + StringUtils.join(inserts, " . ") + " . }");
             try {
-                sink.updateProperties("INSERT DATA { " + StringUtils.join(inserts, " . ") + " . }");
+                fedoraObject.updateProperties("INSERT DATA { " + StringUtils.join(inserts, " . ") + " . }");
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        logger.debug("Shutting down thread pool before destroying FedoraConverter instance");
+        threadPool.shutdown();
+        threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 }

@@ -7,4 +7,6 @@ public interface FedoraOperations {
 
    void save(Object source);
 
+   <T> T load(String path, Class<T> beanType);
+
 }

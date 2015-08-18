@@ -6,6 +6,7 @@ import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseStringType;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.vocabulary.XSD;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
@@ -31,7 +32,6 @@ public class Utils {
     }
 
     public static Object getFedoraObjectProperty(FedoraObject fedoraObject, String localName) throws FedoraException {
-
         Iterator<Triple> props = fedoraObject.getProperties();
         boolean found = false;
         Object value = null;
@@ -48,6 +48,24 @@ public class Utils {
         }
 
         return value;
+    }
+
+    public static Object getProperty(Iterator<Triple> props, Property property){
+        boolean found = false;
+        Object value = null;
+        while (props.hasNext() && !found) {
+            Triple triple = props.next();
+            if (triple.getPredicate().getURI().equals(property.getURI())) {
+                if (!triple.getObject().isLiteral()) {
+                    throw new RuntimeException("Property node " + triple.getObject() + " is not literal");
+                }
+                value = triple.getObject().getLiteralValue();
+                found = true;
+            }
+        }
+
+        return value;
+
     }
 
     public static String encodeLiteralValue(Object value, Class<?> javaType) {

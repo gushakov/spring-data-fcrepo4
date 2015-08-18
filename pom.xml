@@ -21,6 +21,13 @@
             COMPILE
         -->
 
+
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>0.7-rc1</version>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -29,7 +36,7 @@
         <dependency>
             <groupId>org.fcrepo</groupId>
             <artifactId>fcrepo-client-impl</artifactId>
-            <version>4.1.1</version>
+            <version>4.2.0</version>
         </dependency>
 
         <dependency>
@@ -102,6 +109,18 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xmlmatchers</groupId>
+            <artifactId>xml-matchers</artifactId>
+            <version>1.0-RC1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
         </dependency>
 
     </dependencies>

@@ -15,4 +15,6 @@ public interface FedoraConverter extends EntityReader<Object, FedoraObject>, Ent
 
     FedoraObject write(Object source);
 
+    <T> T read(Class<T> beanType, FedoraObject fedoraObject);
+
 }
