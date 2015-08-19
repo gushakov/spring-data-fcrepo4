@@ -6,7 +6,6 @@ package ch.unil.fcrepo4.spring.data.core.convert;
  */
 
 
-import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.FedoraResourcePathException;
 import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
@@ -21,7 +20,6 @@ import org.fcrepo.client.*;
 import org.fcrepo.kernel.RdfLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.mapping.PersistentProperty;
@@ -30,28 +28,17 @@ import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.model.MappingException;
 import org.springframework.util.Assert;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author gushakov
  */
-public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
+public class FedoraMappingConverter implements FedoraConverter {
     private static final Logger logger = LoggerFactory.getLogger(FedoraMappingConverter.class);
 
     private FedoraRepository repository;
@@ -60,8 +47,6 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
 
     private ConversionService conversionService;
 
-    private ExecutorService threadPool;
-
     public FedoraMappingConverter(FedoraRepository repository) {
         Assert.notNull(repository);
         this.repository = repository;
@@ -69,7 +54,6 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
         context.afterPropertiesSet();
         this.mappingContext = context;
         this.conversionService = new DefaultConversionService();
-        this.threadPool = Executors.newFixedThreadPool(4);
     }
 
     @Override
@@ -294,52 +278,15 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
     }
 
     protected FedoraDatastream createDatastream(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
-        FedoraContent content = new FedoraContent();
-        content.setContentType(dsProp.getMimetype());
+        FedoraContent fedoraContent = new FedoraContent();
+        fedoraContent.setContentType(dsProp.getMimetype());
         Object dsContent = entity.getPropertyAccessor(source).getProperty(dsProp);
         if (dsContent != null) {
-            if (dsProp.getMimetype().equals(Constants.MIME_TYPE_TEXT_XML)) {
 
-                Marshaller marshaller;
-                try {
-                    JAXBContext jc = JAXBContext.newInstance(dsProp.getJaxbContextPath());
-                    marshaller = jc.createMarshaller();
-                } catch (JAXBException e) {
-                    throw new MappingException(e.getMessage(), e);
-                }
-
-                PipedInputStream pipedIs = new PipedInputStream();
-                content.setContent(pipedIs);
-                try {
-                    final PipedOutputStream pipedOs = new PipedOutputStream(pipedIs);
-
-                    // see http://stackoverflow.com/a/1250655
-
-                    threadPool.execute(() -> {
-                        try {
-                            marshaller.marshal(dsContent, new StreamResult(pipedOs));
-                        } catch (JAXBException e) {
-                            throw new MappingException(e.getMessage(), e);
-                        } finally {
-                            try {
-                                pipedOs.flush();
-                                pipedOs.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                } catch (IOException e) {
-                    throw new MappingException(e.getMessage(), e);
-                }
-
-            } else {
-                if (!(dsContent instanceof InputStream)) {
-                    throw new MappingException("Invalid datastream content: " + dsContent.getClass());
-                }
-                content.setContent((InputStream) dsContent);
+            if (!(dsContent instanceof InputStream)) {
+                throw new MappingException("Invalid datastream content: " + dsContent.getClass());
             }
+            fedoraContent.setContent((InputStream) dsContent);
 
         }
 
@@ -347,10 +294,10 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
             String dsPath = fedoraObject.getPath() + "/" + dsProp.getPath().replaceFirst("^/*", "");
             if (repository.exists(dsPath)) {
                 FedoraDatastream datastream = repository.getDatastream(dsPath);
-                datastream.updateContent(content);
+                datastream.updateContent(fedoraContent);
                 return datastream;
             } else {
-                return repository.createDatastream(dsPath, content);
+                return repository.createDatastream(dsPath, fedoraContent);
             }
 
         } catch (FedoraException e) {
@@ -359,40 +306,11 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
 
     }
 
-    public Object readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
-
+    public InputStream readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
         try {
             String dsPath = Utils.getDatastreamPath(fedoraObject, dsProp);
             if (repository.exists(dsPath)) {
-                FedoraDatastream datastream = repository.getDatastream(dsPath);
-
-                //FIXME: datastream.getContentType() returns null
-
-                String mimeType = datastream.getContentType();
-                if (mimeType == null) {
-                    mimeType = (String) Utils.getProperty(datastream.getProperties(), RdfLexicon.HAS_MIME_TYPE);
-                }
-
-                if (mimeType == null) {
-                    throw new RuntimeException("Cannot determine mimetype of datastream " + dsPath);
-                }
-
-                if (mimeType.equals(Constants.MIME_TYPE_TEXT_XML)) {
-
-                    Unmarshaller unmarshaller;
-                    try {
-                        JAXBContext jc = JAXBContext.newInstance(dsProp.getJaxbContextPath());
-                        unmarshaller = jc.createUnmarshaller();
-                        return unmarshaller.unmarshal(datastream.getContent());
-                    } catch (JAXBException e) {
-                        throw new MappingException(e.getMessage(), e);
-                    }
-
-                } else {
-                    return datastream.getContent();
-                }
-
-
+                return repository.getDatastream(dsPath).getContent();
             } else {
                 throw new RuntimeException("No datastream with path " + dsPath);
             }
@@ -421,12 +339,5 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        logger.debug("Shutting down thread pool before destroying FedoraConverter instance");
-        threadPool.shutdown();
-        threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 }

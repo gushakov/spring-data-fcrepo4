@@ -8,6 +8,8 @@ import org.springframework.data.convert.EntityConverter;
 import org.springframework.data.convert.EntityReader;
 import org.springframework.data.convert.EntityWriter;
 
+import java.io.InputStream;
+
 /**
  * @author gushakov
  */
@@ -18,5 +20,5 @@ public interface FedoraConverter extends EntityReader<Object, FedoraObject>, Ent
 
     <T> T read(Class<T> beanType, FedoraObject fedoraObject);
 
-    Object readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp);
+    InputStream readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp);
 }

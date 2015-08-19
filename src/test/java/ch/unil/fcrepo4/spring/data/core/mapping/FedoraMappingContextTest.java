@@ -1,8 +1,9 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import ch.unil.fcrepo4.jaxb.foobar.FoobarType;
-import ch.unil.fcrepo4.spring.data.core.Constants;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import org.junit.Test;
 
 import java.util.*;
@@ -42,20 +43,6 @@ public class FedoraMappingContextTest {
         @Path
         String path = "/foo/bar/456";
 
-        @Datastream(jaxbContextPath = "ch.unil.fcrepo4.jaxb.foobar")
-        FoobarType foobarDs;
-
-        @Datastream()
-        Object anotherDs;
-
-    }
-
-    @FedoraObject
-    static class Bean4 {
-
-        @Path
-        String path = "/foo/bar/456";
-
         @Created
         Date created;
 
@@ -80,24 +67,11 @@ public class FedoraMappingContextTest {
     }
 
     @Test
-    public void testJaxbDatastream() throws Exception {
+    public void testCreatedDate() throws Exception {
         FedoraMappingContext context = new FedoraMappingContext();
         context.setInitialEntitySet(new HashSet<>(Collections.singletonList(Bean3.class)));
         context.initialize();
         GenericFedoraPersistenceEntity<?> entity = context.getPersistentEntity(Bean3.class);
-        DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) entity.getPersistentProperty("foobarDs");
-        assertThat(dsProp).isNotNull();
-        assertThat(dsProp.getMimetype()).isEqualTo(Constants.MIME_TYPE_TEXT_XML);
-        assertThat(dsProp.getJaxbContextPath()).isEqualTo("ch.unil.fcrepo4.jaxb.foobar");
-        assertThat(dsProp.getPath()).isEqualTo("foobards");
-    }
-
-    @Test
-    public void testCreatedDate() throws Exception {
-        FedoraMappingContext context = new FedoraMappingContext();
-        context.setInitialEntitySet(new HashSet<>(Collections.singletonList(Bean4.class)));
-        context.initialize();
-        GenericFedoraPersistenceEntity<?> entity = context.getPersistentEntity(Bean4.class);
         CreatedPersistentProperty createdProp = (CreatedPersistentProperty) entity.getPersistentProperty("created");
         assertThat(createdProp).isNotNull();
         assertThat(createdProp.isDate()).isTrue();

@@ -1,7 +1,5 @@
 package ch.unil.fcrepo4.spring.data.core;
 
-import ch.unil.fcrepo4.jaxb.foobar.FoobarType;
-import ch.unil.fcrepo4.jaxb.foobar.ObjectFactory;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Datastream;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
@@ -22,7 +20,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.xml.bind.JAXBElement;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.UUID;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
@@ -72,8 +71,8 @@ public class FedoraTemplateTestIT {
         @Path
         String path = UUID.randomUUID().toString();
 
-        @Datastream(jaxbContextPath = "ch.unil.fcrepo4.jaxb.foobar")
-        JAXBElement<FoobarType> foobarDs;
+        @Datastream
+        InputStream foobarDs = new ByteArrayInputStream("<foo>bar</foo>".getBytes());
     }
 
     @FedoraObject
@@ -92,7 +91,7 @@ public class FedoraTemplateTestIT {
     private FedoraRepository repository;
 
     @Test
-    public void testSave() throws Exception {
+    public void testSave1() throws Exception {
         fedoraTemplate.save(new Bean1());
     }
 
@@ -104,14 +103,6 @@ public class FedoraTemplateTestIT {
     @Test
     public void testSaveXmlDatastream() throws Exception {
         Bean3 bean = new Bean3();
-        ObjectFactory jaxbFactory = new ObjectFactory();
-        FoobarType foobarType = jaxbFactory.createFoobarType();
-        foobarType.setFoo("foo");
-        foobarType.setBar(1);
-        bean.foobarDs = jaxbFactory.createFoobar(foobarType);
-        fedoraTemplate.save(bean);
-        foobarType.setBar(2);
-        bean.foobarDs = jaxbFactory.createFoobar(foobarType);
         fedoraTemplate.save(bean);
         System.out.println(bean.path);
     }
@@ -128,19 +119,11 @@ public class FedoraTemplateTestIT {
     @Test
     public void testLoadXmlDatastream() throws Exception {
         Bean3 beanSave = new Bean3();
-        ObjectFactory jaxbFactory = new ObjectFactory();
-        FoobarType foobarType = jaxbFactory.createFoobarType();
-        foobarType.setFoo("wam");
-        foobarType.setBar(3);
-        beanSave.foobarDs = jaxbFactory.createFoobar(foobarType);
         fedoraTemplate.save(beanSave);
         System.out.println(beanSave.path);
         Bean3 beanLoad = fedoraTemplate.load("/test/" + beanSave.path, Bean3.class);
         assertThat(beanLoad).isNotNull();
         assertThat(beanLoad.foobarDs).isNotNull();
-        assertThat(beanLoad.foobarDs.getValue()).isNotNull();
-        assertThat(beanLoad.foobarDs.getValue().getFoo()).isEqualTo("wam");
-        assertThat(beanLoad.foobarDs.getValue().getBar()).isEqualTo(3);
     }
 
 }

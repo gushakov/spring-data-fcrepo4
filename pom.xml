@@ -136,32 +136,6 @@
         <plugins>
 
             <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.11.0</version>
-                <executions>
-                    <execution>
-                        <id>compile-xsd</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <schemaDirectory>src/test/resources/xsd</schemaDirectory>
-                            <schemaIncludes>
-                                <include>foobar.xsd</include>
-                            </schemaIncludes>
-                            <schemaLanguage>XMLSchema</schemaLanguage>
-                            <forceRegenerate>false</forceRegenerate>
-                            <generateDirectory>${project.build.directory}/generated-test-sources/xjc
-                            </generateDirectory>
-                            <generatePackage>ch.unil.fcrepo4.jaxb.foobar</generatePackage>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.9.1</version>
