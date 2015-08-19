@@ -252,11 +252,14 @@ public class FedoraMappingConverter implements FedoraConverter {
 
                 // see if we need to create a reference to a dynamic proxy
                 if (dsProp.getLazyLoad()) {
+                    if (!FedoraDatastream.class.isAssignableFrom(dsProp.getType())){
+                        throw new MappingException("Lazy loaded datastream must be of type FedoraDatastream, but was " + dsProp.getType());
+                    }
                     try {
                         Object proxy = new ByteBuddy()
-                                .subclass(dsProp.getType())
-                                .implement(DelegatingDynamicProxy.class)
-                                .method(ElementMatchers.isGetter().or(ElementMatchers.isSetter()))
+                                .subclass(Object.class)
+                                .implement(DatastreamDynamicProxy.class)
+                                .method(ElementMatchers.any())
                                 .intercept(MethodDelegation.to(new DatastreamDynamicProxyInterceptor(fedoraObject, dsProp, this)))
                                 .make()
                                 .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
@@ -271,7 +274,20 @@ public class FedoraMappingConverter implements FedoraConverter {
                     }
                 } else {
                     // or just read the datastream object directly
-                    propsAccessor.setProperty(dsProp, readDatastream(fedoraObject, dsProp));
+                    try {
+                        if (InputStream.class.isAssignableFrom(dsProp.getType())){
+                            propsAccessor.setProperty(dsProp, readDatastream(fedoraObject, dsProp).getContent());
+                        }
+                        else if (FedoraDatastream.class.isAssignableFrom(dsProp.getType())){
+                            propsAccessor.setProperty(dsProp, readDatastream(fedoraObject, dsProp));
+                        }
+                        else {
+                            throw new MappingException("Invalid datastream type: " + dsProp.getType());
+                        }
+                    }
+                    catch (FedoraException e){
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -283,10 +299,19 @@ public class FedoraMappingConverter implements FedoraConverter {
         Object dsContent = entity.getPropertyAccessor(source).getProperty(dsProp);
         if (dsContent != null) {
 
-            if (!(dsContent instanceof InputStream)) {
-                throw new MappingException("Invalid datastream content: " + dsContent.getClass());
+            if (dsContent instanceof InputStream) {
+                fedoraContent.setContent((InputStream) dsContent);
             }
-            fedoraContent.setContent((InputStream) dsContent);
+            else if (dsContent instanceof FedoraDatastream){
+                try {
+                    fedoraContent.setContent(((FedoraDatastream)dsContent).getContent());
+                } catch (FedoraException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                throw new MappingException("Invalid datastream type: " + dsContent.getClass());
+            }
 
         }
 
@@ -306,11 +331,11 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     }
 
-    public InputStream readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
+    public FedoraDatastream readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
         try {
             String dsPath = Utils.getDatastreamPath(fedoraObject, dsProp);
             if (repository.exists(dsPath)) {
-                return repository.getDatastream(dsPath).getContent();
+                return repository.getDatastream(dsPath);
             } else {
                 throw new RuntimeException("No datastream with path " + dsPath);
             }

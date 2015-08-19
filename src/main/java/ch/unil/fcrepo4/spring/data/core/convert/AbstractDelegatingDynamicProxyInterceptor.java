@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * @author gushakov
@@ -31,11 +32,25 @@ public abstract class AbstractDelegatingDynamicProxyInterceptor<T> {
         this.fedoraConverter = fedoraConverter;
     }
 
+    @RuntimeType
+    @BindingPriority(1)
+    public void interceptAnyVoidMethod(@Origin Method method, @AllArguments String[] args) {
+        logger.debug("Intercepted a call a method (void) {} with arguments {}", method.getName(), Arrays.toString(args));
+        if (delegate == null) {
+            loadProxy();
+        }
+        try {
+
+            method.invoke(delegate, args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Cannot invoke method " + method.getName() + " on proxy delegate instance " + delegate);
+        }
+    }
 
     @RuntimeType
     @BindingPriority(2)
-    public Object interceptGetter(@Origin Method method, @AllArguments String[] args) {
-        logger.debug("Intercepted getter {}", method.getName());
+    public Object interceptAnyMethodWithReturnValue(@Origin Method method, @AllArguments String[] args) {
+        logger.debug("Intercepted a call a method {} with arguments {}", method.getName(), Arrays.toString(args));
 
         Object result;
 
@@ -43,8 +58,8 @@ public abstract class AbstractDelegatingDynamicProxyInterceptor<T> {
             loadProxy();
         }
 
-        if (method.getName().equals(DelegatingDynamicProxy.DELEGATE_GETTER_NAME)) {
-            logger.debug("Getting the delegate object");
+        if (method.getName().equals(DatastreamDynamicProxy.DELEGATE_METHOD_NAME)) {
+            logger.debug("Returning the delegate object {} of the dynamic proxy", delegate);
             result = delegate;
         } else {
 
@@ -57,22 +72,6 @@ public abstract class AbstractDelegatingDynamicProxyInterceptor<T> {
 
         return result;
     }
-
-    @RuntimeType
-    @BindingPriority(1)
-    public void interceptSetter(@Origin Method method, @AllArguments String[] args) {
-        logger.debug("Intercepted setter {}", method.getName());
-        if (delegate == null) {
-            loadProxy();
-        }
-        try {
-
-            method.invoke(delegate, args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("Cannot invoke method " + method.getName() + " on proxy delegate instance " + delegate);
-        }
-    }
-
 
     public abstract void loadProxy();
 

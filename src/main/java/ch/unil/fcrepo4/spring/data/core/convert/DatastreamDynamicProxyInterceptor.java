@@ -2,6 +2,7 @@ package ch.unil.fcrepo4.spring.data.core.convert;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
 import ch.unil.fcrepo4.utils.Utils;
+import org.fcrepo.client.FedoraDatastream;
 import org.fcrepo.client.FedoraObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author gushakov
  */
-public class DatastreamDynamicProxyInterceptor extends AbstractDelegatingDynamicProxyInterceptor<Object> {
+public class DatastreamDynamicProxyInterceptor extends AbstractDelegatingDynamicProxyInterceptor<FedoraDatastream> {
     private static final Logger logger = LoggerFactory.getLogger(DatastreamDynamicProxyInterceptor.class);
 
     private FedoraObject fedoraObject;
@@ -17,13 +18,9 @@ public class DatastreamDynamicProxyInterceptor extends AbstractDelegatingDynamic
     private DatastreamPersistentProperty dsProp;
 
     public DatastreamDynamicProxyInterceptor(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp, FedoraConverter fedoraConverter) {
-        this(Utils.getDatastreamPath(fedoraObject, dsProp), Object.class, fedoraConverter);
+        super(Utils.getDatastreamPath(fedoraObject, dsProp), FedoraDatastream.class, fedoraConverter);
         this.fedoraObject = fedoraObject;
         this.dsProp = dsProp;
-    }
-
-    public DatastreamDynamicProxyInterceptor(String path, Class<Object> delegateType, FedoraConverter fedoraConverter) {
-        super(path, delegateType, fedoraConverter);
     }
 
     @Override

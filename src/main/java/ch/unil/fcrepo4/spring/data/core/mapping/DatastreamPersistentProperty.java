@@ -2,6 +2,7 @@ package ch.unil.fcrepo4.spring.data.core.mapping;
 
 import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Datastream;
+import org.fcrepo.client.FedoraDatastream;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.MappingException;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
@@ -21,7 +22,8 @@ public class DatastreamPersistentProperty extends GenericFedoraPersistentPropert
         super(field, propertyDescriptor, owner, simpleTypeHolder);
         this.dsAnnot = findAnnotation(Datastream.class);
 
-        if (!InputStream.class.isAssignableFrom(field.getType())){
+        if (!InputStream.class.isAssignableFrom(field.getType())
+                && !FedoraDatastream.class.isAssignableFrom(field.getType())){
             throw new MappingException("Expected datastream field to be of type InputStream, but was " + field.getType().getSimpleName());
         }
 

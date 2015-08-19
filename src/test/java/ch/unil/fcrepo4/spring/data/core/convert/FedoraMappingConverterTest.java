@@ -29,11 +29,13 @@ import java.util.UUID;
 
 import static ch.unil.fcrepo4.hamcrest.XmlFedoraContentMatcher.equalsFedoraContentWithXml;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,6 +100,26 @@ public class FedoraMappingConverterTest {
 
         @Datastream
         InputStream foobarDs;
+    }
+
+    @FedoraObject
+    static class Bean4 {
+
+        @Path
+        String path = PATH;
+
+        @Datastream
+        FedoraDatastream foobarDs;
+    }
+
+    @FedoraObject
+    static class Bean5 {
+
+        @Path
+        String path = PATH;
+
+        @Datastream(lazyLoad = true)
+        FedoraDatastream foobarDs;
     }
 
     @Mock
@@ -173,7 +195,7 @@ public class FedoraMappingConverterTest {
     }
 
     @Test
-    public void testReadDatastreamDefault() throws Exception {
+    public void testReadDatastreamInputStreamDefault() throws Exception {
         // setup mock datastream resource
         doReturn(true).when(mockRepository).exists(DS_PATH);
         doReturn(makeMockDatastream(DS_PATH, DS_XML))
@@ -187,5 +209,34 @@ public class FedoraMappingConverterTest {
                 .matches(XmlConverters.the(DS_XML))).isTrue();
     }
 
+    @Test
+    public void testReadDatastreamFedoraDatastreamDefault() throws Exception {
+        // setup mock datastream resource
+        doReturn(true).when(mockRepository).exists(DS_PATH);
+        doReturn(makeMockDatastream(DS_PATH, DS_XML))
+                .when(mockRepository).getDatastream(DS_PATH);
+        FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
+        Bean4 bean4 = mappingConverter.read(Bean4.class, mockRepository.getObject(FO_PATH));
+        assertThat(bean4).isNotNull();
+        assertThat(bean4.foobarDs).isNotNull();
+        assertThat(bean4.foobarDs).isInstanceOf(FedoraDatastream.class);
+        assertThat(XmlMatchers.isEquivalentTo(new StreamSource(bean4.foobarDs.getContent()))
+                .matches(XmlConverters.the(DS_XML))).isTrue();
+    }
+
+    @Test
+    public void testReadDatastreamWithLazyLoad() throws Exception {
+        FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
+        Bean5 bean5 = mappingConverter.read(Bean5.class, mockRepository.getObject(FO_PATH));
+        verify(mockRepository, never()).getDatastream(anyString());
+        assertThat(bean5).isNotNull();
+        assertThat(bean5.foobarDs).isInstanceOf(DatastreamDynamicProxy.class);
+        // setup mock datastream resource
+        doReturn(true).when(mockRepository).exists(DS_PATH);
+        doReturn(makeMockDatastream(DS_PATH, DS_XML))
+                .when(mockRepository).getDatastream(DS_PATH);
+        assertThat(XmlMatchers.isEquivalentTo(new StreamSource(bean5.foobarDs.getContent()))
+                .matches(XmlConverters.the(DS_XML))).isTrue();
+    }
 
 }
