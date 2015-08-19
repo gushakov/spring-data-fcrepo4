@@ -16,4 +16,5 @@ public @interface Datastream {
     String path() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
     String mimetype() default Constants.MIME_TYPE_TEXT_XML;
     String jaxbContextPath() default "";
+    boolean lazyLoad() default false;
 }

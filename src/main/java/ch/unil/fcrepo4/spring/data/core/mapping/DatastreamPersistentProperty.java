@@ -37,4 +37,8 @@ public class DatastreamPersistentProperty extends GenericFedoraPersistentPropert
         return dsAnnot.jaxbContextPath();
     }
 
+    public boolean getLazyLoad() {
+        return dsAnnot.lazyLoad();
+    }
+
 }

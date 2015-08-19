@@ -57,7 +57,15 @@ Based on org.fcrepo.client.impl.FedoraObjectImplTest
  */
 public class FedoraMappingConverterTest {
 
+    private static final String REPO_URL = "http://localhost:9090/rest";
     private static final String PATH_1 = "/foo/bar/1";
+    private static final String UUID_1 = "df0ce28e-2ec7-4c96-8b21-235a98a0da74";
+    private static final String CREATED_TS_1 = "2015-07-23T08:18:21.327Z";
+
+    private static final String PATH_2 = "/foo/bar/2";
+    private static final String UUID_2 = "55fd4625-550e-4dfc-bd83-66e123f713c5";
+    private static final String CREATED_TS_2 = "2015-08-18T13:41:47.73Z";
+
 
     @FedoraObject
     static class Bean1 {
@@ -83,6 +91,16 @@ public class FedoraMappingConverterTest {
         String baz = "baz";
     }
 
+    @FedoraObject
+    static class Bean2 {
+
+        @Path
+        String path = PATH_2;
+
+        @Datastream(jaxbContextPath = "ch.unil.fcrepo4.jaxb.foobar", lazyLoad = true)
+        JAXBElement<FoobarType> foobarDs;
+    }
+
     @Mock
     private FedoraRepository mockRepository;
 
@@ -92,7 +110,7 @@ public class FedoraMappingConverterTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        when(mockRepository.getRepositoryUrl()).thenReturn("http://localhost:9090/rest");
+        when(mockRepository.getRepositoryUrl()).thenReturn(REPO_URL);
         when(mockRepository.findOrCreateObject(anyString()))
                 .thenAnswer(invocation ->
                                 makeMockFedoraObject((String) invocation.getArguments()[0])
@@ -102,15 +120,25 @@ public class FedoraMappingConverterTest {
 
     private org.fcrepo.client.FedoraObject makeMockFedoraObject(String path) throws FedoraException {
         List<Triple> triples = new ArrayList<Triple>();
+        Node uri;
         switch (path) {
             case "/test" + PATH_1:
-                Node uri = NodeFactory.createURI("http://localhost:9090/rest/test" + PATH_1);
+                uri = NodeFactory.createURI(REPO_URL + PATH_1);
                 triples.add(new Triple(uri,
                         NodeFactory.createURI(RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI()),
-                        NodeFactory.createLiteral("df0ce28e-2ec7-4c96-8b21-235a98a0da74")));
+                        NodeFactory.createLiteral(UUID_1)));
                 triples.add(new Triple(uri,
                         NodeFactory.createURI(RdfLexicon.CREATED_DATE.getURI()),
-                        NodeFactory.createLiteral("2015-07-23T08:18:21.327Z")));
+                        NodeFactory.createLiteral(CREATED_TS_1)));
+                break;
+            case "/test" + PATH_2:
+                uri = NodeFactory.createURI(REPO_URL + PATH_2);
+                triples.add(new Triple(uri,
+                        NodeFactory.createURI(RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI()),
+                        NodeFactory.createLiteral(UUID_2)));
+                triples.add(new Triple(uri,
+                        NodeFactory.createURI(RdfLexicon.CREATED_DATE.getURI()),
+                        NodeFactory.createLiteral(CREATED_TS_2)));
                 break;
         }
         org.fcrepo.client.FedoraObject fo = spy(new FedoraObjectImpl(mockRepository, mockHelper, path));
@@ -126,7 +154,7 @@ public class FedoraMappingConverterTest {
         Bean1 source = new Bean1();
         mappingConverter.write(source);
         assertThat(source.uuid).isNotNull();
-        assertThat(source.uuid.toString()).isEqualTo("df0ce28e-2ec7-4c96-8b21-235a98a0da74");
+        assertThat(source.uuid.toString()).isEqualTo(UUID_1);
         System.out.println(source.uuid);
     }
 
@@ -137,7 +165,7 @@ public class FedoraMappingConverterTest {
         mappingConverter.write(source);
         assertThat(source.created)
                 .isNotNull()
-                .hasTime(ZonedDateTime.parse("2015-07-23T08:18:21.327Z").toInstant().toEpochMilli());
+                .hasTime(ZonedDateTime.parse(CREATED_TS_1).toInstant().toEpochMilli());
     }
 
     @Test
@@ -187,11 +215,19 @@ public class FedoraMappingConverterTest {
         FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
         org.fcrepo.client.FedoraObject mockFedoraObject = makeMockFedoraObject("/test" + PATH_1);
         Bean1 bean = mappingConverter.read(Bean1.class, mockFedoraObject);
-        assertThat(bean.created).hasTime(ZonedDateTime.parse("2015-07-23T08:18:21.327Z").toInstant().toEpochMilli());
-        assertThat(bean.uuid.toString()).isEqualTo("df0ce28e-2ec7-4c96-8b21-235a98a0da74");
+        assertThat(bean.uuid.toString()).isEqualTo(UUID_1);
+        assertThat(bean.created).hasTime(ZonedDateTime.parse(CREATED_TS_1).toInstant().toEpochMilli());
         assertThat(bean.foobarDs).isInstanceOf(JAXBElement.class);
         assertThat(bean.foobarDs.getValue().getFoo()).isEqualTo("foo");
         assertThat(bean.foobarDs.getValue().getBar()).isEqualTo(1);
+    }
+
+    @Test
+    public void testReadDatastreamDynamicProxy() throws Exception {
+        when(mockRepository.exists(eq("/test" + PATH_2 + "/foobards"))).thenReturn(true);
+        FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
+        org.fcrepo.client.FedoraObject mockFedoraObject = makeMockFedoraObject("/test" + PATH_2);
+        Bean2 bean = mappingConverter.read(Bean2.class, mockFedoraObject);
     }
 
 }

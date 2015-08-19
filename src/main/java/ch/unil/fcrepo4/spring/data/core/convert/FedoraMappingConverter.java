@@ -12,6 +12,10 @@ import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import ch.unil.fcrepo4.utils.Utils;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
 import org.fcrepo.kernel.RdfLexicon;
@@ -261,8 +265,30 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
                 if (dsProp.getPath().matches("\\s*")) {
                     throw new MappingException("Datastream path cannot be empty");
                 }
-                Object dsContent = readDatastream(fedoraObject, dsProp);
-                propsAccessor.setProperty(dsProp, dsContent);
+
+                // see if we need to create a reference to a dynamic proxy
+                if (dsProp.getLazyLoad()) {
+                    try {
+                        Object proxy = new ByteBuddy()
+                                .subclass(dsProp.getType())
+                                .implement(DelegatingDynamicProxy.class)
+                                .method(ElementMatchers.isGetter().or(ElementMatchers.isSetter()))
+                                .intercept(MethodDelegation.to(new DatastreamDynamicProxyInterceptor(fedoraObject, dsProp, this)))
+                                .make()
+                                .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
+                                .getLoaded()
+                                .newInstance();
+                        propsAccessor.setProperty(dsProp, proxy);
+                        logger.debug("Created a dynamic proxy for a datastream property " + dsProp.getName() + " of bean " +
+                                bean.getClass().getSimpleName());
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new MappingException("Cannot instantiate a dynamic proxy for a datastream property " +
+                                dsProp.getName() + " of bean " + bean.getClass().getSimpleName(), e);
+                    }
+                } else {
+                    // or just read the datastream object directly
+                    propsAccessor.setProperty(dsProp, readDatastream(fedoraObject, dsProp));
+                }
             }
         });
     }
@@ -333,10 +359,10 @@ public class FedoraMappingConverter implements FedoraConverter, DisposableBean {
 
     }
 
-    protected Object readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
+    public Object readDatastream(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp) {
 
         try {
-            String dsPath = fedoraObject.getPath() + "/" + dsProp.getPath().replaceFirst("^/*", "");
+            String dsPath = Utils.getDatastreamPath(fedoraObject, dsProp);
             if (repository.exists(dsPath)) {
                 FedoraDatastream datastream = repository.getDatastream(dsPath);
 

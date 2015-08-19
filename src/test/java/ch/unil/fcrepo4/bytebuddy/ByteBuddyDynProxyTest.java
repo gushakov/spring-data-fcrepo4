@@ -6,6 +6,8 @@ import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.Test;
 
+import javax.xml.bind.JAXBElement;
+
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 /**
@@ -26,4 +28,5 @@ public class ByteBuddyDynProxyTest {
         System.out.println(dynType.newInstance());
 
     }
+
 }

@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.utils;
 
+import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseStringType;
@@ -79,6 +80,14 @@ public class Utils {
 
         Node literal = NodeFactory.createLiteral(value.toString(), rdfDatatype);
         return "\"" + literal.getLiteralLexicalForm() + "\"^^<" + literal.getLiteralDatatypeURI() + ">";
+    }
+
+    public static String getDatastreamPath(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp){
+        try {
+            return fedoraObject.getPath() + "/" + dsProp.getPath().replaceFirst("^/*", "");
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
