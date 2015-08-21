@@ -59,11 +59,44 @@ public class Bean {
 
     // expose "uuid" property as instance of java.util.UUID
     @Uuid
-    private UUID
+    private UUID uuid;
 
     // expose "created" property as instance of java.util.Date or java.time.ZonedDateTime
     @Created
     private Date createdDate;
 
+}
+```
+
+### Saving a Fedora object with a datastream (binary resource).
+
+```java
+
+// Wrapper bean for the binary resource need to contain a property of type InputStream annotated with @DsContent
+
+@Datastream(mimetype = "image/png")
+public class CarPhoto {
+
+    @DsContent
+    InputStream photoSource;
+
+    public CarPhoto(String fileName) {
+        try {
+            photoSource = new ClassPathResource(fileName).getInputStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+
+// Parent Fedora object bean
+
+@FedoraObject
+public class Vehicle {
+
+    @Path
+    private String path = "/car/1";
+
+    private CarPhoto photo = new CarPhoto("test.png");
 }
 ```

@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -127,23 +128,7 @@ public class FedoraTemplateTestIT {
     public void testSaveWithImageDatastream() throws Exception {
         Bean4 bean4 = new Bean4();
         fedoraTemplate.save(bean4);
-        System.out.println(bean4.imageds.created);
-    }
-
-    @FedoraObject
-    public class Vehicle {
-
-        @Path
-        private String path = "/car/1";
-
-        @Property
-        private int numberOfWheels = 4;
-
-    }
-
-    @Test
-    public void testName() throws Exception {
-        fedoraTemplate.save(new Vehicle());
+        assertThat(bean4.imageds.created).isNotNull();
     }
 
 }

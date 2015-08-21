@@ -159,7 +159,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
         FedoraPersistentProperty idProp = entity.getIdProperty();
         if (idProp == null) {
-            throw new MappingException("No ID property for entity " + entity.getName());
+            throw new MappingException("No path property for entity " + entity.getName());
         }
 
         if (!PathPersistentProperty.class.isAssignableFrom(idProp.getClass())) {
