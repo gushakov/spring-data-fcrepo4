@@ -35,7 +35,7 @@ public FedoraTemplate fedoraTemplate() throws FedoraException {
 public class Vehicle {
 
     @Path
-    private String "/car/1";
+    private String path = "/car/1";
 
     @Property
     private int numberOfWheels = 4;
@@ -49,3 +49,21 @@ fedoraTemplate.save(new Vehicle());
 
 The newly created object will be accessible at `http://localhost:8080/rest/test/car/1` and will contain a `numberOfWheels`
 property with the default namespace, `info:fedora/test/`.
+
+### Exposing common Fedora resource properties.
+
+The common properties of a Fedora resource (Fedora object, datastream) are exposed, when saving or loading beans to the repository.
+
+```java
+public class Bean {
+
+    // expose "uuid" property as instance of java.util.UUID
+    @Uuid
+    private UUID
+
+    // expose "created" property as instance of java.util.Date or java.time.ZonedDateTime
+    @Created
+    private Date createdDate;
+
+}
+```

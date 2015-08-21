@@ -12,7 +12,6 @@ import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import ch.unil.fcrepo4.utils.Utils;
-import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
 import org.fcrepo.kernel.RdfLexicon;
