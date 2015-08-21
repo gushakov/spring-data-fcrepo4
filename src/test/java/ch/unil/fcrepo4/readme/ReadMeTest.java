@@ -51,4 +51,9 @@ public class ReadMeTest {
         fedoraTemplate.save(new Vehicle());
     }
 
+    @Test
+    public void testCustomPathCreator() throws Exception {
+       fedoraTemplate.save(new Person());
+    }
+
 }

@@ -10,15 +10,16 @@ import org.springframework.util.Assert;
  */
 public class SimplePathCreator implements PathCreator {
     @Override
-    public String createPath(final String namespace, final String path) {
+    public String createPath(String namespace, Class<?> entityType, Class<?> propType, String idPropName, Object id) {
         Assert.notNull(namespace);
-        Assert.notNull(path);
+        Assert.notNull(id);
         String fullPath = "/" + namespace;
 
-        if (!path.startsWith("/")) {
+        if (id instanceof String && !((String) id).startsWith("/")) {
             fullPath += "/";
         }
-        fullPath += path;
+
+        fullPath += id;
         return fullPath;
     }
 }

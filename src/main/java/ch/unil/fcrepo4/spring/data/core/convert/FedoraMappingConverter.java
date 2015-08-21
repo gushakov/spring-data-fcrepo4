@@ -178,12 +178,8 @@ public class FedoraMappingConverter implements FedoraConverter {
             throw new MappingException("Path cannot be null");
         }
 
-        if (!(path instanceof String)) {
-            throw new MappingException("Path must be of type String");
-        }
-
         // create full JCR path for the target Fedora object
-        String fullPath = pathCreator.createPath(namespace, (String) path);
+        String fullPath = pathCreator.createPath(namespace, entity.getType(), idProp.getType(), idProp.getName(), path);
         try {
             return repository.findOrCreateObject(fullPath);
         } catch (FedoraException e) {
