@@ -9,8 +9,8 @@ import java.lang.reflect.Field;
 /**
  * @author gushakov
  */
-public class TransientFedoraPersistentProperty extends GenericFedoraPersistentProperty {
-    public TransientFedoraPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
+public class TransientPersistentProperty extends GenericFedoraPersistentProperty {
+    public TransientPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
     }
 

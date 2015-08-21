@@ -9,10 +9,8 @@ import java.lang.annotation.*;
  * @author gushakov
  */
 @Inherited
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Persistent
-public @interface Datastream {
-    String name() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
-    String mimetype() default Constants.MIME_TYPE_TEXT_XML;
+public @interface DsContent {
 }

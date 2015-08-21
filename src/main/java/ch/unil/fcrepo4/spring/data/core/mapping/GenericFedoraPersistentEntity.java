@@ -6,9 +6,9 @@ import org.springframework.data.util.TypeInformation;
 /**
  * @author gushakov
  */
-public class GenericFedoraPersistenceEntity<T> extends BasicPersistentEntity<T, FedoraPersistentProperty>
+public class GenericFedoraPersistentEntity<T> extends BasicPersistentEntity<T, FedoraPersistentProperty>
         implements FedoraPersistentEntity<T> {
-    public GenericFedoraPersistenceEntity(TypeInformation<T> information) {
+    public GenericFedoraPersistentEntity(TypeInformation<T> information) {
         super(information);
     }
 

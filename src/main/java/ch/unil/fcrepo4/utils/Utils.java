@@ -1,6 +1,5 @@
 package ch.unil.fcrepo4.utils;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseStringType;
@@ -10,10 +9,9 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.vocabulary.XSD;
 import org.fcrepo.client.FedoraException;
-import org.fcrepo.client.FedoraObject;
+import org.fcrepo.client.FedoraResource;
 import org.fcrepo.kernel.RdfLexicon;
 
-import java.io.PipedInputStream;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -32,13 +30,13 @@ public class Utils {
         return StreamSupport.stream(iterable.spliterator(), false);
     }
 
-    public static Object getFedoraObjectProperty(FedoraObject fedoraObject, String localName) throws FedoraException {
-        Iterator<Triple> props = fedoraObject.getProperties();
+    public static Object getFedoraObjectProperty(FedoraResource fedoraResource, String localName) throws FedoraException {
+        Iterator<Triple> props = fedoraResource.getProperties();
         boolean found = false;
         Object value = null;
         while (props.hasNext() && !found) {
             Triple triple = props.next();
-            if (triple.getSubject().getURI().endsWith(fedoraObject.getPath())
+            if (triple.getSubject().getURI().endsWith(fedoraResource.getPath())
                     && triple.getPredicate().getURI().equals(RdfLexicon.REPOSITORY_NAMESPACE + localName)) {
                 if (!triple.getObject().isLiteral()) {
                     throw new RuntimeException("Property node " + triple.getObject() + " is not literal");
@@ -80,14 +78,6 @@ public class Utils {
 
         Node literal = NodeFactory.createLiteral(value.toString(), rdfDatatype);
         return "\"" + literal.getLiteralLexicalForm() + "\"^^<" + literal.getLiteralDatatypeURI() + ">";
-    }
-
-    public static String getDatastreamPath(FedoraObject fedoraObject, DatastreamPersistentProperty dsProp){
-        try {
-            return fedoraObject.getPath() + "/" + dsProp.getPath().replaceFirst("^/*", "");
-        } catch (FedoraException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

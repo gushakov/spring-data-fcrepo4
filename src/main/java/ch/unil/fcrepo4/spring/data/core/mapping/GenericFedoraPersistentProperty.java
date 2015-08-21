@@ -22,11 +22,7 @@ public class GenericFedoraPersistentProperty extends AnnotationBasedPersistentPr
 
     @Override
     protected Association<FedoraPersistentProperty> createAssociation() {
-        return null;
-    }
-
-    public boolean isGeneric(){
-        return this.getClass().equals(GenericFedoraPersistentProperty.class);
+        return new Association<>(this, null);
     }
 
 }

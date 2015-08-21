@@ -21,8 +21,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private FedoraRepository repository;
 
-//    private FedoraExceptionTranslator fedoraExceptionTranslator;
-
     public FedoraTemplate(FedoraRepository repository) {
         this.repository = repository;
     }
@@ -49,7 +47,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                 ((ConfigurableApplicationContext) applicationContext).getBeanFactory()
                         .registerSingleton("fedoraExceptionTranslator", FedoraExceptionTranslator.class);
             }
-//            fedoraExceptionTranslator = applicationContext.getBean(FedoraExceptionTranslator.class);
         }
     }
 

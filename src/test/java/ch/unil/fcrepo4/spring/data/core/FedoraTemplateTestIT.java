@@ -1,13 +1,9 @@
 package ch.unil.fcrepo4.spring.data.core;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Datastream;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.vocabulary.XSD;
-import org.fcrepo.client.FedoraDatastream;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
@@ -22,13 +18,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.UUID;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -70,34 +65,33 @@ public class FedoraTemplateTestIT {
     }
 
     @FedoraObject
-    public static class Bean3 {
+    static class Bean3 {
         @Path
-        String path = UUID.randomUUID().toString();
-
-        @Datastream
-        InputStream foobarDs = new ByteArrayInputStream("<foo>bar</foo>".getBytes());
-    }
-
-    @FedoraObject
-    static class Bean4 {
-        @Path
-        String path = UUID.randomUUID().toString();
+        String path = "/" + UUID.randomUUID().toString();
 
         @Property
         int number = 1;
     }
 
     @FedoraObject
-    static class Bean5 {
+    static class Bean4 {
         @Path
-        String path = UUID.randomUUID().toString();
+        String path = "/" + UUID.randomUUID().toString();
+        Bean4Datastream imageds = new Bean4Datastream();
+    }
 
-        @Datastream(mimetype = "image/png")
-        InputStream image;
+    @Datastream(mimetype = "image/png")
+    static class Bean4Datastream {
 
-        public Bean5() {
+        @Created
+        Date created;
+
+        @DsContent
+        InputStream stream;
+
+        public Bean4Datastream() {
             try {
-                image = new ClassPathResource("test.png").getInputStream();
+                this.stream = new ClassPathResource("test.png").getInputStream();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -121,36 +115,35 @@ public class FedoraTemplateTestIT {
     }
 
     @Test
-    public void testSaveXmlDatastream() throws Exception {
-        Bean3 bean = new Bean3();
-        fedoraTemplate.save(bean);
-        System.out.println(bean.path);
+    public void testSavePropertyInt() throws Exception {
+        Bean3 bean3 = new Bean3();
+        fedoraTemplate.save(bean3);
+        assertThat(repository.getObject("/test" + bean3.path).getProperties())
+                .contains(NodeFactory.createURI(Constants.TEST_FEDORA_URI_NAMESPACE + "number"),
+                        NodeFactory.createLiteral("" + bean3.number, new XSDBaseNumericType(XSD.integer.getLocalName())));
     }
 
     @Test
-    public void testSavePropertyInt() throws Exception {
+    public void testSaveWithImageDatastream() throws Exception {
         Bean4 bean4 = new Bean4();
         fedoraTemplate.save(bean4);
-        assertThat(repository.getObject("/test" + bean4.path).getProperties())
-        .contains(NodeFactory.createURI(Constants.TEST_FEDORA_URI_NAMESPACE+"number"),
-                NodeFactory.createLiteral(""+bean4.number, new XSDBaseNumericType(XSD.integer.getLocalName())));
+        System.out.println(bean4.imageds.created);
+    }
+
+    @FedoraObject
+    public class Vehicle {
+
+        @Path
+        private String path = "/car/1";
+
+        @Property
+        private int numberOfWheels = 4;
+
     }
 
     @Test
-    public void testLoadXmlDatastream() throws Exception {
-        Bean3 beanSave = new Bean3();
-        fedoraTemplate.save(beanSave);
-        System.out.println(beanSave.path);
-        Bean3 beanLoad = fedoraTemplate.load("/test" + beanSave.path, Bean3.class);
-        assertThat(beanLoad).isNotNull();
-        assertThat(beanLoad.foobarDs).isNotNull();
-    }
-
-    @Test
-    public void testSaveImageDatastream() throws Exception {
-        Bean5 bean5 = new Bean5();
-        fedoraTemplate.save(bean5);
-        System.out.println(bean5.path);
+    public void testName() throws Exception {
+        fedoraTemplate.save(new Vehicle());
     }
 
 }

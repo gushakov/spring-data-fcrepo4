@@ -12,3 +12,40 @@ This project is heavily based on the code from the following projects (including
 
  * [spring-data-solr](https://github.com/spring-projects/spring-data-solr)
 
+## Synopsis
+
+### Create an instance of `FedoraTemplate` for working with Fedora repository.
+
+```java
+// in Spring configuration class, assume Java configuration via @Configuration annotation
+
+@Bean
+public FedoraTemplate fedoraTemplate() throws FedoraException {
+    return new FedoraTemplate(new FedoraRepositoryImpl("http://localhost:8080/rest"));
+}
+```
+
+### Create new Fedora object resource in the default namespace with some simple properties.
+
+```java
+
+// bean
+
+@FedoraObject
+public class Vehicle {
+
+    @Path
+    private String "/car/1";
+
+    @Property
+    private int numberOfWheels = 4;
+
+}
+
+// converts the bean into a `FedoraObject` and saves it into the repository
+
+fedoraTemplate.save(new Vehicle());
+```
+
+The newly created object will be accessible at `http://localhost:8080/rest/test/car/1` and will contain a `numberOfWheels`
+property with the default namespace, `info:fedora/test/`.
