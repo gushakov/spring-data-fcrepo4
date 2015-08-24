@@ -57,10 +57,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     @Override
     public <T> T load(String path, Class<T> beanType) {
-        try {
-            return fedoraConverter.read(beanType, repository.getObject(path));
-        } catch (FedoraException e) {
-            throw new RuntimeException(e);
-        }
+        return fedoraConverter.read(path, beanType);
     }
 }
