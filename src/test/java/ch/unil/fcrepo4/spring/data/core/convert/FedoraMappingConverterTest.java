@@ -1,7 +1,10 @@
 package ch.unil.fcrepo4.spring.data.core.convert;
 
+import ch.unil.fcrepo4.assertj.Assertions;
+import ch.unil.fcrepo4.beans.Bean1;
+import ch.unil.fcrepo4.beans.Bean2;
+import ch.unil.fcrepo4.beans.Bean2Datastream1;
 import ch.unil.fcrepo4.spring.data.core.Constants;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -15,20 +18,17 @@ import org.fcrepo.client.utils.HttpHelper;
 import org.fcrepo.kernel.RdfLexicon;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
-import static ch.unil.fcrepo4.hamcrest.XmlFedoraContentMatcher.equalsFedoraContentWithXml;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -47,59 +47,17 @@ Based on org.fcrepo.client.impl.FedoraObjectImplTest
  * @author gushakov
  */
 public class FedoraMappingConverterTest {
-/*
+
 
     private static final String REPO_URL = "http://localhost:9090/rest";
 
     private static final String PATH = "/foo/bar/1";
-    private static final String FO_PATH = "/test" + PATH;
     private static final String FO_UUID = "df0ce28e-2ec7-4c96-8b21-235a98a0da74";
     private static final String FO_CREATED = "2015-07-23T08:18:21.327Z";
-    private static final String DS_PATH = FO_PATH + "/foobards";
+    private static final String DS_PATH = "/foo/bar/1/xmlDs";
     private static final String DS_UUID = "b0e99a09-72b7-4c30-ab16-8dcd66ce2004";
     private static final String DS_CREATED = "2015-08-21T11:41:59.364Z";
     private static final String DS_XML = "<foo>bar</foo>";
-
-    @FedoraObject
-    static class Bean1 {
-        @Path
-        String path = PATH;
-
-        @Uuid
-        UUID uuid;
-
-        @Created
-        Date created;
-
-        @Property
-        int number = 1;
-
-        @Property
-        Integer anotherNumber = 2;
-
-        @Property
-        String baz = "baz";
-    }
-
-    @FedoraObject
-    static class Bean2 {
-
-        @Path
-        String path = PATH;
-
-        Bean2Datastream foobards = new Bean2Datastream();
-    }
-
-    @Datastream
-    static class Bean2Datastream {
-
-        @Uuid
-        UUID uuid;
-
-        @DsContent
-        InputStream dsContent = new ByteArrayInputStream(DS_XML.getBytes());
-
-    }
 
     @Mock
     private FedoraRepository mockRepository;
@@ -110,16 +68,7 @@ public class FedoraMappingConverterTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-
-        // setup mock repository, fedora objects (with preset properties) and datastreams
-
         doReturn(REPO_URL).when(mockRepository).getRepositoryUrl();
-
-        org.fcrepo.client.FedoraObject mockFo = makeMockFedoraObject(FO_PATH, FO_UUID, FO_CREATED);
-        doReturn(mockFo)
-                .when(mockRepository).findOrCreateObject(FO_PATH);
-        doReturn(mockFo)
-                .when(mockRepository).getObject(FO_PATH);
     }
 
     private org.fcrepo.client.FedoraObject makeMockFedoraObject(String path, String uuid, String created) throws FedoraException {
@@ -158,37 +107,41 @@ public class FedoraMappingConverterTest {
     }
 
     @Test
-    public void testWrite() throws Exception {
-
+    public void testWriteBean1() throws Exception {
         FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
-        Bean1 source = new Bean1();
-        org.fcrepo.client.FedoraObject fo = mappingConverter.write(source);
-        assertThat(source.uuid).isNotNull();
-        assertThat(source.uuid.toString()).isEqualTo(FO_UUID);
-        System.out.println(source.uuid);
-        assertThat(source.created)
+        org.fcrepo.client.FedoraObject fedoraObject = makeMockFedoraObject(PATH, FO_UUID, FO_CREATED);
+        Bean1 bean1 = new Bean1();
+        bean1.setPath(PATH);
+        bean1.setNumber(3);
+        bean1.setFoo("bar");
+        mappingConverter.write(bean1, fedoraObject);
+        assertThat(bean1.getUuid()).isNotNull();
+        assertThat(bean1.getUuid().toString()).isEqualTo(FO_UUID);
+        assertThat(bean1.getCreated())
                 .isNotNull()
                 .hasTime(ZonedDateTime.parse(FO_CREATED).toInstant().toEpochMilli());
-        System.out.println(source.created);
-        verify(fo).updateProperties(contains("<> <" +
-                Constants.TEST_FEDORA_URI_NAMESPACE +
-                "number> " +
-                Utils.encodeLiteralValue(source.number, int.class)));
+        verify(fedoraObject).updateProperties(AdditionalMatchers.and(
+                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "number> " + Utils.encodeLiteralValue(bean1.getNumber(), int.class)),
+                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "foo> " + Utils.encodeLiteralValue(bean1.getFoo(), String.class))));
     }
 
     @Test
-    public void testWriteDatastream() throws Exception {
-        when(mockRepository.createDatastream(eq(DS_PATH), any()))
-                .thenAnswer(invocation -> makeMockDatastream(DS_PATH, ((FedoraContent) invocation.getArguments()[1]).getContent(), DS_UUID, DS_CREATED));
+    public void testWriteBean2() throws Exception {
         FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
+        org.fcrepo.client.FedoraObject fedoraObject = makeMockFedoraObject(PATH, FO_UUID, FO_CREATED);
+        when(mockRepository.createDatastream(eq(DS_PATH), any()))
+                .thenAnswer(invocation -> {
+                    FedoraContent fedoraContent = (FedoraContent) invocation.getArguments()[1];
+                    Assertions.assertThat(fedoraContent.getContent()).hasXmlContentEquivalentTo(DS_XML);
+                    return makeMockDatastream(DS_PATH, fedoraContent.getContent(), DS_UUID, DS_CREATED);
+                });
         Bean2 bean2 = new Bean2();
-        mappingConverter.write(bean2);
-        verify(mockRepository, times(1)).createDatastream(eq(DS_PATH),
-                argThat(equalsFedoraContentWithXml(DS_XML)));
-        assertThat(bean2.foobards.uuid).isNotNull();
-        assertThat(bean2.foobards.uuid.toString()).isEqualTo(DS_UUID);
+        bean2.setPath(PATH);
+        Bean2Datastream1 xmlDs = new Bean2Datastream1();
+        xmlDs.setXmlStream(new ByteArrayInputStream(DS_XML.getBytes()));
+        bean2.setXmlDs(xmlDs);
+        mappingConverter.write(bean2, fedoraObject);
+        verify(mockRepository, times(1)).createDatastream(eq(DS_PATH), any());
     }
-*/
-
 
 }
