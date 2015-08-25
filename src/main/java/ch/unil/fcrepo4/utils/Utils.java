@@ -11,6 +11,7 @@ import com.hp.hpl.jena.vocabulary.XSD;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraResource;
 import org.fcrepo.kernel.RdfLexicon;
+import org.springframework.util.Assert;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -30,31 +31,12 @@ public class Utils {
         return StreamSupport.stream(iterable.spliterator(), false);
     }
 
-    public static Object getFedoraObjectProperty(FedoraResource fedoraResource, String localName) throws FedoraException {
-        Iterator<Triple> props = fedoraResource.getProperties();
+    public static Object getLiteralValue(Iterator<Triple> props, String predicateUri){
         boolean found = false;
         Object value = null;
         while (props.hasNext() && !found) {
             Triple triple = props.next();
-            if (triple.getSubject().getURI().endsWith(fedoraResource.getPath())
-                    && triple.getPredicate().getURI().equals(RdfLexicon.REPOSITORY_NAMESPACE + localName)) {
-                if (!triple.getObject().isLiteral()) {
-                    throw new RuntimeException("Property node " + triple.getObject() + " is not literal");
-                }
-                value = triple.getObject().getLiteralValue();
-                found = true;
-            }
-        }
-
-        return value;
-    }
-
-    public static Object getProperty(Iterator<Triple> props, Property property){
-        boolean found = false;
-        Object value = null;
-        while (props.hasNext() && !found) {
-            Triple triple = props.next();
-            if (triple.getPredicate().getURI().equals(property.getURI())) {
+            if (triple.getPredicate().getURI().equals(predicateUri)) {
                 if (!triple.getObject().isLiteral()) {
                     throw new RuntimeException("Property node " + triple.getObject() + " is not literal");
                 }
@@ -68,6 +50,7 @@ public class Utils {
     }
 
     public static String encodeLiteralValue(Object value, Class<?> javaType) {
+        Assert.notNull(value);
         RDFDatatype rdfDatatype;
         if (Integer.class.isAssignableFrom(javaType)
                 || int.class.isAssignableFrom(javaType)) {

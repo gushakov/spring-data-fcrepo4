@@ -29,8 +29,15 @@ public class SimpleFedoraPersistentProperty extends GenericFedoraPersistentPrope
     }
 
     public String getUriNs(){
+        // if this is a property of a Fedora object entity
         if (propAnnot.uriNs().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN)){
-            return ((FedoraObjectPersistentEntity<?>)owner).getUriNs();
+            if (owner instanceof FedoraObjectPersistentEntity){
+                return ((FedoraObjectPersistentEntity<?>)owner).getUriNs();
+            }
+            else {
+                // or if this is a property of a datastream entity
+                return ((DatastreamPersistentEntity<?>)owner).getFedoraObjectEntity().getUriNs();
+            }
         }
         else {
             return propAnnot.uriNs();

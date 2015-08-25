@@ -11,13 +11,22 @@ import java.lang.reflect.Field;
  */
 public class DatastreamPersistentProperty extends GenericFedoraPersistentProperty {
 
+
     @SuppressWarnings("unchecked")
-    public DatastreamPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
+    public DatastreamPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder,
+                                        DatastreamPersistentEntity dsEntity) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
+
+        // set the reference to the parent Fedora object entity
+        dsEntity.setFedoraObjectEntity((FedoraObjectPersistentEntity<?>)owner);
     }
 
     @Override
     public boolean isAssociation() {
         return true;
     }
+
+
+
+
 }

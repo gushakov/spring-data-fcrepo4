@@ -24,10 +24,9 @@ import org.junit.Test;
 /**
  * @author gushakov
  */
-@Ignore
 public class SparqlQueryTest {
 
-    @Test
+//    @Test
     public void testQuery() throws Exception {
 
         // from https://jena.apache.org/documentation/query/app_api.html
@@ -49,7 +48,7 @@ public class SparqlQueryTest {
 
     }
 
-    @Test
+//    @Test
     public void testQueryBuilder() throws Exception {
         Triple triple = Triple.create(Var.alloc("s"), NodeFactory.createURI("info:fedora/test/foo"), NodeFactory.createLiteral("bar"));
         Query query = QueryFactory.make();
@@ -78,7 +77,7 @@ public class SparqlQueryTest {
         }
     }
 
-    @Test
+//    @Test
     public void testSparqlQueryCount() throws Exception {
         Expr expr1 = new E_LessThan(new ExprVar("v"), new NodeValueInteger(5));
         Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("t", "http://foobar#"))

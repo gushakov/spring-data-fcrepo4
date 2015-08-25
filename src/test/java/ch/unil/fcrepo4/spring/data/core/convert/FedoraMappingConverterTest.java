@@ -47,6 +47,7 @@ Based on org.fcrepo.client.impl.FedoraObjectImplTest
  * @author gushakov
  */
 public class FedoraMappingConverterTest {
+/*
 
     private static final String REPO_URL = "http://localhost:9090/rest";
 
@@ -187,6 +188,7 @@ public class FedoraMappingConverterTest {
         assertThat(bean2.foobards.uuid).isNotNull();
         assertThat(bean2.foobards.uuid.toString()).isEqualTo(DS_UUID);
     }
+*/
 
 
 }

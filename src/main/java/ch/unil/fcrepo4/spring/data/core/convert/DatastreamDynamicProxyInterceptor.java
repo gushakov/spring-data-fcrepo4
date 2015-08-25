@@ -71,8 +71,8 @@ public class DatastreamDynamicProxyInterceptor {
 
     private void loadDatastream(DatastreamDynamicProxy proxy) {
         logger.debug("Loading datastream from repository for path " + dsPath);
-        datastream = fedoraConverter.readDatastream(dsPath);
-        fedoraConverter.readFedoraResourceProperties(proxy, dsEntity, datastream);
+//        datastream = fedoraConverter.readDatastream(dsPath);
+//        fedoraConverter.readFedoraResourceProperties(proxy, dsEntity, datastream);
     }
 
 

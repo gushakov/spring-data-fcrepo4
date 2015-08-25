@@ -12,11 +12,6 @@ public class Constants {
     public static final String DEFAULT_ANNOTATION_STRING_VALUE_TOKEN = "##default##";
 
     /**
-     * Default (test) namespace, or root path of all Fedora objects.
-     */
-    public static final String DEFAULT_NAMESPACE = "test";
-
-    /**
      * Default datastream mimetype.
      */
     public static final String MIME_TYPE_TEXT_XML = "text/xml";

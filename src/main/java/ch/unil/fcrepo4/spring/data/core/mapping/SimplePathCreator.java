@@ -1,25 +1,24 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import org.springframework.util.Assert;
+import ch.unil.fcrepo4.spring.data.core.Constants;
 
 /**
- * Default implementation of {@linkplain PathCreator} which simply concatenates {@code namespace} and {@code path} to
- * construct the full path for the Fedora object.
+ * Default implementation of {@linkplain PathCreator}, simply concatenates {@code namespace} (if not empty or null) and
+ * {@code idPath}.
  *
  * @author gushakov
  */
 public class SimplePathCreator implements PathCreator {
     @Override
-    public String createPath(String namespace, Class<?> entityType, Class<?> propType, String idPropName, Object id) {
-        Assert.notNull(namespace);
-        Assert.notNull(id);
-        String fullPath = "/" + namespace;
+    public String createPath(String namespace, Class<?> entityType, Class<?> propType, String idPropName, Object idPath) {
+        // prepend namespace only if not null or empty
+        String fullPath = ((namespace != null && namespace.matches("\\s*")) ? "/" + namespace : "");
 
-        if (id instanceof String && !((String) id).startsWith("/")) {
+        if (idPath instanceof String && !((String) idPath).startsWith("/")) {
             fullPath += "/";
         }
 
-        fullPath += id;
+        fullPath += idPath;
         return fullPath;
     }
 }

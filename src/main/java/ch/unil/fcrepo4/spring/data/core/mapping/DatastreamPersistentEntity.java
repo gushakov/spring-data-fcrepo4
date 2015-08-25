@@ -13,6 +13,10 @@ public class DatastreamPersistentEntity<T> extends GenericFedoraPersistentEntity
 
     private Datastream dsAnnot;
 
+    private String fedoraObjectUriNs;
+
+    private FedoraObjectPersistentEntity<?> foEntity;
+
     public DatastreamPersistentEntity(TypeInformation<T> information) {
         super(information);
         this.dsAnnot = findAnnotation(Datastream.class);
@@ -20,11 +24,18 @@ public class DatastreamPersistentEntity<T> extends GenericFedoraPersistentEntity
     }
 
     private void checkName(){
-        // name must not be empty or contain slashes
-        if (!dsAnnot.name().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN)
-                && (dsAnnot.name().matches("\\s*") || dsAnnot.name().contains("/"))){
+        // name must not contain slashes
+        if (!isDefaultDatastreamName() &&  dsAnnot.name().contains("/")){
             throw new MappingException("Invalid datastream name: " + dsAnnot);
         }
+    }
+
+    public FedoraObjectPersistentEntity<?> getFedoraObjectEntity() {
+        return foEntity;
+    }
+
+    public void setFedoraObjectEntity(FedoraObjectPersistentEntity<?> foEntity) {
+        this.foEntity = foEntity;
     }
 
     /**
@@ -33,6 +44,10 @@ public class DatastreamPersistentEntity<T> extends GenericFedoraPersistentEntity
      */
     public String getDsName(){
         return dsAnnot.name();
+    }
+
+    public boolean isDefaultDatastreamName(){
+        return dsAnnot.name().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN) || dsAnnot.name().matches("\\s*");
     }
 
     /**

@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
+import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
@@ -21,6 +22,10 @@ public class FedoraObjectPersistentEntity<T> extends GenericFedoraPersistentEnti
 
     public String getNamespace() {
         return foAnnot.namespace();
+    }
+
+    public boolean isDefaultNamespace(){
+        return foAnnot.namespace().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN) || foAnnot.namespace().matches("\\s*");
     }
 
     public String getUriNs() {

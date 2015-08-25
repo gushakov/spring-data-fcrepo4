@@ -3,6 +3,7 @@ package ch.unil.fcrepo4.spring.data.core;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import org.fcrepo.client.FedoraException;
+import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -51,12 +52,19 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public void save(Object source) {
-         fedoraConverter.write(source);
+    public String save(Object bean) {
+        FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
+        fedoraConverter.write(bean, fedoraObject);
+        try {
+            return fedoraObject.getPath();
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public <T> T load(String path, Class<T> beanType) {
-        return fedoraConverter.read(path, beanType);
+        return fedoraConverter.read(beanType, fedoraConverter.getFedoraObject(path, beanType));
     }
+
 }

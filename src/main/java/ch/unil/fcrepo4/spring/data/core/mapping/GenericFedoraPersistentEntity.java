@@ -17,14 +17,24 @@ public class GenericFedoraPersistentEntity<T> extends BasicPersistentEntity<T, F
         super(information);
     }
 
+    @Override
     public FedoraPersistentProperty findProperty(Method getter){
         final FedoraPersistentProperty found[] = new FedoraPersistentProperty[]{null};
         doWithProperties((FedoraPersistentProperty property) -> {
-            if (property.getGetter().getName().equals(getter.getName())){
+            if (property.getGetter().getName().equals(getter.getName())) {
                 found[0] = property;
             }
         });
         return found[0];
+    }
+
+    @Override
+    public void doWithSimplePersistentProperties(SimplePropertyHandler simplePropertyHandler){
+        doWithProperties((PersistentProperty<?> property) -> {
+           if (property instanceof SimpleFedoraPersistentProperty){
+               simplePropertyHandler.doWithPersistentProperty(property);
+           }
+        });
     }
 
 }

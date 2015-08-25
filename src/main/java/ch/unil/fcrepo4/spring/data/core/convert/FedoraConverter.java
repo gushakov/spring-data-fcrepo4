@@ -14,17 +14,16 @@ import org.springframework.data.convert.EntityWriter;
 /**
  * @author gushakov
  */
-public interface FedoraConverter extends EntityReader<Object, FedoraObject>, EntityWriter<Object, FedoraObject>,
-        EntityConverter<FedoraPersistentEntity<?>, FedoraPersistentProperty, Object, FedoraObject>{
+public interface FedoraConverter extends EntityReader<Object, FedoraResource>, EntityWriter<Object, FedoraResource>,
+        EntityConverter<FedoraPersistentEntity<?>, FedoraPersistentProperty, Object, FedoraResource>{
 
-    void readFedoraResourceProperties(Object bean, GenericFedoraPersistentEntity<?> entity, FedoraResource fedoraResource);
+    @Override
+    <T> T read(Class<T> beanType, FedoraResource fedoraResource);
 
-    FedoraObject write(Object source);
+    @Override
+    void write(Object bean, FedoraResource fedoraResource);
 
-    <T> T read(String path, Class<T> beanType);
+    FedoraObject getFedoraObject(Object bean);
 
-    <T> T read(Class<T> beanType, FedoraObject fedoraObject);
-
-    FedoraDatastream readDatastream(String dsPath);
-
+   <T> FedoraObject getFedoraObject(String path, Class<T> beanType);
 }
