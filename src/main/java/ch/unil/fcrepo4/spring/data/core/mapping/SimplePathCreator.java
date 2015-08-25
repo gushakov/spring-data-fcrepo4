@@ -1,24 +1,26 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import ch.unil.fcrepo4.spring.data.core.Constants;
-
 /**
- * Default implementation of {@linkplain PathCreator}, simply concatenates {@code namespace} (if not empty or null) and
- * {@code idPath}.
- *
  * @author gushakov
  */
 public class SimplePathCreator implements PathCreator {
     @Override
-    public String createPath(String namespace, Class<?> entityType, Class<?> propType, String idPropName, Object idPath) {
+    public String createPath(String namespace, Class<?> beanType, Class<?> pathPropType, String pathPropName, Object pathPropValue) {
         // prepend namespace only if not null or empty
-        String fullPath = ((namespace != null && namespace.matches("\\s*")) ? "/" + namespace : "");
+        String path = (namespace != null && !namespace.matches("\\s*")) ? "/" + namespace : "";
 
-        if (idPath instanceof String && !((String) idPath).startsWith("/")) {
-            fullPath += "/";
+        if (pathPropValue instanceof String && !((String) pathPropValue).startsWith("/")) {
+            path += "/";
         }
 
-        fullPath += idPath;
-        return fullPath;
+        path += pathPropValue;
+        return path;
     }
+
+    @Override
+    public Object parsePath(String namespace, Class<?> beanType, Class<?> pathPropType, String pathPropName, String path) {
+        // remove namespace if not null or empty
+        return (namespace != null && !namespace.matches("\\s*")) ? path.replaceFirst("/" + namespace, "") : path;
+    }
+
 }

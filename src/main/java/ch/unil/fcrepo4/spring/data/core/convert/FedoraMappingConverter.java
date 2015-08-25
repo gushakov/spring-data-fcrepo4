@@ -71,10 +71,10 @@ public class FedoraMappingConverter implements FedoraConverter {
         readFedoraResourceProperties(bean, (GenericFedoraPersistentEntity<?>) entity, fedoraResource);
 
         // if we are reading from a Fedora object
-        if (entity instanceof FedoraObjectPersistentEntity && fedoraResource instanceof FedoraObject){
-            readDatastreams(bean, (FedoraObjectPersistentEntity<?>)entity, (FedoraObject) fedoraResource);
-        }
-        else if (entity instanceof DatastreamPersistentEntity && fedoraResource instanceof FedoraDatastream){
+        if (entity instanceof FedoraObjectPersistentEntity && fedoraResource instanceof FedoraObject) {
+            readPath(bean, (FedoraObjectPersistentEntity<?>) entity, (FedoraObject) fedoraResource);
+            readDatastreams(bean, (FedoraObjectPersistentEntity<?>) entity, (FedoraObject) fedoraResource);
+        } else if (entity instanceof DatastreamPersistentEntity && fedoraResource instanceof FedoraDatastream) {
             // or if we are reading from a datastream
             readDatastreamContent(bean, (DatastreamPersistentEntity<?>) entity, (FedoraDatastream) fedoraResource);
         }
@@ -371,9 +371,19 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
-    private void readDatastreamContent(Object dsBean, DatastreamPersistentEntity<?> dsEntity, FedoraDatastream fedoraDatastream){
+    private void readDatastreamContent(Object dsBean, DatastreamPersistentEntity<?> dsEntity, FedoraDatastream fedoraDatastream) {
         try {
             dsEntity.getPropertyAccessor(dsBean).setProperty(dsEntity.getContentProperty(), fedoraDatastream.getContent());
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void readPath(Object bean, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
+        PathPersistentProperty pathProp = (PathPersistentProperty) entity.getIdProperty();
+        try {
+            entity.getPropertyAccessor(bean).setProperty(pathProp,
+                    pathProp.getPathCreator().parsePath(entity.getNamespace(), bean.getClass(), pathProp.getType(), pathProp.getName(), fedoraObject.getPath()));
         } catch (FedoraException e) {
             throw new RuntimeException(e);
         }

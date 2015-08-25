@@ -84,6 +84,7 @@ public class FedoraTemplateTestIT {
         String path = fedoraTemplate.save(bean1Save);
         Bean1 bean1Load = fedoraTemplate.load(path, Bean1.class);
         assertThat(bean1Load).isNotNull();
+        assertThat(bean1Load.getPath()).isEqualTo(path);
         assertThat(bean1Load.getUuid()).isNotNull();
         assertThat(bean1Load.getCreated()).isNotNull();
         assertThat(bean1Load.getNumber()).isEqualTo(3);
@@ -120,6 +121,7 @@ public class FedoraTemplateTestIT {
         assertThat(bean2Load.getXmlDs()).isInstanceOf(DatastreamDynamicProxy.class);
         assertThat(bean2Load.getXmlDs().getUuid()).isNotNull();
         assertThat(bean2Load.getXmlDs().getWam()).isEqualTo("waz");
+        Assertions.assertThat(bean2Load.getXmlDs().getXmlStream()).hasXmlContentEquivalentTo("<foo>bar</foo>");
     }
 
     @Test
@@ -127,11 +129,14 @@ public class FedoraTemplateTestIT {
         Bean3 bean3Save1 = new Bean3();
         bean3Save1.setPath("/wam/baz/" + System.currentTimeMillis());
         Bean3Datastream1 dsBeanSave1 = new Bean3Datastream1();
+        dsBeanSave1.setNumber(3);
         dsBeanSave1.setXmlStream(new ByteArrayInputStream("<wam>waz</wam>".getBytes()));
         bean3Save1.setXmlDs(dsBeanSave1);
         String path = fedoraTemplate.save(bean3Save1);
         Bean3 bean3Load = fedoraTemplate.load(path, Bean3.class);
-        Assertions.assertThat(bean3Load.getXmlDs().getXmlStream()).hasXmlContentEquivalentTo("<wam>waz2</wam>");
+//        Assertions.assertThat(bean3Load.getXmlDs().getXmlStream()).hasXmlContentEquivalentTo("<wam>waz</wam>");
+        bean3Load.getXmlDs().setNumber(4);
+        fedoraTemplate.save(bean3Load);
     }
 
 }
