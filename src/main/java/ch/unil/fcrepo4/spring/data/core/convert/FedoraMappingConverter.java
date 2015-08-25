@@ -2,7 +2,9 @@ package ch.unil.fcrepo4.spring.data.core.convert;
 
 
 /*
- * Based by org.springframework.data.mongodb.core.convert.MappingMongoConverter
+ * Based on code from:
+ * org.springframework.data.mongodb.core.convert.MappingMongoConverter,
+ * org.springframework.data.solr.core.convert.MappingSolrConverter
  */
 
 
@@ -11,6 +13,10 @@ import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import ch.unil.fcrepo4.utils.Utils;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
 import org.fcrepo.kernel.RdfLexicon;
@@ -58,11 +64,21 @@ public class FedoraMappingConverter implements FedoraConverter {
         T bean;
         try {
             bean = beanType.newInstance();
-            readFedoraResourceProperties(bean, (GenericFedoraPersistentEntity<?>) entity, fedoraResource);
-            readSimpleProperties(bean, entity, fedoraResource);
         } catch (InstantiationException | IllegalAccessException e) {
             throw new MappingException("Cannot instantiate bean of type " + beanType.getName(), e);
         }
+        readSimpleProperties(bean, entity, fedoraResource);
+        readFedoraResourceProperties(bean, (GenericFedoraPersistentEntity<?>) entity, fedoraResource);
+
+        // if we are reading from a Fedora object
+        if (entity instanceof FedoraObjectPersistentEntity && fedoraResource instanceof FedoraObject){
+            readDatastreams(bean, (FedoraObjectPersistentEntity<?>)entity, (FedoraObject) fedoraResource);
+        }
+        else if (entity instanceof DatastreamPersistentEntity && fedoraResource instanceof FedoraDatastream){
+            // or if we are reading from a datastream
+            readDatastreamContent(bean, (DatastreamPersistentEntity<?>) entity, (FedoraDatastream) fedoraResource);
+        }
+
         return bean;
     }
 
@@ -74,9 +90,9 @@ public class FedoraMappingConverter implements FedoraConverter {
         // write simple properties
         writeSimpleProperties(bean, entity, fedoraResource);
 
-        if (entity instanceof FedoraObjectPersistentEntity && fedoraResource instanceof FedoraObject){
-            // write datastreams
-            writeDatastreams(bean, (FedoraObjectPersistentEntity<?>) entity, (FedoraObject)fedoraResource);
+        // if we are writing to a Fedora object
+        if (entity instanceof FedoraObjectPersistentEntity && fedoraResource instanceof FedoraObject) {
+            writeDatastreams(bean, (FedoraObjectPersistentEntity<?>) entity, (FedoraObject) fedoraResource);
         }
     }
 
@@ -172,6 +188,14 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
+    @Override
+    public FedoraDatastream fetchDatastream(String dsPath) {
+        try {
+            return repository.getDatastream(dsPath);
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void readFedoraResourceProperties(Object bean, GenericFedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
@@ -240,7 +264,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         entity.doWithSimplePersistentProperties(simpleProp -> {
             Object propValue = propsAccessor.getProperty(simpleProp);
             // ignore if property value is null
-            if (propValue != null){
+            if (propValue != null) {
                 inserts.add("<> <" + ((SimpleFedoraPersistentProperty) simpleProp).getUri() + "> "
                         + Utils.encodeLiteralValue(propValue, simpleProp.getType()));
             }
@@ -268,7 +292,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     }
 
-    protected void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
+    private void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
         entity.doWithDatastreams(dsProp -> {
             Object dsBean = entity.getPropertyAccessor(source).getProperty(dsProp);
             if (dsBean == null) {
@@ -283,7 +307,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         });
     }
 
-    protected FedoraDatastream createDatastream(Object dsBean, DatastreamPersistentProperty dsProp, DatastreamPersistentEntity<?> dsEntity, FedoraObject fedoraObject) {
+    private FedoraDatastream createDatastream(Object dsBean, DatastreamPersistentProperty dsProp, DatastreamPersistentEntity<?> dsEntity, FedoraObject fedoraObject) {
         FedoraContent fedoraContent = new FedoraContent();
         fedoraContent.setContentType(dsEntity.getMimetype());
 
@@ -314,5 +338,44 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     }
 
+    private void readDatastreams(Object bean, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
+        entity.doWithDatastreams(dsProp -> {
+            DatastreamPersistentEntity<?> dsEntity = (DatastreamPersistentEntity<?>) mappingContext.getPersistentEntity(dsProp.getType());
+            PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
+            try {
+                String dsPath = fedoraObject.getPath() + "/" +
+                        (dsEntity.isDefaultDatastreamName() ? dsProp.getName() : dsEntity.getDsName());
+                propsAccessor.setProperty(dsProp, createDatastreamBeanProxy((DatastreamPersistentProperty) dsProp, dsPath, dsEntity));
+                logger.debug("Created a dynamic proxy for a datastream property " + dsProp.getName() + " of bean " +
+                        bean.getClass().getSimpleName());
+            } catch (FedoraException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
+    private Object createDatastreamBeanProxy(DatastreamPersistentProperty dsProp, String dsPath, DatastreamPersistentEntity<?> dsEntity) {
+        try {
+            return new ByteBuddy()
+                    .subclass(dsProp.getType())
+                    .implement(DatastreamDynamicProxy.class)
+                    .method(ElementMatchers.isGetter())
+                    .intercept(MethodDelegation.to(new DatastreamDynamicProxyInterceptor(dsPath, dsEntity, this)))
+                    .make()
+                    .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
+                    .getLoaded()
+                    .newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new MappingException("Cannot instantiate a dynamic proxy for a datastream property " +
+                    dsProp.getName() + " of type " + dsEntity.getType().getSimpleName(), e);
+        }
+    }
+
+    private void readDatastreamContent(Object dsBean, DatastreamPersistentEntity<?> dsEntity, FedoraDatastream fedoraDatastream){
+        try {
+            dsEntity.getPropertyAccessor(dsBean).setProperty(dsEntity.getContentProperty(), fedoraDatastream.getContent());
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

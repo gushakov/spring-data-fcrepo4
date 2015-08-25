@@ -13,8 +13,6 @@ public class DatastreamPersistentEntity<T> extends GenericFedoraPersistentEntity
 
     private Datastream dsAnnot;
 
-    private String fedoraObjectUriNs;
-
     private FedoraObjectPersistentEntity<?> foEntity;
 
     public DatastreamPersistentEntity(TypeInformation<T> information) {

@@ -1,15 +1,12 @@
 package ch.unil.fcrepo4.spring.data.core.convert;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamContentPersistentProperty;
 import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentEntity;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
-import net.bytebuddy.implementation.bind.annotation.*;
-import org.fcrepo.client.FedoraContent;
-import org.fcrepo.client.FedoraDatastream;
+import net.bytebuddy.implementation.bind.annotation.Origin;
+import net.bytebuddy.implementation.bind.annotation.RuntimeType;
+import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.data.mapping.SimplePropertyHandler;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
@@ -27,7 +24,7 @@ public class DatastreamDynamicProxyInterceptor {
 
     private FedoraConverter fedoraConverter;
 
-    private FedoraDatastream datastream;
+    private Object dsBean;
 
     public DatastreamDynamicProxyInterceptor(String dsPath, DatastreamPersistentEntity<?> dsEntity, FedoraConverter fedoraConverter) {
         this.dsPath = dsPath;
@@ -36,29 +33,27 @@ public class DatastreamDynamicProxyInterceptor {
     }
 
     @RuntimeType
-    public Object interceptGetter(@This DatastreamDynamicProxy proxy,  @SuperCall Callable<?> delegateCall, @Origin Method method) {
+    public Object interceptGetter(@SuperCall Callable<?> delegateCall, @Origin Method method) {
         Object result;
-        logger.debug("Intercepted method call to getter: " + method);
+        logger.debug("Intercepted method call to getter: {}", method);
         try {
 
             FedoraPersistentProperty prop = dsEntity.findProperty(method);
 
             if (prop != null){
+
                 // call to a getter of a persistent property, load datastream if needed
-                if (datastream == null){
-                    loadDatastream(proxy);
+
+                if (dsBean == null) {
+                    loadDatastream();
                 }
 
-                if (prop instanceof DatastreamContentPersistentProperty){
-                    result = datastream.getContent();
-                }
-                else {
-                    logger.debug("Delegating call to the super object");
-                    result = delegateCall.call();
-                }
+                logger.debug("Calling method {} on the datastream bean", method.getName());
+                result = method.invoke(dsBean);
+
             }
             else {
-                logger.debug("Delegating call to the super object");
+                logger.debug("Delegating call to the method {} to the super object", method.getName());
                result = delegateCall.call();
             }
 
@@ -69,11 +64,9 @@ public class DatastreamDynamicProxyInterceptor {
         }
     }
 
-    private void loadDatastream(DatastreamDynamicProxy proxy) {
-        logger.debug("Loading datastream from repository for path " + dsPath);
-//        datastream = fedoraConverter.readDatastream(dsPath);
-//        fedoraConverter.readFedoraResourceProperties(proxy, dsEntity, datastream);
+    private void loadDatastream() {
+        logger.debug("Loading datastream from repository for path {}", dsPath);
+        dsBean = fedoraConverter.read(dsEntity.getType(), fedoraConverter.fetchDatastream(dsPath));
     }
-
 
 }

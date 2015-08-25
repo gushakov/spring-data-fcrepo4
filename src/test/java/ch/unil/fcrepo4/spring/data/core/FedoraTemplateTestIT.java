@@ -1,8 +1,8 @@
 package ch.unil.fcrepo4.spring.data.core;
 
-import ch.unil.fcrepo4.beans.Bean1;
-import ch.unil.fcrepo4.beans.Bean2;
-import ch.unil.fcrepo4.beans.Bean2Datastream1;
+import ch.unil.fcrepo4.assertj.Assertions;
+import ch.unil.fcrepo4.beans.*;
+import ch.unil.fcrepo4.spring.data.core.convert.DatastreamDynamicProxy;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import com.hp.hpl.jena.graph.NodeFactory;
 import org.fcrepo.client.FedoraDatastream;
@@ -103,6 +103,35 @@ public class FedoraTemplateTestIT {
         assertThat(ds.getProperties()).contains(NodeFactory.createURI("info:fedora/test/wam"),
                 NodeFactory.createLiteral("baz", XSDBaseNumericType.XSDstring));
 
+    }
+
+    @Test
+    public void testLoadBean2() throws Exception {
+        Bean2 bean2Save = new Bean2();
+        bean2Save.setPath("/foo/bar/" + System.currentTimeMillis());
+        Bean2Datastream1 dsBean = new Bean2Datastream1();
+        dsBean.setWam("waz");
+        dsBean.setXmlStream(new ByteArrayInputStream("<foo>bar</foo>".getBytes()));
+        bean2Save.setXmlDs(dsBean);
+        String path = fedoraTemplate.save(bean2Save);
+        Bean2 bean2Load = fedoraTemplate.load(path, Bean2.class);
+        assertThat(bean2Load).isNotNull();
+        assertThat(bean2Load.getXmlDs()).isNotNull();
+        assertThat(bean2Load.getXmlDs()).isInstanceOf(DatastreamDynamicProxy.class);
+        assertThat(bean2Load.getXmlDs().getUuid()).isNotNull();
+        assertThat(bean2Load.getXmlDs().getWam()).isEqualTo("waz");
+    }
+
+    @Test
+    public void testSaveLoadSaveBean3() throws Exception {
+        Bean3 bean3Save1 = new Bean3();
+        bean3Save1.setPath("/wam/baz/" + System.currentTimeMillis());
+        Bean3Datastream1 dsBeanSave1 = new Bean3Datastream1();
+        dsBeanSave1.setXmlStream(new ByteArrayInputStream("<wam>waz</wam>".getBytes()));
+        bean3Save1.setXmlDs(dsBeanSave1);
+        String path = fedoraTemplate.save(bean3Save1);
+        Bean3 bean3Load = fedoraTemplate.load(path, Bean3.class);
+        Assertions.assertThat(bean3Load.getXmlDs().getXmlStream()).hasXmlContentEquivalentTo("<wam>waz2</wam>");
     }
 
 }

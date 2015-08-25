@@ -4,6 +4,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import org.fcrepo.client.FedoraResource;
 
+import java.io.InputStream;
 import java.util.Iterator;
 
 /**
@@ -25,5 +26,9 @@ public class Assertions  {
 
     public static TriplesIteratorAssert assertThat(Iterator<Triple> triplesIterator){
         return new TriplesIteratorAssert(triplesIterator);
+    }
+
+    public static XmlInputStreamAssert assertThat(InputStream xmlStream){
+        return new XmlInputStreamAssert(xmlStream);
     }
 }
