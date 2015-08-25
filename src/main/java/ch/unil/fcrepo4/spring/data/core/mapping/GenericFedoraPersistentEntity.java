@@ -3,7 +3,6 @@ package ch.unil.fcrepo4.spring.data.core.mapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.data.mapping.PropertyHandler;
 import org.springframework.data.mapping.SimplePropertyHandler;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.util.TypeInformation;
@@ -22,7 +21,7 @@ public class GenericFedoraPersistentEntity<T> extends BasicPersistentEntity<T, F
     }
 
     @Override
-    public FedoraPersistentProperty findProperty(Method getter){
+    public FedoraPersistentProperty findGetterProperty(Method getter){
         final FedoraPersistentProperty found[] = new FedoraPersistentProperty[]{null};
         doWithProperties((FedoraPersistentProperty property) -> {
             if (property.getGetter() != null) {
@@ -32,6 +31,22 @@ public class GenericFedoraPersistentEntity<T> extends BasicPersistentEntity<T, F
             }
             else {
                 logger.warn("No getter for property {}", property);
+            }
+        });
+        return found[0];
+    }
+
+    @Override
+    public FedoraPersistentProperty findSetterProperty(Method setter) {
+        final FedoraPersistentProperty found[] = new FedoraPersistentProperty[]{null};
+        doWithProperties((FedoraPersistentProperty property) -> {
+            if (property.getSetter() != null) {
+                if (property.getSetter().getName().equals(setter.getName())){
+                    found[0] = property;
+                }
+            }
+            else {
+                logger.warn("No setter for property {}", property);
             }
         });
         return found[0];

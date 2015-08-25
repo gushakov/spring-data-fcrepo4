@@ -295,12 +295,16 @@ public class FedoraMappingConverter implements FedoraConverter {
     private void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
         entity.doWithDatastreams(dsProp -> {
             Object dsBean = entity.getPropertyAccessor(source).getProperty(dsProp);
+            // check if this is a dynamic proxy
+            if (dsBean instanceof DatastreamDynamicProxy) {
+                // then substitute target bean instead
+                dsBean = ((DatastreamDynamicProxy) dsBean).__getTargetDatastreamBean();
+            }
             if (dsBean == null) {
                 throw new MappingException("Datastream " + dsProp.getName() + " must not be null, entity " + entity.getType().getSimpleName());
             }
 
             DatastreamPersistentEntity<?> dsEntity = (DatastreamPersistentEntity<?>) mappingContext.getPersistentEntity(dsProp.getType());
-
             FedoraDatastream datastream = createDatastream(dsBean, (DatastreamPersistentProperty) dsProp, dsEntity, fedoraObject);
             readFedoraResourceProperties(dsBean, dsEntity, datastream);
             writeSimpleProperties(dsBean, dsEntity, datastream);
@@ -359,7 +363,7 @@ public class FedoraMappingConverter implements FedoraConverter {
             return new ByteBuddy()
                     .subclass(dsProp.getType())
                     .implement(DatastreamDynamicProxy.class)
-                    .method(ElementMatchers.isGetter())
+                    .method(ElementMatchers.named(DatastreamDynamicProxy.GET_TARGET_BEAN_METHOD_NAME).or(ElementMatchers.isGetter().or(ElementMatchers.isSetter())))
                     .intercept(MethodDelegation.to(new DatastreamDynamicProxyInterceptor(dsPath, dsEntity, this)))
                     .make()
                     .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)

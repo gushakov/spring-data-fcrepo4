@@ -10,7 +10,9 @@ import java.lang.reflect.Method;
  */
 public interface FedoraPersistentEntity<T> extends PersistentEntity<T, FedoraPersistentProperty> {
 
-    FedoraPersistentProperty findProperty(Method getter);
+    FedoraPersistentProperty findGetterProperty(Method getter);
+
+    FedoraPersistentProperty findSetterProperty(Method setter);
 
     void doWithSimplePersistentProperties(SimplePropertyHandler simplePropertyHandler);
 }
