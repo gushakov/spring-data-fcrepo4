@@ -136,35 +136,6 @@
         <plugins>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
-                <executions>
-                    <execution>
-                        <id>reserve-network-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>triplestore.ajp.port</portName>
-                                <portName>triplestore.servlet.port</portName>
-                                <portName>triplestore.rmi.port</portName>
-                                <portName>fedora.ajp.port</portName>
-                                <portName>fedora.servlet.port</portName>
-                                <portName>fedora.rmi.port</portName>
-                                <portName>indexer.ajp.port</portName>
-                                <portName>indexer.servlet.port</portName>
-                                <portName>indexer.rmi.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.7</version>
@@ -225,6 +196,16 @@ See fuseki configuration at
 
     <profiles>
         <profile>
+            <id>localhost</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+               <fedora.servlet.port>9090</fedora.servlet.port>
+            </properties>
+        </profile>
+
+        <profile>
             <id>cargo-fedora-integration-tests</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -240,6 +221,28 @@ See fuseki configuration at
             </dependencies>
             <build>
                 <plugins>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>reserve-network-port</id>
+                                <goals>
+                                    <goal>reserve-network-port</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <portNames>
+                                        <portName>fedora.ajp.port</portName>
+                                        <portName>fedora.servlet.port</portName>
+                                        <portName>fedora.rmi.port</portName>
+                                    </portNames>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -396,6 +399,34 @@ See fuseki configuration at
             </dependencies>
             <build>
                 <plugins>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>reserve-network-port</id>
+                                <goals>
+                                    <goal>reserve-network-port</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <portNames>
+                                        <portName>triplestore.ajp.port</portName>
+                                        <portName>triplestore.servlet.port</portName>
+                                        <portName>triplestore.rmi.port</portName>
+                                        <portName>fedora.ajp.port</portName>
+                                        <portName>fedora.servlet.port</portName>
+                                        <portName>fedora.rmi.port</portName>
+                                        <portName>indexer.ajp.port</portName>
+                                        <portName>indexer.servlet.port</portName>
+                                        <portName>indexer.rmi.port</portName>
+                                    </portNames>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -638,35 +669,6 @@ See fuseki configuration at
                         </executions>
                     </plugin>
                 </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>assertj-plugin</id>
-            <build>
-                 <plugins>
-                     <plugin>
-                         <groupId>org.assertj</groupId>
-                         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-                         <version>1.6.0</version>
-                         <executions>
-                             <execution>
-                                 <id>generate-assertions</id>
-                                 <goals>
-                                     <goal>generate-assertions</goal>
-                                 </goals>
-                                 <phase>generate-test-sources</phase>
-                                 <configuration>
-                                     <entryPointClassPackage>ch.unil.spring.data.fcrepo4.assertj</entryPointClassPackage>
-                                     <classes>
-                                         <class>org.fcrepo.client.FedoraResource</class>
-                                         <class>org.fcrepo.client.FedoraObject</class>
-                                         <class>org.fcrepo.client.FedoraDatastream</class>
-                                     </classes>
-                                 </configuration>
-                             </execution>
-                         </executions>
-                     </plugin>
-                 </plugins>
             </build>
         </profile>
     </profiles>
