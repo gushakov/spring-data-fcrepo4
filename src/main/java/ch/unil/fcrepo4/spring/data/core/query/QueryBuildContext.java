@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.query;
 
+import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
 import com.hp.hpl.jena.sparql.expr.aggregate.Aggregator;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
@@ -12,9 +13,13 @@ import java.util.Optional;
  */
 public interface QueryBuildContext {
 
+    void setDatatypeConverter(RdfDatatypeConverter converter);
+
+    RdfDatatypeConverter getDatatypeConverter();
+
     PrefixMap getPrefixMap();
 
-   Optional<Aggregator> getCountAggregator();
+    Optional<Aggregator> getCountAggregator();
 
     void setCountAggregator(Aggregator aggregator);
 

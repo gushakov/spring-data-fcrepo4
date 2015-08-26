@@ -31,10 +31,10 @@ public class DatastreamDynamicProxyInterceptor {
         this.fedoraConverter = fedoraConverter;
     }
 
+    //Note: needs to be the same name as DatastreamDynamicProxy.GET_TARGET_DATASTREAM_BEAN_METHOD
     @RuntimeType
-    @BindingPriority(1)
-    public Object interceptCallForTargetDatastreamBean(@Origin Method method){
-        logger.debug("Getting target datastream bean");
+    public Object __getTargetDatastreamBean() {
+        logger.debug("Intercepted call to " + DatastreamDynamicProxy.GET_TARGET_DATASTREAM_BEAN_METHOD);
         if (targetDsBean == null) {
             loadTargetDatastreamBean();
         }
@@ -43,11 +43,10 @@ public class DatastreamDynamicProxyInterceptor {
 
 
     @RuntimeType
-    @BindingPriority(2)
-    public Object interceptGetter(@SuperCall Callable<?> delegateCall, @Origin Method method) {
-        logger.debug("Intercepted method call to getter: {}", method);
+    public Object intercept(@SuperCall Callable<?> delegateCall, @Origin Method method, @AllArguments Object[] args) {
+        logger.debug("Intercepted method call to method: {}", method);
 
-        FedoraPersistentProperty prop = dsEntity.findGetterProperty(method);
+        FedoraPersistentProperty prop = dsEntity.findPropertyForGetterOrSetter(method);
         if (prop != null) {
 
             if (targetDsBean == null) {
@@ -56,7 +55,7 @@ public class DatastreamDynamicProxyInterceptor {
 
             logger.debug("Calling method {} on the datastream bean", method.getName());
             try {
-                return method.invoke(targetDsBean);
+                return method.invoke(targetDsBean, args);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
@@ -68,33 +67,6 @@ public class DatastreamDynamicProxyInterceptor {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    @RuntimeType
-    @BindingPriority(3)
-    public void interceptSetter(@SuperCall Callable<?> delegateCall, @Origin Method method, @AllArguments Object[] args) {
-        logger.debug("Intercepted method call to setter: {}", method);
-
-        try {
-            FedoraPersistentProperty prop = dsEntity.findSetterProperty(method);
-            if (prop != null) {
-
-                // trying to access a persistent property, load and convert datastream object
-
-                if (targetDsBean == null) {
-                    loadTargetDatastreamBean();
-                }
-
-                logger.debug("Calling method {} on the datastream bean", method.getName());
-                method.invoke(targetDsBean, args);
-
-            } else {
-                logger.debug("Delegating call to the method {} to the super object", method.getName());
-                delegateCall.call();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 

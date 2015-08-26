@@ -5,7 +5,6 @@ import ch.unil.fcrepo4.beans.Bean1;
 import ch.unil.fcrepo4.beans.Bean2;
 import ch.unil.fcrepo4.beans.Bean2Datastream1;
 import ch.unil.fcrepo4.spring.data.core.Constants;
-import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
@@ -58,6 +57,8 @@ public class FedoraMappingConverterTest {
     private static final String DS_UUID = "b0e99a09-72b7-4c30-ab16-8dcd66ce2004";
     private static final String DS_CREATED = "2015-08-21T11:41:59.364Z";
     private static final String DS_XML = "<foo>bar</foo>";
+
+    private RdfDatatypeConverter rdfDatatypeConverter = new XsdDatatypeConverter();
 
     @Mock
     private FedoraRepository mockRepository;
@@ -121,8 +122,8 @@ public class FedoraMappingConverterTest {
                 .isNotNull()
                 .hasTime(ZonedDateTime.parse(FO_CREATED).toInstant().toEpochMilli());
         verify(fedoraObject).updateProperties(AdditionalMatchers.and(
-                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "number> " + Utils.encodeLiteralValue(bean1.getNumber(), int.class)),
-                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "foo> " + Utils.encodeLiteralValue(bean1.getFoo(), String.class))));
+                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "number> " + rdfDatatypeConverter.serializeLiteralValue(bean1.getNumber())),
+                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "foo> " + rdfDatatypeConverter.serializeLiteralValue(bean1.getFoo()))));
     }
 
     @Test

@@ -48,6 +48,8 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     private ConversionService conversionService;
 
+    private RdfDatatypeConverter rdfDatatypeConverter;
+
     public FedoraMappingConverter(FedoraRepository repository) {
         Assert.notNull(repository);
         this.repository = repository;
@@ -55,6 +57,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         context.afterPropertiesSet();
         this.mappingContext = context;
         this.conversionService = new DefaultConversionService();
+        this.rdfDatatypeConverter = new XsdDatatypeConverter();
     }
 
     @Override
@@ -266,7 +269,7 @@ public class FedoraMappingConverter implements FedoraConverter {
             // ignore if property value is null
             if (propValue != null) {
                 inserts.add("<> <" + ((SimpleFedoraPersistentProperty) simpleProp).getUri() + "> "
-                        + Utils.encodeLiteralValue(propValue, simpleProp.getType()));
+                        + rdfDatatypeConverter.serializeLiteralValue(propValue));
             }
         });
         if (inserts.size() > 0) {
@@ -299,6 +302,7 @@ public class FedoraMappingConverter implements FedoraConverter {
             if (dsBean instanceof DatastreamDynamicProxy) {
                 // then substitute target bean instead
                 dsBean = ((DatastreamDynamicProxy) dsBean).__getTargetDatastreamBean();
+                logger.debug("Substituted target datastream bean {}", dsBean);
             }
             if (dsBean == null) {
                 throw new MappingException("Datastream " + dsProp.getName() + " must not be null, entity " + entity.getType().getSimpleName());
@@ -363,7 +367,8 @@ public class FedoraMappingConverter implements FedoraConverter {
             return new ByteBuddy()
                     .subclass(dsProp.getType())
                     .implement(DatastreamDynamicProxy.class)
-                    .method(ElementMatchers.named(DatastreamDynamicProxy.GET_TARGET_BEAN_METHOD_NAME).or(ElementMatchers.isGetter().or(ElementMatchers.isSetter())))
+                    .method(ElementMatchers.is(DatastreamDynamicProxy.GET_TARGET_DATASTREAM_BEAN_METHOD)
+                            .or(ElementMatchers.isGetter()).or(ElementMatchers.isSetter()))
                     .intercept(MethodDelegation.to(new DatastreamDynamicProxyInterceptor(dsPath, dsEntity, this)))
                     .make()
                     .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)

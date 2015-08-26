@@ -1,5 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core.query;
 
+import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
+import ch.unil.fcrepo4.spring.data.core.convert.XsdDatatypeConverter;
 import com.hp.hpl.jena.sparql.expr.aggregate.Aggregator;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
@@ -13,6 +15,8 @@ import java.util.Optional;
  */
 public class DefaultQueryBuildContext implements QueryBuildContext {
 
+    private RdfDatatypeConverter rdfDatatypeConverter;
+
     private PrefixMap prefixMap;
 
     private Aggregator countAggregator;
@@ -24,13 +28,36 @@ public class DefaultQueryBuildContext implements QueryBuildContext {
     private ElementFilter whereFilter;
 
     public DefaultQueryBuildContext() {
-        this.prefixMap = new PrefixMap();
-        this.fromBlocks = new ArrayList<>();
+        init();
     }
 
     public DefaultQueryBuildContext(PrefixMap prefixMap) {
         this.prefixMap = prefixMap;
-        this.fromBlocks = new ArrayList<>();
+        init();
+    }
+
+    private void init() {
+        if (prefixMap == null) {
+            prefixMap = new PrefixMap();
+        }
+
+        if (fromBlocks == null) {
+            fromBlocks = new ArrayList<>();
+        }
+
+        if (rdfDatatypeConverter == null) {
+            rdfDatatypeConverter = new XsdDatatypeConverter();
+        }
+    }
+
+    @Override
+    public void setDatatypeConverter(RdfDatatypeConverter converter) {
+        this.rdfDatatypeConverter = converter;
+    }
+
+    @Override
+    public RdfDatatypeConverter getDatatypeConverter() {
+        return rdfDatatypeConverter;
     }
 
     @Override

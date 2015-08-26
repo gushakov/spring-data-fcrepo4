@@ -1,7 +1,5 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimplePropertyHandler;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
@@ -14,50 +12,30 @@ import java.lang.reflect.Method;
  */
 public class GenericFedoraPersistentEntity<T> extends BasicPersistentEntity<T, FedoraPersistentProperty>
         implements FedoraPersistentEntity<T> {
-    private static final Logger logger = LoggerFactory.getLogger(GenericFedoraPersistentEntity.class);
 
     public GenericFedoraPersistentEntity(TypeInformation<T> information) {
         super(information);
     }
 
     @Override
-    public FedoraPersistentProperty findGetterProperty(Method getter){
+    public FedoraPersistentProperty findPropertyForGetterOrSetter(Method getterOrSetter) {
         final FedoraPersistentProperty found[] = new FedoraPersistentProperty[]{null};
         doWithProperties((FedoraPersistentProperty property) -> {
-            if (property.getGetter() != null) {
-                if (property.getGetter().getName().equals(getter.getName())){
-                    found[0] = property;
-                }
-            }
-            else {
-                logger.warn("No getter for property {}", property);
+            if ((property.getGetter() != null && property.getGetter().getName().equals(getterOrSetter.getName()))
+                    || (property.getSetter() != null && property.getSetter().getName().equals(getterOrSetter.getName()))) {
+                found[0] = property;
             }
         });
         return found[0];
     }
 
-    @Override
-    public FedoraPersistentProperty findSetterProperty(Method setter) {
-        final FedoraPersistentProperty found[] = new FedoraPersistentProperty[]{null};
-        doWithProperties((FedoraPersistentProperty property) -> {
-            if (property.getSetter() != null) {
-                if (property.getSetter().getName().equals(setter.getName())){
-                    found[0] = property;
-                }
-            }
-            else {
-                logger.warn("No setter for property {}", property);
-            }
-        });
-        return found[0];
-    }
 
     @Override
-    public void doWithSimplePersistentProperties(SimplePropertyHandler simplePropertyHandler){
+    public void doWithSimplePersistentProperties(SimplePropertyHandler simplePropertyHandler) {
         doWithProperties((PersistentProperty<?> property) -> {
-           if (property instanceof SimpleFedoraPersistentProperty){
-               simplePropertyHandler.doWithPersistentProperty(property);
-           }
+            if (property instanceof SimpleFedoraPersistentProperty) {
+                simplePropertyHandler.doWithPersistentProperty(property);
+            }
         });
     }
 

@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.query;
 
+import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
@@ -37,6 +38,12 @@ public class SelectQueryBuilder implements SelectQuery {
 
     @SuppressWarnings("unchecked")
     @Override
+    public <T extends SelectQuery> T withDatatypeConverter(RdfDatatypeConverter rdfDatatypeConverter) {
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public <T extends SelectQuery> T select(String varName) {
         context.setResultVarName(varName);
         return (T) this;
@@ -52,7 +59,7 @@ public class SelectQueryBuilder implements SelectQuery {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends FromBlock> T from(String varName, String predicateUri, Object value) {
-        return (T) new FromBlockBuilder(context, new BgpFragmentBuilder(context.getPrefixMap(), varName, predicateUri, value));
+        return (T) new FromBlockBuilder(context, new BgpFragmentBuilder(context.getPrefixMap(), varName, predicateUri, value, context.getDatatypeConverter()));
     }
 
     @Override
