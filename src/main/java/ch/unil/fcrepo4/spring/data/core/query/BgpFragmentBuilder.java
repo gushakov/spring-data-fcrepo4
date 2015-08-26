@@ -1,6 +1,9 @@
 package ch.unil.fcrepo4.spring.data.core.query;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
+import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseStringType;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
@@ -23,12 +26,13 @@ public class BgpFragmentBuilder implements BgpFragment {
                 ? Var.alloc(predicateUri.substring(1))
                 : NodeFactory.createURI(prefixMap.fullUri(predicateUri));
         if (value instanceof Integer) {
-            this.object = NodeFactory.createLiteral(Integer.toString((Integer) value), new XSDBaseNumericType(XSD.integer.getLocalName()));
+            Integer val = (Integer) value;
+            this.object = NodeFactory.createLiteral(val.toString(), XSDDatatype.XSDinteger);
         } else if (value instanceof String) {
             String val = (String) value;
             this.object = val.startsWith("?")
                     ? Var.alloc(val.substring(1))
-                    : NodeFactory.createURI(prefixMap.fullUri(val));
+                    : NodeFactory.createLiteral(val, XSDDatatype.XSDstring);
         } else {
             throw new RuntimeException("Unknown type for the triple value: " + object.getClass());
         }
