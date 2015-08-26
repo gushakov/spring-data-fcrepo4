@@ -134,7 +134,6 @@ public class FedoraTemplateTestIT {
         bean3Save1.setXmlDs(dsBeanSave1);
         String path = fedoraTemplate.save(bean3Save1);
         Bean3 bean3Load = fedoraTemplate.load(path, Bean3.class);
-//        Assertions.assertThat(bean3Load.getXmlDs().getXmlStream()).hasXmlContentEquivalentTo("<wam>waz</wam>");
         bean3Load.getXmlDs().setNumber(4);
         fedoraTemplate.save(bean3Load);
     }

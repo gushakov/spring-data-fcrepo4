@@ -2,6 +2,7 @@ package ch.unil.fcrepo4.assertj;
 
 import com.hp.hpl.jena.graph.Node;
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.util.Objects;
 
 /**
  * @author gushakov
@@ -67,6 +68,18 @@ public class NodeAssert extends AbstractAssert<NodeAssert, Node> {
 
         if (!actualUri.equals(uri)) {
             failWithMessage("Expected node to have URI <%s> instead of <%s>", uri, actualUri);
+        }
+
+        return this;
+    }
+
+    public NodeAssert hasLiteralValue(Object value){
+          isLiteral();
+
+        Object actualValue = actual.getLiteralValue();
+
+        if (!Objects.areEqual(actualValue, value)){
+           failWithMessage("Expected literal value to be %s, but was %s", value, actualValue);
         }
 
         return this;
