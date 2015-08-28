@@ -13,4 +13,6 @@ public interface FedoraOperations {
 
    <T> T load(String path, Class<T> beanType);
 
+   <T, ID> boolean exists(ID id, Class<T> beanType);
+
 }

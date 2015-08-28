@@ -72,4 +72,8 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         return fedoraConverter.read(beanType, fedoraConverter.getFedoraObject(path, beanType));
     }
 
+    @Override
+    public <T, ID> boolean exists(ID id, Class<T> beanType) {
+        return fedoraConverter.exists(fedoraConverter.getFedoraObjectPath(id, beanType));
+    }
 }

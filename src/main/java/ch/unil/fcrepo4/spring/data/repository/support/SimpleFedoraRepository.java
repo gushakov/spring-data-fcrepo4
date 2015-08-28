@@ -55,7 +55,9 @@ public class SimpleFedoraRepository<T, ID extends Serializable> implements Fedor
 
     @Override
     public <S extends T> S save(S entity) {
-        return null;
+        Assert.notNull(entity, "Entity cannot be null");
+        fedoraOperations.save(entity);
+        return entity;
     }
 
     @Override
@@ -70,7 +72,8 @@ public class SimpleFedoraRepository<T, ID extends Serializable> implements Fedor
 
     @Override
     public boolean exists(ID id) {
-        return false;
+        Assert.notNull(id, "ID property cannot be null");
+        return fedoraOperations.exists(id, getEntityClass());
     }
 
     @Override

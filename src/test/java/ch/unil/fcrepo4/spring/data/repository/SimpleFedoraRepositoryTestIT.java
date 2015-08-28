@@ -1,9 +1,10 @@
-package ch.unil.fcrepo4.spring.data.repository.config;
+package ch.unil.fcrepo4.spring.data.repository;
+
+// based on code from org.springframework.data.solr.repository.ITestSolrRepositoryOperations
 
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
-import org.assertj.core.api.Assertions;
-import org.fcrepo.client.FedoraException;
-import org.fcrepo.client.FedoraRepository;
+import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
+import org.fcrepo.client.*;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author gushakov
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {EnableFedoraRepositoriesTestIT.TestConfig.class})
-public class EnableFedoraRepositoriesTestIT {
+@ContextConfiguration(classes = {SimpleFedoraRepositoryTestIT.TestConfig.class})
+public class SimpleFedoraRepositoryTestIT {
 
     @Configuration
     @PropertySource("classpath:fcrepo4.properties")
@@ -32,7 +33,7 @@ public class EnableFedoraRepositoriesTestIT {
         private Environment env;
 
         @Bean
-        public FedoraRepository fedoraRepository() throws FedoraException {
+        public org.fcrepo.client.FedoraRepository fedoraRepository() throws FedoraException {
             String repoUrl = env.getProperty("fedora.repository.url");
             return new FedoraRepositoryImpl(repoUrl);
         }
@@ -43,12 +44,20 @@ public class EnableFedoraRepositoriesTestIT {
         }
     }
 
+    @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
-    private VehicleRepository vehicleRepository;
+    private VehicleCrudRepository repository;
 
     @Test
-    public void testAutowireFedoraRepository() throws Exception {
-         assertThat(vehicleRepository).isNotNull();
+    public void testWireVehicleRepository() throws Exception {
+        assertThat(repository).isNotNull();
+    }
+
+    @Test
+    public void testSaveOne() throws Exception {
+        Vehicle bean = new Vehicle(1L);
+        assertThat(repository.save(bean)).isEqualTo(bean);
+        assertThat(repository.exists(1L));
     }
 
 }

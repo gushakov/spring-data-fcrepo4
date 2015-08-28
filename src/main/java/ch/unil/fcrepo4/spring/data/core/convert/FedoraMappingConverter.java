@@ -111,7 +111,51 @@ public class FedoraMappingConverter implements FedoraConverter {
 
 
     @Override
-    public FedoraObject getFedoraObject(Object bean) {
+    public <T> FedoraObject getFedoraObject(T bean) {
+        String fullPath = getFedoraObjectPath(bean);
+
+        try {
+            // get object from the repository if exists
+            if (repository.exists(fullPath)) {
+                return repository.getObject(fullPath);
+            } else {
+                // or create a new one
+                return repository.createObject(fullPath);
+            }
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public <T, ID> FedoraObject getFedoraObject(ID path, Class<T> beanType) {
+        String fullPath = getFedoraObjectPath(path, beanType);
+
+        try {
+            // get object from the repository if exists
+            if (repository.exists(fullPath)) {
+                return repository.getObject(fullPath);
+            } else {
+                // or create a new one
+                return repository.createObject(fullPath);
+            }
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public FedoraDatastream fetchDatastream(String dsPath) {
+        try {
+            return repository.getDatastream(dsPath);
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> String getFedoraObjectPath(T bean) {
         FedoraPersistentEntity<?> ent = mappingContext.getPersistentEntity(bean.getClass());
         if (!(ent instanceof FedoraObjectPersistentEntity)) {
             throw new MappingException("Cannot map a bean of type " + bean.getClass() + " to a Fedora object");
@@ -136,24 +180,13 @@ public class FedoraMappingConverter implements FedoraConverter {
         Object path = entity.getPropertyAccessor(bean).getProperty(pathProp);
 
         // create full path for the target Fedora object
-        String fullPath = pathCreator.createPath(entity.isDefaultNamespace() ? null : entity.getNamespace(), entity.getType(),
+        return pathCreator.createPath(entity.isDefaultNamespace() ? null : entity.getNamespace(), entity.getType(),
                 idProp.getType(), idProp.getName(), path);
-
-        try {
-            // get object from the repository if exists
-            if (repository.exists(fullPath)) {
-                return repository.getObject(fullPath);
-            } else {
-                // or create a new one
-                return repository.createObject(fullPath);
-            }
-        } catch (FedoraException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
-    public <T> FedoraObject getFedoraObject(String path, Class<T> beanType) {
+    @SuppressWarnings("unchecked")
+    public <T, ID> String getFedoraObjectPath(ID id, Class<T> beanType) {
         FedoraPersistentEntity<?> ent = mappingContext.getPersistentEntity(beanType);
         if (!(ent instanceof FedoraObjectPersistentEntity)) {
             throw new MappingException("Cannot map a bean of type " + beanType + " to a Fedora object");
@@ -166,7 +199,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
 
         if (!PathPersistentProperty.class.isAssignableFrom(idProp.getClass())) {
-            throw new MappingException("ID property " + idProp.getName() + " is not of type UuidPersistentProperty");
+            throw new MappingException("ID property " + idProp.getName() + " is not of type PathPersistentProperty");
         }
 
         final PathPersistentProperty pathProp = (PathPersistentProperty) idProp;
@@ -175,26 +208,15 @@ public class FedoraMappingConverter implements FedoraConverter {
         final PathCreator pathCreator = pathProp.getPathCreator();
 
         // create full path for the target Fedora object
-        String fullPath = pathCreator.createPath(entity.isDefaultNamespace() ? null : entity.getNamespace(), entity.getType(),
-                idProp.getType(), idProp.getName(), path);
-
-        try {
-            // get object from the repository if exists
-            if (repository.exists(fullPath)) {
-                return repository.getObject(fullPath);
-            } else {
-                // or create a new one
-                return repository.createObject(fullPath);
-            }
-        } catch (FedoraException e) {
-            throw new RuntimeException(e);
-        }
+        return pathCreator.createPath(entity.isDefaultNamespace() ? null : entity.getNamespace(), entity.getType(),
+                idProp.getType(), idProp.getName(), id);
     }
 
     @Override
-    public FedoraDatastream fetchDatastream(String dsPath) {
+    public boolean exists(String path) {
+        Assert.notNull(path);
         try {
-            return repository.getDatastream(dsPath);
+            return repository.exists(path);
         } catch (FedoraException e) {
             throw new RuntimeException(e);
         }
@@ -388,6 +410,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void readPath(Object bean, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
         PathPersistentProperty pathProp = (PathPersistentProperty) entity.getIdProperty();
         try {

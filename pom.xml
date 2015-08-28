@@ -198,7 +198,7 @@ See fuseki configuration at
         <profile>
             <id>localhost</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
                 <fedora.servlet.port>9090</fedora.servlet.port>
@@ -209,7 +209,7 @@ See fuseki configuration at
         <profile>
             <id>cargo-fedora-integration-tests</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -688,5 +688,11 @@ See fuseki configuration at
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>spring-libs-snapshot</id>
+            <url>https://repo.spring.io/libs-snapshot</url>
+        </repository>
+    </repositories>
 
 </project>

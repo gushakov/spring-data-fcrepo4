@@ -23,9 +23,15 @@ public interface FedoraConverter extends EntityReader<Object, FedoraResource>, E
     @Override
     void write(Object bean, FedoraResource fedoraResource);
 
-    FedoraObject getFedoraObject(Object bean);
+    <T> FedoraObject getFedoraObject(T bean);
 
-    <T> FedoraObject getFedoraObject(String path, Class<T> beanType);
+    <T, ID> FedoraObject getFedoraObject(ID id, Class<T> beanType);
 
     FedoraDatastream fetchDatastream(String dsPath);
+
+    <T> String getFedoraObjectPath(T bean);
+
+    <T, ID> String getFedoraObjectPath(ID id, Class<T> entityClass);
+
+    boolean exists(String path);
 }
