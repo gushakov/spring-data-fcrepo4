@@ -159,9 +159,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
                 <configuration>
-                   <excludes>
-                       <exclude>**/readme/*Test.java</exclude>
-                   </excludes>
+                    <excludes>
+                        <exclude>**/readme/*Test.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 
@@ -201,7 +201,8 @@ See fuseki configuration at
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-               <fedora.servlet.port>9090</fedora.servlet.port>
+                <fedora.servlet.port>9090</fedora.servlet.port>
+                <triplestore.servlet.port>3030</triplestore.servlet.port>
             </properties>
         </profile>
 
@@ -287,7 +288,8 @@ See fuseki configuration at
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${project.build.directory}/fedora-webapp/WEB-INF/classes</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/fedora-webapp/WEB-INF/classes
+                                    </outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>${basedir}/src/test/etc</directory>
@@ -489,7 +491,8 @@ See fuseki configuration at
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${project.build.directory}/fedora-webapp/WEB-INF/classes</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/fedora-webapp/WEB-INF/classes
+                                    </outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>${basedir}/src/test/etc</directory>
@@ -684,7 +687,6 @@ See fuseki configuration at
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 
 
 </project>
