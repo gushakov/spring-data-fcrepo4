@@ -8,7 +8,7 @@
     </appender>
 
     <logger name="org.springframework" level="INFO"/>
-    <logger name="org.springframework.data" level="INFO"/>
+    <logger name="org.springframework.data" level="DEBUG"/>
     <logger name="ch.unil.fcrepo4" level="DEBUG"/>
 
     <root level="ERROR">

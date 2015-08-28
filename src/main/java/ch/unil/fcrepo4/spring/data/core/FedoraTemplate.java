@@ -52,6 +52,11 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
+    public FedoraConverter getConverter() {
+        return fedoraConverter;
+    }
+
+    @Override
     public String save(Object bean) {
         FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
         fedoraConverter.write(bean, fedoraObject);
