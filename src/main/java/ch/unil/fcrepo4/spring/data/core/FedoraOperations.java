@@ -9,9 +9,9 @@ public interface FedoraOperations {
 
    FedoraConverter getConverter();
 
-   String save(Object source);
+   <T> String save(T bean);
 
-   <T> T load(String path, Class<T> beanType);
+   <T, ID> T load(ID id, Class<T> beanType);
 
    <T, ID> boolean exists(ID id, Class<T> beanType);
 

@@ -67,7 +67,8 @@ public class SimpleFedoraRepository<T, ID extends Serializable> implements Fedor
 
     @Override
     public T findOne(ID id) {
-        return null;
+        Assert.notNull(id);
+        return fedoraOperations.load(id, entityClass);
     }
 
     @Override

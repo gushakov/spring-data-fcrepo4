@@ -60,4 +60,11 @@ public class SimpleFedoraRepositoryTestIT {
         assertThat(repository.exists(1L));
     }
 
+    @Test
+    public void testFindOne() throws Exception {
+        Vehicle bean = new Vehicle(1L);
+        assertThat(repository.save(bean));
+        assertThat(repository.findOne(1L)).isNotNull();
+    }
+
 }

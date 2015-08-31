@@ -19,9 +19,29 @@ public class SimplePathCreator<T, ID> implements PathCreator<T, ID> {
     }
 
     @Override
-    public Object parsePath(String namespace, Class<T> beanType, Class<ID> pathPropType, String pathPropName, String path) {
+    public ID parsePath(String namespace, Class<T> beanType, Class<ID> pathPropType, String pathPropName, String path) {
         // remove namespace if not null or empty
-        return (namespace != null && !namespace.matches("\\s*")) ? path.replaceFirst("/" + namespace, "") : path;
+        String idPath = (namespace != null && !namespace.matches("\\s*")) ? path.replaceFirst("/" + namespace + "/", "") : path;
+        return deserializeId(idPath, pathPropType);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected ID deserializeId(String idPath, Class<ID> pathPropType) {
+        Object pathPropValue;
+        if (pathPropType.equals(Integer.class)) {
+            pathPropValue = pathPropType.cast(Integer.parseInt(idPath));
+        } else if (pathPropType.equals(int.class)) {
+            pathPropValue = Integer.parseInt(idPath);
+        } else if (pathPropType.equals(Long.class)) {
+            pathPropValue = pathPropType.cast(Long.parseLong(idPath));
+        } else if (pathPropType.equals(long.class)) {
+            pathPropValue = Long.parseLong(idPath);
+        } else if (pathPropType.equals(String.class)) {
+            pathPropValue = pathPropType.cast(idPath);
+        } else {
+            throw new RuntimeException("Unknown path property type " + pathPropType);
+        }
+        return (ID) pathPropValue;
     }
 
 }

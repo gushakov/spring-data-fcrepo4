@@ -57,7 +57,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public String save(Object bean) {
+    public <T> String save(T bean) {
         FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
         fedoraConverter.write(bean, fedoraObject);
         try {
@@ -68,8 +68,8 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public <T> T load(String path, Class<T> beanType) {
-        return fedoraConverter.read(beanType, fedoraConverter.getFedoraObject(path, beanType));
+    public <T, ID> T load(ID id, Class<T> beanType) {
+        return fedoraConverter.read(beanType, fedoraConverter.getFedoraObject(id, beanType));
     }
 
     @Override

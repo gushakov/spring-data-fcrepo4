@@ -7,5 +7,6 @@ public interface PathCreator<T, ID> {
 
     String createPath(String namespace, Class<T> beanType, Class<ID> pathPropType, String pathPropName, ID pathPropValue);
 
-    Object parsePath(String namespace, Class<T> beanType, Class<ID> pathPropType, String pathPropName, String path);
+    ID parsePath(String namespace, Class<T> beanType, Class<ID> pathPropType, String pathPropName, String path);
+
 }
