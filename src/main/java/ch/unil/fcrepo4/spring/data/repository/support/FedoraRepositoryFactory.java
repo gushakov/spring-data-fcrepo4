@@ -5,13 +5,20 @@ package ch.unil.fcrepo4.spring.data.repository.support;
 import ch.unil.fcrepo4.spring.data.core.FedoraOperations;
 import ch.unil.fcrepo4.spring.data.repository.query.FedoraEntityInformationCreator;
 import ch.unil.fcrepo4.spring.data.repository.query.FedoraEntityInformationCreatorImpl;
+import ch.unil.fcrepo4.spring.data.repository.query.FedoraQueryMethod;
+import ch.unil.fcrepo4.spring.data.repository.query.PartTreeRdfQuery;
 import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.data.repository.query.EvaluationContextProvider;
+import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 
 /**
  * @author gushakov
@@ -46,4 +53,18 @@ public class FedoraRepositoryFactory extends RepositoryFactorySupport {
     protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
         return SimpleFedoraRepository.class;
     }
+
+    @Override
+    protected QueryLookupStrategy getQueryLookupStrategy(QueryLookupStrategy.Key key, EvaluationContextProvider evaluationContextProvider) {
+        return new FedoraQueryLookupStrategy();
+    }
+
+    private class FedoraQueryLookupStrategy implements QueryLookupStrategy {
+
+        @Override
+        public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, NamedQueries namedQueries) {
+            return new PartTreeRdfQuery(new FedoraQueryMethod(method, metadata), fedoraOperations);
+        }
+    }
+
 }
