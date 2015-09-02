@@ -16,6 +16,9 @@ public class Vehicle {
     @Property
     private String make;
 
+    @Property
+    private int miles;
+
     public Vehicle() {
     }
 
@@ -26,6 +29,12 @@ public class Vehicle {
     public Vehicle(long id, String make) {
         this.id = id;
         this.make = make;
+    }
+
+    public Vehicle(long id, String make, int miles) {
+        this.id = id;
+        this.make = make;
+        this.miles = miles;
     }
 
     public long getId() {
@@ -42,5 +51,13 @@ public class Vehicle {
 
     public void setMake(String make) {
         this.make = make;
+    }
+
+    public int getMiles() {
+        return miles;
+    }
+
+    public void setMiles(int miles) {
+        this.miles = miles;
     }
 }

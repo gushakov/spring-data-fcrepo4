@@ -53,7 +53,7 @@ public class SelectQueryBuilderTest {
 
         try(QueryExecution queryExecution = QueryExecutionFactory.create(query, model)){
             ResultSet results = queryExecution.execSelect();
-            assertThat(results.hasNext());
+            assertThat(results.hasNext()).isTrue();
             assertThat(results.next().getResource("s").getURI()).isEqualTo(sUri);
         }
     }
@@ -84,7 +84,7 @@ public class SelectQueryBuilderTest {
 
         try(QueryExecution queryExecution = QueryExecutionFactory.create(query, model)) {
             ResultSet results = queryExecution.execSelect();
-            assertThat(results.hasNext());
+            assertThat(results.hasNext()).isTrue();
             assertThat(results.next().get("count").asNode())
                     .isLiteral()
                     .hasLiteralValue(2)
@@ -109,12 +109,13 @@ public class SelectQueryBuilderTest {
         Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("f", REPOSITORY_NAMESPACE))
                 .select("s")
                 .from("s", "f:" + CREATED_DATE.getLocalName(), dateTime)
+                .from("v", "f:" + HAS_PRIMARY_IDENTIFIER, "123")
                 .build();
         System.out.println(query);
 
         try(QueryExecution queryExecution = QueryExecutionFactory.create(query, model)) {
             ResultSet results = queryExecution.execSelect();
-            assertThat(results.hasNext());
+            assertThat(results.hasNext()).isTrue();
             assertThat(results.next().getResource("s").getURI()).isEqualTo(sUri);
         }
 

@@ -8,4 +8,6 @@ import java.util.List;
 public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Long> {
 
     List<Vehicle> findByMake(String make);
+
+    List<Vehicle> findByMakeAndMilesGreaterThan(String make, int miles);
 }

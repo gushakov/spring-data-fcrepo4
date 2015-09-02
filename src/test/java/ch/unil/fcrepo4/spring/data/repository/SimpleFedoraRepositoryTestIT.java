@@ -33,14 +33,8 @@ public class SimpleFedoraRepositoryTestIT {
         private Environment env;
 
         @Bean
-        public org.fcrepo.client.FedoraRepository fedoraRepository() throws FedoraException {
-            String repoUrl = env.getProperty("fedora.repository.url");
-            return new FedoraRepositoryImpl(repoUrl);
-        }
-
-        @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate(fedoraRepository());
+            return new FedoraTemplate(env.getProperty("fedora.repository.url"), env.getProperty("triplestore.sparql.query.url"));
         }
     }
 
@@ -65,6 +59,16 @@ public class SimpleFedoraRepositoryTestIT {
         Vehicle bean = new Vehicle(1L);
         assertThat(repository.save(bean));
         assertThat(repository.findOne(1L)).isNotNull();
+    }
+
+    @Test
+    public void testFindByMake() throws Exception {
+        repository.findByMake("Ford");
+    }
+
+    @Test
+    public void testFindByMakeAndMiles() throws Exception {
+        repository.findByMakeAndMilesGreaterThan("Ford", 10000);
     }
 
 }

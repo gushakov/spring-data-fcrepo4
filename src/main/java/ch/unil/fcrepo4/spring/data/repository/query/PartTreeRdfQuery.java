@@ -1,11 +1,13 @@
 package ch.unil.fcrepo4.spring.data.repository.query;
 
-// based on the code from org.springframework.data.solr.repository.query.PartTreeSolrQuery
-
 import ch.unil.fcrepo4.spring.data.core.FedoraOperations;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
+import com.hp.hpl.jena.query.Query;
 import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.parser.PartTree;
+
+// based on the code from org.springframework.data.solr.repository.query.PartTreeSolrQuery
 
 /**
  * @author gushakov
@@ -22,4 +24,8 @@ public class PartTreeRdfQuery extends AbstractRdfQuery {
     }
 
 
+    @Override
+    protected Query createQuery(ParametersParameterAccessor parameterAccessor) {
+        return new FedoraRdfQueryCreator(tree, parameterAccessor, mappingContext).createQuery();
+    }
 }
