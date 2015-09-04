@@ -22,7 +22,23 @@ import java.util.Iterator;
  * @author gushakov
  */
 public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, SelectQuery> {
-    private static final String DEFAULT_SUBJECT_NODE_NAME = "s";
+    enum Vars {s("s"), v("v");
+
+        String varName;
+
+        Vars(String varName) {
+           this.varName = varName;
+        }
+
+        @Override
+        public String toString() {
+            return varName;
+        }
+
+        public String getVariableName() {
+            return varName;
+        }
+    }
 
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
 
@@ -36,12 +52,12 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, SelectQue
 
     @Override
     protected SelectQuery create(Part part, Iterator<Object> iterator) {
-        return queryBuilder.from(DEFAULT_SUBJECT_NODE_NAME, getPersistentProperty(part).getUri(), iterator.next());
+        return queryBuilder.from(Vars.s.getVariableName(), getPersistentProperty(part).getUri(), iterator.next());
     }
 
     @Override
     protected SelectQuery and(Part part, SelectQuery base, Iterator<Object> iterator) {
-        return base.from(DEFAULT_SUBJECT_NODE_NAME, getPersistentProperty(part).getUri(), iterator.next());
+        return base.from(Vars.s.getVariableName(), getPersistentProperty(part).getUri(), iterator.next());
     }
 
     @Override

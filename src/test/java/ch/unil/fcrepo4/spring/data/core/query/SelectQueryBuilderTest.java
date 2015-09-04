@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
 import static ch.unil.fcrepo4.spring.data.core.Constants.TEST_FEDORA_URI_NAMESPACE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.fcrepo.kernel.RdfLexicon.CREATED_BY;
 import static org.fcrepo.kernel.RdfLexicon.CREATED_DATE;
 import static org.fcrepo.kernel.RdfLexicon.HAS_PRIMARY_IDENTIFIER;
 import static org.fcrepo.kernel.RdfLexicon.REPOSITORY_NAMESPACE;
@@ -45,9 +46,9 @@ public class SelectQueryBuilderTest {
         Model model = ModelFactory.createModelForGraph(graph);
         RDFDataMgr.write(System.out, model, Lang.TURTLE);
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("f", REPOSITORY_NAMESPACE))
+        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
                 .select("s")
-                .from("s", "f:" + HAS_PRIMARY_IDENTIFIER.getLocalName(), uuid)
+                .from("s", "fdr:" + HAS_PRIMARY_IDENTIFIER.getLocalName(), uuid)
                 .build();
         System.out.println(query);
 
@@ -76,9 +77,9 @@ public class SelectQueryBuilderTest {
         RDFDataMgr.write(System.out, model, Lang.TURTLE);
 
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("t", TEST_FEDORA_URI_NAMESPACE))
+        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("tst", TEST_FEDORA_URI_NAMESPACE))
                 .count(true)
-                .from("s", "t:number", "?v")
+                .from("s", "tst:number", "?v")
                 .build();
         System.out.println(query);
 
@@ -106,10 +107,46 @@ public class SelectQueryBuilderTest {
         Model model = ModelFactory.createModelForGraph(graph);
         RDFDataMgr.write(System.out, model, Lang.TURTLE);
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("f", REPOSITORY_NAMESPACE))
+        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
                 .select("s")
-                .from("s", "f:" + CREATED_DATE.getLocalName(), dateTime)
-                .from("v", "f:" + HAS_PRIMARY_IDENTIFIER, "123")
+                .from("s", "fdr:" + CREATED_DATE.getLocalName(), dateTime)
+                .build();
+        System.out.println(query);
+
+        try(QueryExecution queryExecution = QueryExecutionFactory.create(query, model)) {
+            ResultSet results = queryExecution.execSelect();
+            assertThat(results.hasNext()).isTrue();
+            assertThat(results.next().getResource("s").getURI()).isEqualTo(sUri);
+        }
+
+    }
+
+    @Test
+    public void testSelectAnd() throws Exception {
+        String created = "2015-08-25T08:27:13.660Z";
+        String createdBy = "bypassAdmin";
+        ZonedDateTime dateTime = ZonedDateTime.parse(created, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String sUri = REPO_URL + "/foo/bar/1440491233444";
+        Graph graph = new GraphMem();
+        graph.add(new Triple(
+                NodeFactory.createURI(sUri),
+                NodeFactory.createURI(CREATED_DATE.getURI()),
+                NodeFactory.createLiteral(created, XSDDatatype.XSDdateTime)
+        ));
+        graph.add(new Triple(
+                NodeFactory.createURI(sUri),
+                NodeFactory.createURI(CREATED_BY.getURI()),
+                NodeFactory.createLiteral("bypassAdmin", XSDDatatype.XSDstring)
+        ));
+        Model model = ModelFactory.createModelForGraph(graph);
+        RDFDataMgr.write(System.out, model, Lang.TURTLE);
+
+        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
+                .select("s")
+                .from("s", "fdr:" + CREATED_DATE.getLocalName(), dateTime)
+                .where(null)
+                .from("s", "fdr:" + CREATED_BY.getLocalName(), createdBy)
+
                 .build();
         System.out.println(query);
 
