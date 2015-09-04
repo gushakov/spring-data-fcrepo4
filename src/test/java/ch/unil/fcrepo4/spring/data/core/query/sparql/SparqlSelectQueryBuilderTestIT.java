@@ -1,4 +1,4 @@
-package ch.unil.fcrepo4.spring.data.core.query;
+package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -38,8 +38,8 @@ import static org.fcrepo.kernel.RdfLexicon.REPOSITORY_NAMESPACE;
  * @author gushakov
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {SelectQueryBuilderTestIT.TestConfig.class})
-public class SelectQueryBuilderTestIT {
+@ContextConfiguration(classes = {SparqlSelectQueryBuilderTestIT.TestConfig.class})
+public class SparqlSelectQueryBuilderTestIT {
 
     @Configuration
     @PropertySource("classpath:fcrepo4.properties")
@@ -69,7 +69,7 @@ public class SelectQueryBuilderTestIT {
         System.out.println(xsdDateTime.toString());
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(xsdDateTime.toString());
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("f", REPOSITORY_NAMESPACE))
+        Query query = new SparqlSelectQueryBuilder(new PrefixMap().addPrefix("f", REPOSITORY_NAMESPACE))
                 .select("s")
                 .from("s", "f:" + CREATED_DATE.getLocalName(), zonedDateTime)
                 .build();

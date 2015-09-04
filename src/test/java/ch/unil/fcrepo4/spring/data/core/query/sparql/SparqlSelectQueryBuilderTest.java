@@ -1,4 +1,4 @@
-package ch.unil.fcrepo4.spring.data.core.query;
+package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Graph;
@@ -29,7 +29,7 @@ import static org.fcrepo.kernel.RdfLexicon.REPOSITORY_NAMESPACE;
 /**
  * @author gushakov
  */
-public class SelectQueryBuilderTest {
+public class SparqlSelectQueryBuilderTest {
 
     private static final String REPO_URL = "http://localhost:9090/rest";
 
@@ -46,7 +46,7 @@ public class SelectQueryBuilderTest {
         Model model = ModelFactory.createModelForGraph(graph);
         RDFDataMgr.write(System.out, model, Lang.TURTLE);
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
+        Query query = new SparqlSelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
                 .select("s")
                 .from("s", "fdr:" + HAS_PRIMARY_IDENTIFIER.getLocalName(), uuid)
                 .build();
@@ -77,7 +77,7 @@ public class SelectQueryBuilderTest {
         RDFDataMgr.write(System.out, model, Lang.TURTLE);
 
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("tst", TEST_FEDORA_URI_NAMESPACE))
+        Query query = new SparqlSelectQueryBuilder(new PrefixMap().addPrefix("tst", TEST_FEDORA_URI_NAMESPACE))
                 .count(true)
                 .from("s", "tst:number", "?v")
                 .build();
@@ -107,7 +107,7 @@ public class SelectQueryBuilderTest {
         Model model = ModelFactory.createModelForGraph(graph);
         RDFDataMgr.write(System.out, model, Lang.TURTLE);
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
+        Query query = new SparqlSelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
                 .select("s")
                 .from("s", "fdr:" + CREATED_DATE.getLocalName(), dateTime)
                 .build();
@@ -141,12 +141,11 @@ public class SelectQueryBuilderTest {
         Model model = ModelFactory.createModelForGraph(graph);
         RDFDataMgr.write(System.out, model, Lang.TURTLE);
 
-        Query query = new SelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
+        Query query = new SparqlSelectQueryBuilder(new PrefixMap().addPrefix("fdr", REPOSITORY_NAMESPACE))
                 .select("s")
                 .from("s", "fdr:" + CREATED_DATE.getLocalName(), dateTime)
-                .where(null)
-                .from("s", "fdr:" + CREATED_BY.getLocalName(), createdBy)
-
+                .and("s", "fdr:" + CREATED_BY.getLocalName(), createdBy)
+//                .where(null)
                 .build();
         System.out.println(query);
 

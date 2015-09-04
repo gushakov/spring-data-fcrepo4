@@ -1,17 +1,18 @@
-package ch.unil.fcrepo4.spring.data.core.query;
+package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.sparql.expr.aggregate.Aggregator;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author gushakov
  */
-public interface QueryBuildContext {
+public interface SparqlQueryBuildContext {
+    String COUNT_RESULTS_VARIABLE = "count";
 
     void setDatatypeConverter(RdfDatatypeConverter converter);
 
@@ -19,20 +20,22 @@ public interface QueryBuildContext {
 
     PrefixMap getPrefixMap();
 
-    Optional<Aggregator> getCountAggregator();
+    Aggregator getCountAggregator();
 
     void setCountAggregator(Aggregator aggregator);
 
-    Optional<String> getResultVarName();
+    String getResultVarName();
 
     void setResultVarName(String resultVarName);
 
-    Optional<List<ElementTriplesBlock>> getFromBlocks();
+    List<ElementTriplesBlock> getFromBlocks();
 
     void addFromBlock(ElementTriplesBlock fromBlock);
 
-    Optional<ElementFilter> getWhereFilter();
+    ElementFilter getWhereFilter();
 
     void setWhereFilter(ElementFilter whereFilter);
+
+
 
 }

@@ -1,4 +1,4 @@
-package ch.unil.fcrepo4.spring.data.core.query;
+package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import java.util.HashMap;
 import java.util.Map;

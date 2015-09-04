@@ -1,9 +1,13 @@
-package ch.unil.fcrepo4.spring.data.core.query;
+package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.XsdDatatypeConverter;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.aggregate.Aggregator;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
+import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 
 import java.util.ArrayList;
@@ -13,7 +17,7 @@ import java.util.Optional;
 /**
  * @author gushakov
  */
-public class DefaultQueryBuildContext implements QueryBuildContext {
+public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext, SelectQueryBuilder {
 
     private RdfDatatypeConverter rdfDatatypeConverter;
 
@@ -27,11 +31,22 @@ public class DefaultQueryBuildContext implements QueryBuildContext {
 
     private ElementFilter whereFilter;
 
-    public DefaultQueryBuildContext() {
+    public SelectQueryBuildContextHolder() {
         init();
     }
 
-    public DefaultQueryBuildContext(PrefixMap prefixMap) {
+    public SelectQueryBuildContextHolder(PrefixMap prefixMap) {
+        this.prefixMap = prefixMap;
+        init();
+    }
+
+    public SelectQueryBuildContextHolder(RdfDatatypeConverter rdfDatatypeConverter) {
+        this.rdfDatatypeConverter = rdfDatatypeConverter;
+        init();
+    }
+
+    public SelectQueryBuildContextHolder(PrefixMap prefixMap, RdfDatatypeConverter rdfDatatypeConverter) {
+        this.rdfDatatypeConverter = rdfDatatypeConverter;
         this.prefixMap = prefixMap;
         init();
     }
@@ -66,8 +81,8 @@ public class DefaultQueryBuildContext implements QueryBuildContext {
     }
 
     @Override
-    public Optional<Aggregator> getCountAggregator() {
-        return Optional.ofNullable(countAggregator);
+    public Aggregator getCountAggregator() {
+        return countAggregator;
     }
 
     @Override
@@ -76,8 +91,8 @@ public class DefaultQueryBuildContext implements QueryBuildContext {
     }
 
     @Override
-    public Optional<String> getResultVarName() {
-        return Optional.ofNullable(resultVarName);
+    public String getResultVarName() {
+        return resultVarName;
     }
 
     @Override
@@ -86,8 +101,8 @@ public class DefaultQueryBuildContext implements QueryBuildContext {
     }
 
     @Override
-    public Optional<List<ElementTriplesBlock>> getFromBlocks() {
-        return Optional.ofNullable(fromBlocks);
+    public List<ElementTriplesBlock> getFromBlocks() {
+        return fromBlocks;
     }
 
     @Override
@@ -96,12 +111,18 @@ public class DefaultQueryBuildContext implements QueryBuildContext {
     }
 
     @Override
-    public Optional<ElementFilter> getWhereFilter() {
-        return Optional.ofNullable(whereFilter);
+    public ElementFilter getWhereFilter() {
+        return whereFilter;
     }
 
     @Override
     public void setWhereFilter(ElementFilter whereFilter) {
         this.whereFilter = whereFilter;
+    }
+
+    @Override
+    public Query build() {
+        return null;
+
     }
 }

@@ -2,8 +2,9 @@ package ch.unil.fcrepo4.spring.data.repository.query;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
 import ch.unil.fcrepo4.spring.data.core.mapping.SimpleFedoraPersistentProperty;
-import ch.unil.fcrepo4.spring.data.core.query.SelectQuery;
-import ch.unil.fcrepo4.spring.data.core.query.SelectQueryBuilder;
+import ch.unil.fcrepo4.spring.data.core.query.sparql.FromBlock;
+import ch.unil.fcrepo4.spring.data.core.query.sparql.SelectBlock;
+import ch.unil.fcrepo4.spring.data.core.query.sparql.SparqlSelectQueryBuilder;
 import com.hp.hpl.jena.query.Query;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PersistentProperty;
@@ -21,52 +22,35 @@ import java.util.Iterator;
 /**
  * @author gushakov
  */
-public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, SelectQuery> {
-    enum Vars {s("s"), v("v");
-
-        String varName;
-
-        Vars(String varName) {
-           this.varName = varName;
-        }
-
-        @Override
-        public String toString() {
-            return varName;
-        }
-
-        public String getVariableName() {
-            return varName;
-        }
-    }
+public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, FromBlock> {
 
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
 
-    private SelectQueryBuilder queryBuilder;
+    private SparqlSelectQueryBuilder queryBuilder;
 
     public FedoraRdfQueryCreator(PartTree tree, ParameterAccessor parameters, MappingContext<?, FedoraPersistentProperty> mappingContext) {
         super(tree, parameters);
         this.mappingContext = mappingContext;
-        this.queryBuilder = new SelectQueryBuilder();
+        this.queryBuilder = new SparqlSelectQueryBuilder();
     }
 
     @Override
-    protected SelectQuery create(Part part, Iterator<Object> iterator) {
-        return queryBuilder.from(Vars.s.getVariableName(), getPersistentProperty(part).getUri(), iterator.next());
+    protected FromBlock create(Part part, Iterator<Object> iterator) {
+        return queryBuilder.select("s").from("s", getPersistentProperty(part).getUri(), iterator.next());
     }
 
     @Override
-    protected SelectQuery and(Part part, SelectQuery base, Iterator<Object> iterator) {
-        return base.from(Vars.s.getVariableName(), getPersistentProperty(part).getUri(), iterator.next());
+    protected FromBlock and(Part part, FromBlock base, Iterator<Object> iterator) {
+        return base.and("s", getPersistentProperty(part).getUri(), iterator.next());
     }
 
     @Override
-    protected SelectQuery or(SelectQuery base, SelectQuery criteria) {
+    protected FromBlock or(FromBlock base, FromBlock criteria) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    protected Query complete(SelectQuery criteria, Sort sort) {
+    protected Query complete(FromBlock criteria, Sort sort) {
         return criteria.build();
     }
 

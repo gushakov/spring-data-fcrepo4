@@ -1,4 +1,4 @@
-package ch.unil.fcrepo4.spring.data.core.query;
+package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
 import com.hp.hpl.jena.graph.Node;
