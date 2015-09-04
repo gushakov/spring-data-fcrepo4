@@ -1,6 +1,5 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
-import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
@@ -9,7 +8,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 /**
  * @author gushakov
  */
-public class BgpFragmentBuilder implements BgpFragment {
+public class BgpFragmentBuilder extends AbstractSparqlSelectQueryBuilder implements BgpFragment {
 
     private Node subject;
 
@@ -17,18 +16,19 @@ public class BgpFragmentBuilder implements BgpFragment {
 
     private Node object;
 
-    public BgpFragmentBuilder(PrefixMap prefixMap, String varName, String predicateUri, Object value, RdfDatatypeConverter rdfDatatypeConverter) {
+    public BgpFragmentBuilder(SparqlQueryBuildContext context, String varName, String predicateUri, Object value) {
+        super(context);
         this.subject = Var.alloc(varName);
         this.predicate = predicateUri.startsWith("?")
                 ? Var.alloc(predicateUri.substring(1))
-                : NodeFactory.createURI(prefixMap.fullUri(predicateUri));
+                : NodeFactory.createURI(context.getPrefixMap().fullUri(predicateUri));
         if (value instanceof String) {
             String val = (String) value;
             this.object = val.startsWith("?")
                     ? Var.alloc(val.substring(1))
-                    : rdfDatatypeConverter.encodeLiteralValue(value);
+                    : context.getRdfDatatypeConverter().encodeLiteralValue(value);
         } else {
-            this.object = rdfDatatypeConverter.encodeLiteralValue(value);
+            this.object = context.getRdfDatatypeConverter().encodeLiteralValue(value);
         }
     }
 

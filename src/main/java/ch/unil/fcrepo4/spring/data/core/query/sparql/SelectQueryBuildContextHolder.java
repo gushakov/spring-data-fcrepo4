@@ -2,22 +2,15 @@ package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.XsdDatatypeConverter;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.expr.aggregate.Aggregator;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
-import com.hp.hpl.jena.sparql.syntax.ElementGroup;
-import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * @author gushakov
  */
-public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext, SelectQueryBuilder {
+public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext {
 
     private RdfDatatypeConverter rdfDatatypeConverter;
 
@@ -27,7 +20,7 @@ public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext, S
 
     private String resultVarName;
 
-    private List<ElementTriplesBlock> fromBlocks;
+    private BasicPattern fromTriples;
 
     private ElementFilter whereFilter;
 
@@ -56,8 +49,8 @@ public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext, S
             prefixMap = new PrefixMap();
         }
 
-        if (fromBlocks == null) {
-            fromBlocks = new ArrayList<>();
+        if (fromTriples == null) {
+            fromTriples = new BasicPattern();
         }
 
         if (rdfDatatypeConverter == null) {
@@ -66,19 +59,25 @@ public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext, S
     }
 
     @Override
-    public void setDatatypeConverter(RdfDatatypeConverter converter) {
-        this.rdfDatatypeConverter = converter;
+    public RdfDatatypeConverter getRdfDatatypeConverter() {
+        return rdfDatatypeConverter;
     }
 
     @Override
-    public RdfDatatypeConverter getDatatypeConverter() {
-        return rdfDatatypeConverter;
+    public void setDatatypeConverter(RdfDatatypeConverter converter) {
+        this.rdfDatatypeConverter = converter;
     }
 
     @Override
     public PrefixMap getPrefixMap() {
         return prefixMap;
     }
+
+    @Override
+    public void setPrefixMap(PrefixMap prefixMap) {
+        this.prefixMap = prefixMap;
+    }
+
 
     @Override
     public Aggregator getCountAggregator() {
@@ -101,14 +100,15 @@ public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext, S
     }
 
     @Override
-    public List<ElementTriplesBlock> getFromBlocks() {
-        return fromBlocks;
+    public BasicPattern getFromTriples() {
+        return fromTriples;
     }
 
     @Override
-    public void addFromBlock(ElementTriplesBlock fromBlock) {
-        fromBlocks.add(fromBlock);
+    public void addFromTriple(Triple fromTriple) {
+        fromTriples.add(fromTriple);
     }
+
 
     @Override
     public ElementFilter getWhereFilter() {
@@ -120,9 +120,4 @@ public class SelectQueryBuildContextHolder implements SparqlQueryBuildContext, S
         this.whereFilter = whereFilter;
     }
 
-    @Override
-    public Query build() {
-        return null;
-
-    }
 }

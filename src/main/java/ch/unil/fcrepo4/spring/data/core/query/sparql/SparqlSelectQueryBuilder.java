@@ -1,12 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.convert.RdfDatatypeConverter;
-import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.aggregate.AggregatorFactory;
-import com.hp.hpl.jena.vocabulary.XSD;
 
 /**
  * @author gushakov
@@ -43,7 +38,7 @@ public class SparqlSelectQueryBuilder extends AbstractSparqlSelectQueryBuilder i
 
     @Override
     public FromBlock from(String varName, String predicateUri, Object value) {
-        return new FromBlockBuilder(context, new BgpFragmentBuilder(context.getPrefixMap(), varName, predicateUri, value, context.getDatatypeConverter()));
+        return new FromBlockBuilder(context, new BgpFragmentBuilder(context, varName, predicateUri, value));
     }
 
 }

@@ -1,26 +1,28 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.hp.hpl.jena.shared.PrefixMapping;
 
 /**
  * @author gushakov
  */
 public class PrefixMap {
 
-    private Map<String, String> map;
+    private PrefixMapping prefixMapping;
 
     public PrefixMap() {
-        map = new HashMap<>();
+        prefixMapping = PrefixMapping.Standard;
+    }
+
+    public PrefixMapping getPrefixMapping() {
+        return prefixMapping;
     }
 
     public PrefixMap addPrefix(String prefix, String uri) {
-        map.put(prefix, uri);
+        prefixMapping.setNsPrefix(prefix, uri);
         return this;
     }
 
     public String fullUri(String prefixedUri) {
-        String[] split = prefixedUri.split(":", 2);
-        return map.containsKey(split[0]) ? map.get(split[0]) + split[1] : prefixedUri;
+        return prefixMapping.expandPrefix(prefixedUri);
     }
 }

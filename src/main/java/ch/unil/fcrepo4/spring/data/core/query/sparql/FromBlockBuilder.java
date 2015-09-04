@@ -10,15 +10,13 @@ public class FromBlockBuilder extends AbstractSparqlSelectQueryBuilder implement
 
     public FromBlockBuilder(SparqlQueryBuildContext context, BgpFragment bgp) {
         super(context);
-        ElementTriplesBlock triplesBlock = new ElementTriplesBlock();
-        triplesBlock.addTriple(bgp.getTriple());
-        context.addFromBlock(triplesBlock);
+        context.addFromTriple(bgp.getTriple());
     }
 
 
     @Override
     public FromBlock and(String varName, String predicateUri, Object value) {
-        //TODO add triple to the triples block
+        context.addFromTriple(new BgpFragmentBuilder(context, varName, predicateUri, value).getTriple());
         return this;
     }
 

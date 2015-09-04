@@ -11,6 +11,4 @@ public interface FromBlock extends SelectQueryBuilder {
 
     WhereBlock where(Expr filterExpr);
 
-
-
 }

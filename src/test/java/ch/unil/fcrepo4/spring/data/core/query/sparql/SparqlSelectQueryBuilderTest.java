@@ -34,6 +34,27 @@ public class SparqlSelectQueryBuilderTest {
     private static final String REPO_URL = "http://localhost:9090/rest";
 
     @Test
+    public void testEmptySelect() throws Exception {
+        Query query = new SparqlSelectQueryBuilder().build();
+        assertThat(compress(query)).isEqualTo("SELECT ?_ WHERE { }");
+    }
+
+    @Test
+    public void testSelectWithVar() throws Exception {
+        Query query = new SparqlSelectQueryBuilder().select("s").build();
+        assertThat(compress(query)).isEqualTo("SELECT ?s WHERE { }");
+    }
+
+    @Test
+    public void testSelectWithFrom() throws Exception {
+        Query query = new SparqlSelectQueryBuilder()
+                .select("s")
+                .from("s", "rdf:type", "Class")
+                .build();
+//        assertThat(compress(query)).isEqualTo("SELECT ?s WHERE { }");
+    }
+
+    @Test
     public void testSelectByUuid() throws Exception {
         String uuid = "b2c934fc-e358-4ddd-af9b-f30900422a6a";
         String sUri = REPO_URL + "/foo/bar/1440491233444";
@@ -155,6 +176,10 @@ public class SparqlSelectQueryBuilderTest {
             assertThat(results.next().getResource("s").getURI()).isEqualTo(sUri);
         }
 
+    }
+
+    private String compress(Query query) {
+        return query.toString().replaceAll("\\n", " ").replaceAll("\\s+", " ").trim();
     }
 
 }
