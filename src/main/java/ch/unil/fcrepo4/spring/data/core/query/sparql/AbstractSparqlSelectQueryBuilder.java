@@ -35,7 +35,7 @@ public abstract class AbstractSparqlSelectQueryBuilder implements SelectQueryBui
 
         //TODO:
 
-//        context.getFromTriples().iterator().forEachRemaining(System.out::println);
+        context.getFromTriples().iterator().forEachRemaining(pattern::addTriplePattern);
 
         query.setQueryPattern(pattern);
         return query;

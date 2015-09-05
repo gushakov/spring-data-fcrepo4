@@ -21,7 +21,7 @@ public class BgpFragmentBuilder extends AbstractSparqlSelectQueryBuilder impleme
         this.subject = Var.alloc(varName);
         this.predicate = predicateUri.startsWith("?")
                 ? Var.alloc(predicateUri.substring(1))
-                : NodeFactory.createURI(context.getPrefixMap().fullUri(predicateUri));
+                : NodeFactory.createURI(context.getPrefixMap().resolveUri(predicateUri));
         if (value instanceof String) {
             String val = (String) value;
             this.object = val.startsWith("?")
