@@ -9,5 +9,7 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     List<Vehicle> findByMake(String make);
 
+    List<Vehicle> findByMakeLike(String make);
+
     List<Vehicle> findByMakeAndMilesGreaterThan(String make, int miles);
 }

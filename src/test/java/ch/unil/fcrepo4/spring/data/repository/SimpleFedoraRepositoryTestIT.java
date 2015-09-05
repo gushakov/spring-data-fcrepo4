@@ -71,4 +71,10 @@ public class SimpleFedoraRepositoryTestIT {
         repository.findByMakeAndMilesGreaterThan("Ford", 10000);
     }
 
+
+    @Test
+    public void testFindByMakeLike() throws Exception {
+        repository.findByMakeLike("toto");
+    }
+
 }
