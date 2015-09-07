@@ -8,11 +8,15 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.expr.E_GreaterThan;
+import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
+import com.hp.hpl.jena.sparql.expr.E_Regex;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
+import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,25 +53,40 @@ public class FusekiSparqlTestIT {
         query.setQuerySelectType();
         query.addResultVar("v1");
 
-        ElementTriplesBlock triples = new ElementTriplesBlock();
-        triples.addTriple(new Triple(NodeFactory.createVariable("v1"),
+        ElementTriplesBlock triples1 = new ElementTriplesBlock();
+        triples1.addTriple(new Triple(NodeFactory.createVariable("v1"),
                 NodeFactory.createURI("tst:prop1"), NodeFactory.createVariable("v2")));
 
 
-        ElementGroup group = new ElementGroup();
-        group.addElement(triples);
+        ElementGroup group1 = new ElementGroup();
+        group1.addElement(triples1);
 
-        RdfDatatypeConverter rdfDatatypeConverter = new ExtendedXsdDatatypeConverter();
 
-        ElementFilter filter = new ElementFilter(new E_GreaterThan(new ExprVar("v2"),
-                rdfDatatypeConverter.encodeExpressionValue(1000)));
+        RdfDatatypeConverter rdfTypes = new ExtendedXsdDatatypeConverter();
 
-        group.addElementFilter(filter);
+        E_GreaterThan expr1 = new E_GreaterThan(new ExprVar("v2"),
+                rdfTypes.encodeExpressionValue(1000));
 
-        query.setQueryPattern(group);
+        E_Regex expr2 = new E_Regex(new ExprVar("v3"), "foo", "i");
+
+        E_LogicalAnd andExpr = new E_LogicalAnd(expr1, expr2);
+
+        ElementFilter filter = new ElementFilter(andExpr);
+        group1.addElementFilter(filter);
+
+
+        ElementTriplesBlock triples2 = new ElementTriplesBlock();
+        triples2.addTriple(new Triple(NodeFactory.createVariable("v4"),
+                NodeFactory.createURI("tst:prop2"), rdfTypes.encodeLiteralValue("foo")));
+
+        ElementGroup group2 = new ElementGroup();
+        group2.addElement(triples2);
+
+        ElementUnion union = new ElementUnion();
+        union.addElement(group1);
+        union.addElement(group2);
+        query.setQueryPattern(union);
         System.out.println(query);
-
-
     }
 
     @Test

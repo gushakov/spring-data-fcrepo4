@@ -17,7 +17,13 @@ public class Vehicle {
     private String make;
 
     @Property
+    private String color;
+
+    @Property
     private int miles;
+
+    @Property
+    private float consumption;
 
     public Vehicle() {
     }
@@ -53,11 +59,27 @@ public class Vehicle {
         this.make = make;
     }
 
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
     public int getMiles() {
         return miles;
     }
 
     public void setMiles(int miles) {
         this.miles = miles;
+    }
+
+    public float getConsumption() {
+        return consumption;
+    }
+
+    public void setConsumption(float consumption) {
+        this.consumption = consumption;
     }
 }

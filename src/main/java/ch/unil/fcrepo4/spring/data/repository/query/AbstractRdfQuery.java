@@ -34,8 +34,13 @@ public abstract class AbstractRdfQuery implements RepositoryQuery {
 
         Query query = createQuery(parameterAccessor);
         logger.debug("Query: {}", query);
+/*
+        logger.debug("Query: {}", query);
 
         return fedoraOperations.queryTriplestore(query, fedoraQueryMethod.getEntityInformation().getJavaType());
+*/
+
+        return null;
     }
 
     @Override

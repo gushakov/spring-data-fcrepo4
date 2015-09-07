@@ -5,7 +5,6 @@ package ch.unil.fcrepo4.spring.data.repository;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.fcrepo.client.*;
-import org.fcrepo.client.impl.FedoraRepositoryImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +66,18 @@ public class SimpleFedoraRepositoryTestIT {
     }
 
     @Test
-    public void testFindByMakeAndMiles() throws Exception {
+    public void testFindByMakeAndMilesGreaterThan() throws Exception {
         repository.findByMakeAndMilesGreaterThan("Ford", 10000);
+    }
+
+    @Test
+    public void testFindByMakeAndMilesGreaterThanAndConsumptionGreaterThan() throws Exception {
+        repository.findByMakeAndMilesGreaterThanAndConsumptionGreaterThan("Ford", 10000, 6.5f);
+    }
+
+    @Test
+    public void testFindByMakeAndMilesOrColorAndConsumption() throws Exception {
+        repository.findByMakeAndMilesOrColorAndConsumption("Ford", 10000, "green", 6.5f);
     }
 
 

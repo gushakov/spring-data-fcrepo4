@@ -2,8 +2,13 @@ package ch.unil.fcrepo4.utils;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.syntax.Element;
+import com.hp.hpl.jena.sparql.syntax.ElementFilter;
+import com.hp.hpl.jena.sparql.syntax.ElementGroup;
+import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -36,6 +41,26 @@ public class Utils {
         }
 
         return literal;
+    }
+
+    public static ElementTriplesBlock getTriples(ElementGroup group){
+        ElementTriplesBlock triples = null;
+        for (Element element: group.getElements()){
+            if (element instanceof ElementTriplesBlock){
+                triples = (ElementTriplesBlock) element;
+            }
+        }
+        return triples;
+    }
+
+    public static ElementFilter getFilter(ElementGroup group){
+        ElementFilter filter = null;
+        for (Element element: group.getElements()){
+            if (element instanceof ElementFilter){
+                filter = (ElementFilter) element;
+            }
+        }
+        return filter;
     }
 
 }
