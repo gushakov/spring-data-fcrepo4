@@ -48,7 +48,7 @@ public class ConnectTestIT {
                 .createdBefore(LocalDateTime.now().toInstant(ZoneOffset.UTC))
         ;
         Utils.triplesStream(fo.getProperties()).forEach(System.out::println);
-        System.out.println(Utils.getLiteralValue(fo.getProperties(), RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI()));
+        System.out.println(Utils.getObjectLiteral(fo.getProperties(), RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI()).getLiteralLexicalForm());
     }
 
     @Test

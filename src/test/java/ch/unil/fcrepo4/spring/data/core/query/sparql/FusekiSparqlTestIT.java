@@ -1,10 +1,16 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
-import ch.unil.fcrepo4.assertj.TripleUtils;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
+import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.sparql.expr.E_GreaterThan;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 import org.junit.Test;
@@ -15,9 +21,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,38 +43,35 @@ public class FusekiSparqlTestIT {
     private Environment env;
 
     @Test
-    public void testQuery() throws Exception {
+    public void testSelectQuery() throws Exception {
 
-        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(env.getProperty("triplestore.sparql.query.url"), "ASK {}")) {
-            boolean result = queryExecution.execAsk();
-            assertThat(result).isTrue();
-        }
+        Query query = QueryFactory.make();
+        query.setQuerySelectType();
+        query.addResultVar("v1");
+
+        ElementTriplesBlock triples = new ElementTriplesBlock();
+        triples.addTriple(new Triple(NodeFactory.createVariable("v1"),
+                NodeFactory.createURI("tst:prop1"), NodeFactory.createVariable("v2")));
+
+
+        ElementGroup group = new ElementGroup();
+        group.addElement(triples);
+
+        RdfDatatypeConverter rdfDatatypeConverter = new ExtendedXsdDatatypeConverter();
+
+        ElementFilter filter = new ElementFilter(new E_GreaterThan(new ExprVar("v2"),
+                rdfDatatypeConverter.encodeExpressionValue(1000)));
+
+        group.addElementFilter(filter);
+
+        query.setQueryPattern(group);
+        System.out.println(query);
+
 
     }
 
     @Test
-    public void testSelectQuery() throws Exception {
-        Query query = QueryFactory.make();
-        query.setQuerySelectType();
-        query.addResultVar("s");
-        ElementGroup pattern = new ElementGroup();
-        query.setQueryPattern(pattern);
-        List<ElementTriplesBlock> fromBlocks = new ArrayList<>();
-        ElementTriplesBlock from1 = new ElementTriplesBlock();
-        from1.addTriple(TripleUtils.triple("s:s1 p:p1 o:o1"));
-        from1.addTriple(TripleUtils.triple("s:s2 p:p2 o:o2"));
-        fromBlocks.add(from1);
-
-
-//        ElementTriplesBlock from2 = new ElementTriplesBlock();
-//        from2.addTriple(TripleUtils.triple("s:s2 p:p2 o:o2"));
-//        fromBlocks.add(from2);
-
-        for (ElementTriplesBlock fromBlock : fromBlocks){
-            pattern.addElement(fromBlock);
-        }
-
-        System.out.println(query);
+    public void testAskQuery() throws Exception {
 
         try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(env.getProperty("triplestore.sparql.query.url"), "ASK {}")) {
             boolean result = queryExecution.execAsk();

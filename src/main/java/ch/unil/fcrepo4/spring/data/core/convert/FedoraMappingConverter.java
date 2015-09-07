@@ -9,10 +9,13 @@ package ch.unil.fcrepo4.spring.data.core.convert;
 
 
 import ch.unil.fcrepo4.spring.data.core.Constants;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import ch.unil.fcrepo4.utils.Utils;
+import com.hp.hpl.jena.graph.Node;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -30,11 +33,8 @@ import org.springframework.data.mapping.model.MappingException;
 import org.springframework.util.Assert;
 
 import java.io.InputStream;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author gushakov
@@ -57,7 +57,12 @@ public class FedoraMappingConverter implements FedoraConverter {
         context.afterPropertiesSet();
         this.mappingContext = context;
         this.conversionService = new DefaultConversionService();
-        this.rdfDatatypeConverter = new XsdDatatypeConverter();
+        this.rdfDatatypeConverter = new ExtendedXsdDatatypeConverter();
+    }
+
+    @Override
+    public RdfDatatypeConverter getRdfDatatypeConverter() {
+        return rdfDatatypeConverter;
     }
 
     @Override
@@ -234,20 +239,16 @@ public class FedoraMappingConverter implements FedoraConverter {
             // ignore if uuid property is set on the source bean
 
             try {
-                Object uuid = Utils.getLiteralValue(fedoraResource.getProperties(), RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI());
+                Node uuidLiteral = Utils.getObjectLiteral(fedoraResource.getProperties(), RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI());
 
-                if (uuid == null) {
+                if (uuidLiteral == null) {
                     throw new MappingException("No " +
                             RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI() +
                             " property found");
                 }
 
-                // convert to UUID if needed
-                if (uuidProp.isUUID()) {
-                    propsAccessor.setProperty(uuidProp, UUID.fromString((String) uuid));
-                } else {
-                    propsAccessor.setProperty(uuidProp, uuid);
-                }
+                propsAccessor.setProperty(uuidProp, rdfDatatypeConverter.parseLiteralValue(uuidLiteral.getLiteralLexicalForm(),
+                        uuidProp.getType()));
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }
@@ -262,19 +263,14 @@ public class FedoraMappingConverter implements FedoraConverter {
             // ignore if created property is set on the source bean
 
             try {
-                Object created = Utils.getLiteralValue(fedoraResource.getProperties(), RdfLexicon.CREATED_DATE.getURI());
+                Node createdLiteral = Utils.getObjectLiteral(fedoraResource.getProperties(), RdfLexicon.CREATED_DATE.getURI());
 
-                if (created == null) {
+                if (createdLiteral == null) {
                     throw new MappingException("No " + RdfLexicon.CREATED_DATE.getURI() + " property found");
                 }
+                propsAccessor.setProperty(createdProp,
+                        rdfDatatypeConverter.parseLiteralValue(createdLiteral.getLiteralLexicalForm(), createdProp.getType()));
 
-                ZonedDateTime dateTime = ZonedDateTime.parse(created.toString());
-
-                if (createdProp.isDate()) {
-                    propsAccessor.setProperty(createdProp, Date.from(dateTime.toInstant()));
-                } else {
-                    propsAccessor.setProperty(createdProp, dateTime);
-                }
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }
@@ -308,8 +304,9 @@ public class FedoraMappingConverter implements FedoraConverter {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
         entity.doWithSimplePersistentProperties(simpleProp -> {
             try {
-                propsAccessor.setProperty(simpleProp, Utils.getLiteralValue(fedoraResource.getProperties(),
-                        ((SimpleFedoraPersistentProperty) simpleProp).getUri()));
+                Node literal = Utils.getObjectLiteral(fedoraResource.getProperties(),
+                        ((SimpleFedoraPersistentProperty) simpleProp).getUri());
+                propsAccessor.setProperty(simpleProp, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), simpleProp.getType()));
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }

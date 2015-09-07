@@ -5,6 +5,8 @@ import ch.unil.fcrepo4.beans.Bean1;
 import ch.unil.fcrepo4.beans.Bean2;
 import ch.unil.fcrepo4.beans.Bean2Datastream1;
 import ch.unil.fcrepo4.spring.data.core.Constants;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
@@ -47,7 +49,6 @@ Based on org.fcrepo.client.impl.FedoraObjectImplTest
  */
 public class FedoraMappingConverterTest {
 
-
     private static final String REPO_URL = "http://localhost:9090/rest";
 
     private static final String PATH = "/foo/bar/1";
@@ -58,7 +59,7 @@ public class FedoraMappingConverterTest {
     private static final String DS_CREATED = "2015-08-21T11:41:59.364Z";
     private static final String DS_XML = "<foo>bar</foo>";
 
-    private RdfDatatypeConverter rdfDatatypeConverter = new XsdDatatypeConverter();
+    private RdfDatatypeConverter rdfDatatypeConverter = new ExtendedXsdDatatypeConverter();
 
     @Mock
     private FedoraRepository mockRepository;
