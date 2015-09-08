@@ -2,6 +2,7 @@ package ch.unil.fcrepo4.spring.data.repository;
 
 // based on code from org.springframework.data.solr.repository.ITestSolrRepositoryOperations
 
+import ch.unil.fcrepo4.beans.Vehicle;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.fcrepo.client.*;
@@ -15,7 +16,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 /**
  * @author gushakov
@@ -48,42 +52,28 @@ public class SimpleFedoraRepositoryTestIT {
 
     @Test
     public void testSaveOne() throws Exception {
-        Vehicle bean = new Vehicle(1L);
-        assertThat(repository.save(bean)).isEqualTo(bean);
+        Vehicle vehicle = new Vehicle(1L, "Ford", "Green", 15000, 6.5f);
+        assertThat(repository.save(vehicle)).isEqualTo(vehicle);
         assertThat(repository.exists(1L));
     }
 
     @Test
     public void testFindOne() throws Exception {
-        Vehicle bean = new Vehicle(1L);
-        assertThat(repository.save(bean));
+        Vehicle vehicle = new Vehicle(1L, "Ford", "Green", 15000, 6.5f);
+        repository.save(vehicle);
         assertThat(repository.findOne(1L)).isNotNull();
     }
 
     @Test
     public void testFindByMake() throws Exception {
-        repository.findByMake("Ford");
-    }
-
-    @Test
-    public void testFindByMakeAndMilesGreaterThan() throws Exception {
-        repository.findByMakeAndMilesGreaterThan("Ford", 10000);
-    }
-
-    @Test
-    public void testFindByMakeAndMilesGreaterThanAndConsumptionGreaterThan() throws Exception {
-        repository.findByMakeAndMilesGreaterThanAndConsumptionGreaterThan("Ford", 10000, 6.5f);
-    }
-
-    @Test
-    public void testFindByMakeAndMilesOrColorAndConsumption() throws Exception {
-        repository.findByMakeAndMilesOrColorAndConsumption("Ford", 10000, "green", 6.5f);
-    }
-
-
-    @Test
-    public void testFindByMakeLike() throws Exception {
-        repository.findByMakeLike("toto");
+        Vehicle vehicle = new Vehicle(1L, "Ford", "Green", 15000, 6.5f);
+        repository.save(vehicle);
+        List<Vehicle> vehicles = repository.findByMake("Ford");
+        assertThat(vehicles)
+                .hasSize(1)
+                .extracting("id", "make", "color", "miles", "consumption")
+                .contains(tuple(1L, "Ford", "Green", 15000, 6.5f))
+        ;
     }
 
 }

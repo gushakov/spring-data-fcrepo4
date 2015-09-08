@@ -1,5 +1,7 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
+import ch.unil.fcrepo4.beans.Vehicle;
+
 import java.util.List;
 
 /**

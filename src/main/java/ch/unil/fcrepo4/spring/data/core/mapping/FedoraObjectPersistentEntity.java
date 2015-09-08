@@ -39,4 +39,5 @@ public class FedoraObjectPersistentEntity<T> extends GenericFedoraPersistentEnti
              }
         });
     }
+
 }

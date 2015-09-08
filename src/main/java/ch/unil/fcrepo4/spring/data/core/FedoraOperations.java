@@ -18,6 +18,6 @@ public interface FedoraOperations {
 
    <T, ID> boolean exists(ID id, Class<T> beanType);
 
-   <T> List<T> queryTriplestore(Query rdfQuery, Class<T> beanType);
+   <T> List<T> query(Query rdfQuery, Class<T> beanType);
 
 }

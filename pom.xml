@@ -160,7 +160,7 @@
                 <version>2.18.1</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/readme/*Test.java</exclude>
+                        <exclude>**/GraphExporterTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

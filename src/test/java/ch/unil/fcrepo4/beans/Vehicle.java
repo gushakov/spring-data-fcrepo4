@@ -1,4 +1,4 @@
-package ch.unil.fcrepo4.spring.data.repository;
+package ch.unil.fcrepo4.beans;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
@@ -41,6 +41,14 @@ public class Vehicle {
         this.id = id;
         this.make = make;
         this.miles = miles;
+    }
+
+    public Vehicle(long id, String make, String color, int miles, float consumption) {
+        this.id = id;
+        this.make = make;
+        this.color = color;
+        this.miles = miles;
+        this.consumption = consumption;
     }
 
     public long getId() {

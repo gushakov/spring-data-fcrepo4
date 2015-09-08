@@ -2,10 +2,9 @@ package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
@@ -19,9 +18,8 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -40,12 +38,12 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         this.repository = repository;
     }
 
-    public FedoraTemplate(String repositoryUrl){
+    public FedoraTemplate(String repositoryUrl) {
         Assert.notNull(repositoryUrl);
         this.repository = new FedoraRepositoryImpl(repositoryUrl);
     }
 
-    public FedoraTemplate(String repositoryUrl, String triplestoreQueryUrl){
+    public FedoraTemplate(String repositoryUrl, String triplestoreQueryUrl) {
         Assert.notNull(repositoryUrl);
         Assert.notNull(triplestoreQueryUrl);
         this.repository = new FedoraRepositoryImpl(repositoryUrl);
@@ -67,15 +65,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         }
 
         registerPersistenceExceptionTranslator();
-    }
-
-    private void registerPersistenceExceptionTranslator() {
-        if (applicationContext instanceof ConfigurableApplicationContext) {
-            if (applicationContext.getBeansOfType(PersistenceExceptionTranslator.class).isEmpty()) {
-                ((ConfigurableApplicationContext) applicationContext).getBeanFactory()
-                        .registerSingleton("fedoraExceptionTranslator", FedoraExceptionTranslator.class);
-            }
-        }
     }
 
     @Override
@@ -105,16 +94,54 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public <T> List<T> queryTriplestore(Query rdfQuery, Class<T> beanType) {
+    public <T> List<T> query(Query rdfQuery, Class<T> beanType) {
+        Assert.notNull(beanType);
         Assert.notNull(triplestoreQueryUrl, "Triple store query URL must be specified");
         List<T> beans = new ArrayList<>();
         try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(triplestoreQueryUrl, rdfQuery)) {
             ResultSet results = queryExecution.execSelect();
-            if (results.hasNext()){
-                String sUri = results.next().getResource(rdfQuery.getResultVars().get(0)).getURI();
-                System.out.println("||||||||||||||"+sUri);
+            if (results.hasNext()) {
+                List<String> resultVars = rdfQuery.getResultVars();
+                Resource queryResultResource = getFirstAvailableResource(results.next(), resultVars);
+                if (queryResultResource == null) {
+                    throw new IllegalStateException("Query solution has no resource for variables " + Arrays.toString(resultVars.toArray(new String[resultVars.size()])));
+                }
+                String path = parsePathFromUri(queryResultResource.getURI());
+                try {
+                    if (repository.exists(path)) {
+                        beans.add(fedoraConverter.read(beanType, repository.getObject(path)));
+                    } else {
+                        throw new IllegalStateException("Resource with path " + path + " was found in the triplestore but it does not exist in the repository");
+                    }
+                } catch (FedoraException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return beans;
+    }
+
+    private void registerPersistenceExceptionTranslator() {
+        if (applicationContext instanceof ConfigurableApplicationContext) {
+            if (applicationContext.getBeansOfType(PersistenceExceptionTranslator.class).isEmpty()) {
+                ((ConfigurableApplicationContext) applicationContext).getBeanFactory()
+                        .registerSingleton("fedoraExceptionTranslator", FedoraExceptionTranslator.class);
+            }
+        }
+    }
+
+    private Resource getFirstAvailableResource(QuerySolution querySolution, List<String> varNames) {
+        Resource resource = null;
+        for (String varName : varNames) {
+            resource = querySolution.getResource(varName);
+            if (resource != null) {
+                break;
+            }
+        }
+        return resource;
+    }
+
+    private String parsePathFromUri(String uri) {
+        return StringUtils.removeStart(uri, repository.getRepositoryUrl());
     }
 }

@@ -60,10 +60,18 @@ public class ExtendedXsdDatatypeConverter implements RdfDatatypeConverter {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T parseLiteralValue(String lexicalForm, Class<T> javaType) {
         RDFDatatype rdfDatatype = delegateRdfMapper.getTypeByClass(javaType);
         Assert.notNull(rdfDatatype, "No RDF datatype registered for value of type " + javaType);
-        return javaType.cast(rdfDatatype.parse(lexicalForm));
+        Object value = rdfDatatype.parse(lexicalForm);
+        T literalValue;
+        if (javaType.isPrimitive()) {
+            literalValue = (T) value;
+        } else {
+            literalValue = javaType.cast(value);
+        }
+        return literalValue;
     }
 
 }
