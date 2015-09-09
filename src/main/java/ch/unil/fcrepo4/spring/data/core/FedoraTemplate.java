@@ -100,7 +100,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         List<T> beans = new ArrayList<>();
         try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(triplestoreQueryUrl, rdfQuery)) {
             ResultSet results = queryExecution.execSelect();
-            if (results.hasNext()) {
+            while (results.hasNext()) {
                 List<String> resultVars = rdfQuery.getResultVars();
                 Resource queryResultResource = getFirstAvailableResource(results.next(), resultVars);
                 if (queryResultResource == null) {

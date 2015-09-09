@@ -68,6 +68,7 @@ public class FedoraTemplateTestIT {
         assertThat(bean1).isNotNull();
         assertThat(bean1.getUuid()).isNotNull();
         assertThat(bean1.getCreated()).isNotNull();
+        System.out.println(bean1.getCreated());
         org.fcrepo.client.FedoraObject fo = fedoraRepository.getObject(path);
         assertThat(fo.getProperties()).contains(NodeFactory.createURI("info:fedora/test/number"),
                 NodeFactory.createLiteral("3", XSDBaseNumericType.XSDinteger));

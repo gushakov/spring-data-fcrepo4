@@ -5,10 +5,14 @@ package ch.unil.fcrepo4.spring.data.repository;
 import ch.unil.fcrepo4.beans.Vehicle;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
-import org.fcrepo.client.*;
+import ch.unil.fcrepo4.utils.GraphExporter;
+import org.assertj.core.api.Condition;
+import org.fcrepo.client.FedoraException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -45,35 +49,88 @@ public class SimpleFedoraRepositoryTestIT {
     @Autowired
     private VehicleCrudRepository repository;
 
+
+    @Value("#{environment.getProperty('fedora.repository.url')}")
+    private String repoUrl;
+
+    @Value("#{environment.getProperty('triplestore.sparql.data.url')}")
+    private String sparqlDataUrl;
+
+
+    @Value("#{environment.getProperty('maven.profile.id')}")
+    private String profileId;
+
+    // set to false to reinitialize
+    private boolean initialized = true;
+
+    @Before
+    public void setUp() throws Exception {
+        if (!initialized) {
+
+            repository.save(new Vehicle(1L, "Ford", "Green", 15000, 6.5f));
+            repository.save(new Vehicle(2L, "Toyota", "Light-green", 10000, 7.5f));
+            repository.save(new Vehicle(3L, "Honda", "Yellow", 20000, 8.5f));
+            repository.save(new Vehicle(4L, "Volkswagen", "Red", 30000, 5.0f));
+            repository.save(new Vehicle(5L, "BMW", "Gray", 5000, 7.5f));
+
+            // import only if running with the localhost profile
+            if (profileId.equals("localhost")){
+                GraphExporter.getInstance().exportToFuseki("/vehicle", repoUrl,
+                        sparqlDataUrl);
+            }
+
+            initialized = true;
+        }
+
+    }
+
     @Test
     public void testWireVehicleRepository() throws Exception {
         assertThat(repository).isNotNull();
     }
 
     @Test
-    public void testSaveOne() throws Exception {
-        Vehicle vehicle = new Vehicle(1L, "Ford", "Green", 15000, 6.5f);
-        assertThat(repository.save(vehicle)).isEqualTo(vehicle);
+    public void testExists() throws Exception {
         assertThat(repository.exists(1L));
     }
 
     @Test
     public void testFindOne() throws Exception {
-        Vehicle vehicle = new Vehicle(1L, "Ford", "Green", 15000, 6.5f);
-        repository.save(vehicle);
         assertThat(repository.findOne(1L)).isNotNull();
     }
 
     @Test
     public void testFindByMake() throws Exception {
-        Vehicle vehicle = new Vehicle(1L, "Ford", "Green", 15000, 6.5f);
-        repository.save(vehicle);
-        List<Vehicle> vehicles = repository.findByMake("Ford");
-        assertThat(vehicles)
+        assertThat(repository.findByMake("Ford"))
                 .hasSize(1)
                 .extracting("id", "make", "color", "miles", "consumption")
                 .contains(tuple(1L, "Ford", "Green", 15000, 6.5f))
         ;
+    }
+
+    @Test
+    public void testFindByMilesGreaterThan() throws Exception {
+        assertThat(repository.findByMilesGreaterThan(15000))
+                .extracting("miles", Integer.class).have(greaterThan(15000));
+    }
+
+    @Test
+    public void testFindByMilesGreaterThanAndConsumptionGreaterThan() throws Exception {
+        List<Vehicle> vehicles = repository.findByMilesGreaterThanAndConsumptionGreaterThan(5000, 7.0f);
+        assertThat(vehicles)
+                .extracting("miles", Integer.class).have(greaterThan(5000));
+        assertThat(vehicles)
+                .extracting("consumption", Float.class).have(greaterThan(7.0f));
+
+    }
+
+    private <T> Condition<Comparable<T>> greaterThan(T checkValue) {
+        return new Condition<Comparable<T>>() {
+            @Override
+            public boolean matches(Comparable<T> value) {
+                return value.compareTo(checkValue) > 0;
+            }
+        };
     }
 
 }

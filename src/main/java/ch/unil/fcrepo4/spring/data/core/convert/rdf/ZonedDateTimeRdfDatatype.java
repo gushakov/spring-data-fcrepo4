@@ -4,10 +4,11 @@ import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
 
 // based on example from https://jena.apache.org/documentation/notes/typed-literals.html
 
@@ -36,13 +37,13 @@ public class ZonedDateTimeRdfDatatype extends BaseDatatype {
 
     @Override
     public String unparse(Object value) {
-        return ((ZonedDateTime) value).format(RdfDatatypeConstants.THREE_DIGITS_MILLIS_ISO_FORMATTER);
+        return ((ZonedDateTime) value).format(DateTimeFormatter.ISO_INSTANT);
     }
 
     @Override
     public Object parse(String lexicalForm) throws DatatypeFormatException {
         try {
-            return RdfDatatypeConstants.THREE_DIGITS_MILLIS_ISO_FORMATTER.parse(lexicalForm);
+            return ZonedDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(lexicalForm)), ZoneId.of("UTC"));
         } catch (DateTimeParseException e) {
             throw new DatatypeFormatException(lexicalForm, instance, e.getMessage());
         }
