@@ -124,11 +124,27 @@ public class SimpleFedoraRepositoryTestIT {
 
     }
 
+    @Test
+    public void testFindByColorLike() throws Exception {
+        List<Vehicle> vehicles = repository.findByColorLike("green");
+        assertThat(vehicles).extracting("color", String.class)
+                .are(like("green"));
+    }
+
     private <T> Condition<Comparable<T>> greaterThan(T checkValue) {
         return new Condition<Comparable<T>>() {
             @Override
             public boolean matches(Comparable<T> value) {
                 return value.compareTo(checkValue) > 0;
+            }
+        };
+    }
+
+    private Condition<String> like(String text){
+        return new Condition<String>(){
+            @Override
+            public boolean matches(String value) {
+                return value.toLowerCase().contains(text.toLowerCase());
             }
         };
     }

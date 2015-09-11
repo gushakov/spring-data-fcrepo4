@@ -13,7 +13,7 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     List<Vehicle> findByMilesGreaterThan(int miles);
 
-    List<Vehicle> findByMakeLike(String make);
+    List<Vehicle> findByColorLike(String color);
 
     List<Vehicle> findByMilesGreaterThanAndConsumptionGreaterThan(int miles, float consumption);
 

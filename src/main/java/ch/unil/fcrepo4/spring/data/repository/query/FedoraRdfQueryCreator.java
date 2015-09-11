@@ -21,6 +21,7 @@ import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,7 +44,6 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
         this.rdfDatatypeConverter = rdfDatatypeConverter;
         this.varNameBuilder = new VarNameBuilder();
     }
-
 
     @Override
     protected Element create(Part part, Iterator<Object> iterator) {
@@ -157,8 +157,11 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
                 return new E_GreaterThan(new ExprVar(varNameBuilder.nextVarName()), rdfDatatypeConverter.encodeExpressionValue(value));
             case GREATER_THAN_EQUAL:
                 return new E_GreaterThanOrEqual(new ExprVar(varNameBuilder.nextVarName()), rdfDatatypeConverter.encodeExpressionValue(value));
+            case LIKE:
+                return new E_Regex(new ExprVar(varNameBuilder.nextVarName()), "" + value, "i");
             default:
-                return null;
+                throw new UnsupportedOperationException("Expressions containing " +
+                        Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");
         }
     }
 
