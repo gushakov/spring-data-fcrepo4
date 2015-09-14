@@ -12,8 +12,6 @@ import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.*;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Node;
 import net.bytebuddy.ByteBuddy;
@@ -22,7 +20,6 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
-import org.fcrepo.kernel.RdfLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -76,7 +73,6 @@ public class FedoraMappingConverter implements FedoraConverter {
             throw new MappingException("Cannot instantiate bean of type " + beanType.getName(), e);
         }
         readSimpleProperties(bean, entity, fedoraResource);
-        readFedoraResourceProperties(bean, (GenericFedoraPersistentEntity<?>) entity, fedoraResource);
 
         // if we are reading from a Fedora object
         if (entity instanceof FedoraObjectPersistentEntity && fedoraResource instanceof FedoraObject) {
@@ -93,8 +89,10 @@ public class FedoraMappingConverter implements FedoraConverter {
     @Override
     public void write(Object bean, FedoraResource fedoraResource) {
         FedoraPersistentEntity<?> entity = mappingContext.getPersistentEntity(bean.getClass());
-        // read common resource properties
-        readFedoraResourceProperties(bean, (GenericFedoraPersistentEntity<?>) entity, fedoraResource);
+
+        // read common (read-only) properties
+        readCommonFedoraResourceProperties(bean, entity, fedoraResource);
+
         // write simple properties
         writeSimpleProperties(bean, entity, fedoraResource);
 
@@ -227,67 +225,19 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
-    private void readFedoraResourceProperties(Object bean, GenericFedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
-        PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
-
-        //
-        // Uuid
-        //
-        UuidPersistentProperty uuidProp = (UuidPersistentProperty) entity.getPersistentProperty(Uuid.class);
-        if (uuidProp != null) {
-
-            // ignore if uuid property is set on the source bean
-
-            try {
-                Node uuidLiteral = Utils.getObjectLiteral(fedoraResource.getProperties(), RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI());
-
-                if (uuidLiteral == null) {
-                    throw new MappingException("No " +
-                            RdfLexicon.HAS_PRIMARY_IDENTIFIER.getURI() +
-                            " property found");
-                }
-
-                propsAccessor.setProperty(uuidProp, rdfDatatypeConverter.parseLiteralValue(uuidLiteral.getLiteralLexicalForm(),
-                        uuidProp.getType()));
-            } catch (FedoraException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-
-        //
-        // Created
-        //
-        CreatedPersistentProperty createdProp = (CreatedPersistentProperty) entity.getPersistentProperty(Created.class);
-        if (createdProp != null) {
-            // ignore if created property is set on the source bean
-
-            try {
-                Node createdLiteral = Utils.getObjectLiteral(fedoraResource.getProperties(), RdfLexicon.CREATED_DATE.getURI());
-
-                if (createdLiteral == null) {
-                    throw new MappingException("No " + RdfLexicon.CREATED_DATE.getURI() + " property found");
-                }
-                propsAccessor.setProperty(createdProp,
-                        rdfDatatypeConverter.parseLiteralValue(createdLiteral.getLiteralLexicalForm(), createdProp.getType()));
-
-            } catch (FedoraException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-
-    }
-
     private void writeSimpleProperties(Object bean, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
         final List<String> inserts = new ArrayList<>();
-        entity.doWithSimplePersistentProperties(simpleProp -> {
-            Object propValue = propsAccessor.getProperty(simpleProp);
-            // ignore if property value is null
-            if (propValue != null) {
-                inserts.add("<> <" + ((SimpleFedoraPersistentProperty) simpleProp).getUri() + "> "
-                        + rdfDatatypeConverter.serializeLiteralValue(propValue));
+        entity.doWithSimplePersistentProperties(property -> {
+            SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
+            // do not write read-only properties
+            if (!simpleProp.isReadOnly()){
+                Object propValue = propsAccessor.getProperty(property);
+                // ignore if property value is null
+                if (propValue != null) {
+                    inserts.add("<> <" + simpleProp.getUri() + "> "
+                            + rdfDatatypeConverter.serializeLiteralValue(propValue));
+                }
             }
         });
         if (inserts.size() > 0) {
@@ -302,16 +252,32 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     private void readSimpleProperties(Object bean, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
-        entity.doWithSimplePersistentProperties(simpleProp -> {
+        entity.doWithSimplePersistentProperties(property -> {
+            SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
             try {
                 Node literal = Utils.getObjectLiteral(fedoraResource.getProperties(),
-                        ((SimpleFedoraPersistentProperty) simpleProp).getUri());
-                propsAccessor.setProperty(simpleProp, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), simpleProp.getType()));
+                        simpleProp.getUri());
+                propsAccessor.setProperty(property, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), property.getType()));
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }
         });
+    }
 
+    private void readCommonFedoraResourceProperties(Object bean, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
+        PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
+        entity.doWithSimplePersistentProperties(property -> {
+            SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
+            if (simpleProp.isReadOnly()){
+                try {
+                    Node literal = Utils.getObjectLiteral(fedoraResource.getProperties(),
+                            simpleProp.getUri());
+                    propsAccessor.setProperty(property, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), property.getType()));
+                } catch (FedoraException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     private void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
@@ -329,7 +295,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
             DatastreamPersistentEntity<?> dsEntity = (DatastreamPersistentEntity<?>) mappingContext.getPersistentEntity(dsProp.getType());
             FedoraDatastream datastream = createDatastream(dsBean, (DatastreamPersistentProperty) dsProp, dsEntity, fedoraObject);
-            readFedoraResourceProperties(dsBean, dsEntity, datastream);
+            readCommonFedoraResourceProperties(dsBean, dsEntity, datastream);
             writeSimpleProperties(dsBean, dsEntity, datastream);
         });
     }

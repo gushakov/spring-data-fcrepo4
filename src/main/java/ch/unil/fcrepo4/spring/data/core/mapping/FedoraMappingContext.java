@@ -56,7 +56,7 @@ public class FedoraMappingContext extends AbstractMappingContext<GenericFedoraPe
                 && simpleTypeHolder.isSimpleType(field.getType())) {
             logger.debug("Found " + Property.class.getSimpleName() +
                     " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
-            prop = new SimpleFedoraPersistentProperty(field, descriptor, owner, simpleTypeHolder);
+            prop = new SimpleFedoraResourcePersistentProperty(field, descriptor, owner, simpleTypeHolder);
         } else if (field != null && AnnotationUtils.findAnnotation(field.getType(), Datastream.class) != null) {
             logger.debug("Found association: Fedora object to Datastream, field <{}> of entity {}", field.getName(), owner.getType().getName());
             prop = new DatastreamPersistentProperty(field, descriptor, owner, simpleTypeHolder, (DatastreamPersistentEntity) getPersistentEntity(field.getType()));

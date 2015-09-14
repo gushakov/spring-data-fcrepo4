@@ -7,4 +7,5 @@ import org.springframework.data.mapping.PersistentProperty;
  * @author gushakov
  */
 public interface FedoraPersistentProperty extends PersistentProperty<FedoraPersistentProperty> {
+
 }

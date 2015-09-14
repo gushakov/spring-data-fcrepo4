@@ -2,7 +2,7 @@ package ch.unil.fcrepo4.spring.data.repository.query;
 
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
-import ch.unil.fcrepo4.spring.data.core.mapping.SimpleFedoraPersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.mapping.SimpleFedoraResourcePersistentProperty;
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -137,17 +137,17 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
     }
 
 
-    private SimpleFedoraPersistentProperty getPersistentProperty(Part part) {
+    private SimpleFedoraResourcePersistentProperty getPersistentProperty(Part part) {
         PersistentProperty<?> property = mappingContext.getPersistentEntity(part.getProperty().getOwningType()).getPersistentProperty(part.getProperty().getSegment());
 
         Assert.state(property != null, "No persistent property: " + part.getProperty());
-        Assert.state(property instanceof SimpleFedoraPersistentProperty, "Property " + part.getProperty() + " is not of type SimpleFedoraPersistentProperty");
+        Assert.state(property instanceof SimpleFedoraResourcePersistentProperty, "Property " + part.getProperty() + " is not of type SimpleFedoraPersistentProperty");
 
-        if (!(property instanceof SimpleFedoraPersistentProperty)) {
+        if (!(property instanceof SimpleFedoraResourcePersistentProperty)) {
             throw new IllegalStateException("Property " + property + " is not a SimpleFedoraPersistentProperty");
         }
 
-        return (SimpleFedoraPersistentProperty) property;
+        return (SimpleFedoraResourcePersistentProperty) property;
 
     }
 
@@ -159,6 +159,8 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
                 return new E_GreaterThanOrEqual(new ExprVar(varNameBuilder.nextVarName()), rdfDatatypeConverter.encodeExpressionValue(value));
             case LIKE:
                 return new E_Regex(new ExprVar(varNameBuilder.nextVarName()), "" + value, "i");
+            case SIMPLE_PROPERTY:
+                return null;
             default:
                 throw new UnsupportedOperationException("Expressions containing " +
                         Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");

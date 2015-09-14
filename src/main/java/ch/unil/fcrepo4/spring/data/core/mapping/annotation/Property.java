@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * @author gushakov
  */
 @Inherited
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Persistent
 public @interface Property {

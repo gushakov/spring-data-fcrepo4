@@ -1,6 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
+import org.fcrepo.kernel.RdfLexicon;
 import org.junit.Test;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
@@ -19,7 +20,7 @@ public class FedoraMappingContextTest {
     static class Bean1 {
 
         @Path
-        String path = "/foo/bar/123";
+        long id = 1L;
 
         @Uuid
         String uuid;
@@ -30,10 +31,10 @@ public class FedoraMappingContextTest {
     static class Bean2 {
 
         @Path
-        String path = "/foo/bar/456";
+        long id = 1L;
 
         @Uuid
-        UUID uuid;
+        UUID uniqueId;
 
     }
 
@@ -41,10 +42,10 @@ public class FedoraMappingContextTest {
     static class Bean3 {
 
         @Path
-        String path = "/foo/bar/456";
+        long id = 1L;
 
         @Created
-        Date created;
+        Date createdAt;
 
     }
 
@@ -52,7 +53,7 @@ public class FedoraMappingContextTest {
     static class Bean4 {
 
         @Path
-        String path = "/foo/bar/456";
+        long id = 1L;
 
         Datastream1 datastream1 = new Datastream1();
 
@@ -69,31 +70,20 @@ public class FedoraMappingContextTest {
     @Test
     public void testFedoraObjectProperties() throws Exception {
         FedoraMappingContext context = new FedoraMappingContext();
-        context.setInitialEntitySet(new HashSet<>(Arrays.asList(Bean1.class, Bean2.class)));
+        context.setInitialEntitySet(new HashSet<>(Arrays.asList(Bean1.class, Bean2.class, Bean3.class)));
         context.initialize();
         assertThat(context.getPersistentEntities().size()).isGreaterThan(0);
         GenericFedoraPersistentEntity<?> entity1 = context.getPersistentEntity(Bean1.class);
         assertThat(entity1).isNotNull();
         assertThat(entity1.getIdProperty()).isNotNull();
-        UuidPersistentProperty uuidProp1 = (UuidPersistentProperty) entity1.getPersistentProperty(Uuid.class);
-        assertThat(uuidProp1).isNotNull();
-        assertThat(uuidProp1.isUUID()).isFalse();
         GenericFedoraPersistentEntity<?> entity2 = context.getPersistentEntity(Bean2.class);
-        UuidPersistentProperty uuidProp2 = (UuidPersistentProperty) entity2.getPersistentProperty(Uuid.class);
-        assertThat(uuidProp2).isNotNull();
-        assertThat(uuidProp2.isUUID()).isTrue();
-    }
-
-    @Test
-    public void testCreatedDate() throws Exception {
-        FedoraMappingContext context = new FedoraMappingContext();
-        context.setInitialEntitySet(new HashSet<>(Collections.singletonList(Bean3.class)));
-        context.initialize();
-        GenericFedoraPersistentEntity<?> entity = context.getPersistentEntity(Bean3.class);
-        CreatedPersistentProperty createdProp = (CreatedPersistentProperty) entity.getPersistentProperty("created");
-        assertThat(createdProp).isNotNull();
-        assertThat(createdProp.isDate()).isTrue();
-        assertThat(createdProp.isZonedDateTime()).isFalse();
+        UuidPersistentProperty uniqueIdProp = (UuidPersistentProperty) entity2.getPersistentProperty(Uuid.class);
+        assertThat(uniqueIdProp.getLocalName()).isEqualTo(RdfLexicon.HAS_PRIMARY_IDENTIFIER.getLocalName());
+        assertThat(uniqueIdProp.getUriNs()).isEqualTo(RdfLexicon.HAS_PRIMARY_IDENTIFIER.getNameSpace());
+        GenericFedoraPersistentEntity<?> entity3 = context.getPersistentEntity(Bean3.class);
+        CreatedPersistentProperty createdAtProperty = (CreatedPersistentProperty) entity3.getPersistentProperty("createdAt");
+        assertThat(createdAtProperty.getLocalName()).isEqualTo(RdfLexicon.CREATED_DATE.getLocalName());
+        assertThat(createdAtProperty.getUriNs()).isEqualTo(RdfLexicon.CREATED_DATE.getNameSpace());
     }
 
     @Test

@@ -33,7 +33,7 @@ public class GenericFedoraPersistentEntity<T> extends BasicPersistentEntity<T, F
     @Override
     public void doWithSimplePersistentProperties(SimplePropertyHandler simplePropertyHandler) {
         doWithProperties((PersistentProperty<?> property) -> {
-            if (property instanceof SimpleFedoraPersistentProperty) {
+            if (property instanceof SimpleFedoraResourcePersistentProperty) {
                 simplePropertyHandler.doWithPersistentProperty(property);
             }
         });

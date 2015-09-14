@@ -11,14 +11,21 @@ import java.lang.reflect.Field;
 /**
  * @author gushakov
  */
-public class SimpleFedoraPersistentProperty extends GenericFedoraPersistentProperty {
+public class SimpleFedoraResourcePersistentProperty extends GenericFedoraPersistentProperty
+    implements FedoraResourcePersistentProperty {
     private Property propAnnot;
 
-    public SimpleFedoraPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
+    public SimpleFedoraResourcePersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
         this.propAnnot = findAnnotation(Property.class);
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
+    @Override
     public String getLocalName(){
         if (propAnnot.localName().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN)){
             return field.getName();
@@ -28,6 +35,7 @@ public class SimpleFedoraPersistentProperty extends GenericFedoraPersistentPrope
         }
     }
 
+    @Override
     public String getUriNs(){
         // if this is a property of a Fedora object entity
         if (propAnnot.uriNs().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN)){
@@ -44,6 +52,7 @@ public class SimpleFedoraPersistentProperty extends GenericFedoraPersistentPrope
         }
     }
 
+    @Override
     public String getUri(){
         return getUriNs() + getLocalName();
     }

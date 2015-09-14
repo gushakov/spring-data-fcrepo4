@@ -1,23 +1,33 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Uuid;
+import org.fcrepo.kernel.RdfLexicon;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.util.UUID;
 
 /**
  * @author gushakov
  */
-public class UuidPersistentProperty extends GenericFedoraPersistentProperty {
+public class UuidPersistentProperty extends SimpleFedoraResourcePersistentProperty {
 
     public UuidPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
     }
 
-    public boolean isUUID() {
-        return UUID.class.isAssignableFrom(getField().getType());
+    @Override
+    public boolean isReadOnly() {
+        return true;
+    }
+
+    @Override
+    public String getLocalName() {
+        return RdfLexicon.HAS_PRIMARY_IDENTIFIER.getLocalName();
+    }
+
+    @Override
+    public String getUriNs() {
+        return RdfLexicon.HAS_PRIMARY_IDENTIFIER.getNameSpace();
     }
 }

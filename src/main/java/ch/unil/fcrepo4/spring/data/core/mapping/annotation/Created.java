@@ -8,8 +8,8 @@ import java.lang.annotation.*;
  * @author gushakov
  */
 @Inherited
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Persistent
+@Property
 public @interface Created {
 }
