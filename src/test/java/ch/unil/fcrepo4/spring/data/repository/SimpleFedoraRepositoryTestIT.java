@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -129,6 +131,11 @@ public class SimpleFedoraRepositoryTestIT {
         List<Vehicle> vehicles = repository.findByColorLike("green");
         assertThat(vehicles).extracting("color", String.class)
                 .are(like("green"));
+    }
+
+    @Test
+    public void testFindByMilesGreaterThanInPageable() throws Exception {
+        Page<Vehicle> vehicles = repository.findByMilesGreaterThan(0, new PageRequest(0, 3));
     }
 
     private <T> Condition<Comparable<T>> greaterThan(T checkValue) {
