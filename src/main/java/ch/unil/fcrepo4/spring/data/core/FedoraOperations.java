@@ -20,4 +20,6 @@ public interface FedoraOperations {
 
    <T> List<T> query(Query rdfQuery, Class<T> beanType);
 
+   long count(Query rdfQuery);
+
 }

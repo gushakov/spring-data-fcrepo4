@@ -4,11 +4,15 @@ import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.sparql.expr.aggregate.AggCount;
+import com.hp.hpl.jena.sparql.expr.aggregate.AggregatorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -25,6 +29,7 @@ import java.util.List;
  * @author gushakov
  */
 public class FedoraTemplate implements FedoraOperations, InitializingBean, ApplicationContextAware {
+    private static final Logger logger = LoggerFactory.getLogger(FedoraTemplate.class);
     private ApplicationContext applicationContext;
 
     private FedoraConverter fedoraConverter;
@@ -95,9 +100,11 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     @Override
     public <T> List<T> query(Query rdfQuery, Class<T> beanType) {
+        Assert.notNull(rdfQuery);
         Assert.notNull(beanType);
         Assert.notNull(triplestoreQueryUrl, "Triple store query URL must be specified");
         List<T> beans = new ArrayList<>();
+        logger.debug("Query: {}", rdfQuery);
         try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(triplestoreQueryUrl, rdfQuery)) {
             ResultSet results = queryExecution.execSelect();
             while (results.hasNext()) {
@@ -119,6 +126,20 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
             }
         }
         return beans;
+    }
+
+    @Override
+    public long count(Query rdfQuery) {
+        long number = -1;
+        logger.debug("Query (count): {}", rdfQuery);
+        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(triplestoreQueryUrl, rdfQuery)) {
+            ResultSet results = queryExecution.execSelect();
+            if (results.hasNext()){
+               number = Long.parseLong(results.next().getLiteral("count").getLexicalForm());
+            }
+        }
+        logger.debug("Query (count) result: {}", number);
+        return number;
     }
 
     private void registerPersistenceExceptionTranslator() {

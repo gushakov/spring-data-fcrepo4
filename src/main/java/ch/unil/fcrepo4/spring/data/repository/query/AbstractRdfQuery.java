@@ -5,12 +5,8 @@ import com.hp.hpl.jena.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
-
-import java.util.List;
 
 
 // based on code from org.springframework.data.solr.repository.query.AbstractSolrQuery
@@ -33,21 +29,22 @@ public abstract class AbstractRdfQuery implements RepositoryQuery {
 
     @Override
     public Object execute(Object[] parameters) {
-        ParametersParameterAccessor parameterAccessor = new ParametersParameterAccessor(fedoraQueryMethod.getParameters(),
+        FedoraParameterAccessor parameterAccessor = new FedoraParametersParameterAccessor(fedoraQueryMethod.getParameters(),
                 parameters);
-
-        Query query = createQuery(parameterAccessor);
-
+        Object result;
         if (fedoraQueryMethod.isPageQuery()) {
-            Pageable pageable = parameterAccessor.getPageable();
-            query.setLimit(pageable.getPageSize());
-            query.setOffset(pageable.getOffset());
-            logger.debug("Query: {}", query);
-            return new PageImpl<>(fedoraOperations.query(query, fedoraQueryMethod.getEntityInformation().getJavaType()));
+            // check if this is a first page of a paging query and we need to run a counting query
+            // for the total number of results
+            if (parameterAccessor.needsCount()) {
+                parameterAccessor.setTotalCount(fedoraOperations.count(createQuery(parameterAccessor)));
+            }
+            result = new PageImpl<>(fedoraOperations.query(createQuery(parameterAccessor),
+                    fedoraQueryMethod.getEntityInformation().getJavaType()), parameterAccessor.getPageable(), parameterAccessor.getTotalCount());
         } else {
-            logger.debug("Query: {}", query);
-            return fedoraOperations.query(query, fedoraQueryMethod.getEntityInformation().getJavaType());
+            result = fedoraOperations.query(createQuery(parameterAccessor),
+                    fedoraQueryMethod.getEntityInformation().getJavaType());
         }
+        return result;
     }
 
     @Override
@@ -55,5 +52,5 @@ public abstract class AbstractRdfQuery implements RepositoryQuery {
         return fedoraQueryMethod;
     }
 
-    protected abstract Query createQuery(ParametersParameterAccessor parameterAccessor);
+    protected abstract Query createQuery(FedoraParameterAccessor parameterAccessor);
 }

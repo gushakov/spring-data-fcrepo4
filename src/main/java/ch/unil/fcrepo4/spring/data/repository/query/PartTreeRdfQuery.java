@@ -5,7 +5,6 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
 import com.hp.hpl.jena.query.Query;
 import org.springframework.data.mapping.context.MappingContext;
-import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.parser.PartTree;
 
 // based on the code from org.springframework.data.solr.repository.query.PartTreeSolrQuery
@@ -28,7 +27,7 @@ public class PartTreeRdfQuery extends AbstractRdfQuery {
 
 
     @Override
-    protected Query createQuery(ParametersParameterAccessor parameterAccessor) {
+    protected Query createQuery(FedoraParameterAccessor parameterAccessor) {
         return new FedoraRdfQueryCreator(tree, parameterAccessor, mappingContext, rdfDatatypeConverter).createQuery();
     }
 }

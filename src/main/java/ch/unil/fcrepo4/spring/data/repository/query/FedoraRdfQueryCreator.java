@@ -10,7 +10,9 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.expr.*;
+import com.hp.hpl.jena.sparql.expr.aggregate.AggregatorFactory;
 import com.hp.hpl.jena.sparql.syntax.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.context.MappingContext;
@@ -34,12 +36,14 @@ import java.util.List;
  */
 public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> {
 
+    private FedoraParameterAccessor parameterAccessor;
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
     private RdfDatatypeConverter rdfDatatypeConverter;
     private VarNameBuilder varNameBuilder;
 
-    public FedoraRdfQueryCreator(PartTree tree, ParameterAccessor parameters, MappingContext<?, FedoraPersistentProperty> mappingContext, RdfDatatypeConverter rdfDatatypeConverter) {
+    public FedoraRdfQueryCreator(PartTree tree, FedoraParameterAccessor parameters, MappingContext<?, FedoraPersistentProperty> mappingContext, RdfDatatypeConverter rdfDatatypeConverter) {
         super(tree, parameters);
+        this.parameterAccessor = parameters;
         this.mappingContext = mappingContext;
         this.rdfDatatypeConverter = rdfDatatypeConverter;
         this.varNameBuilder = new VarNameBuilder();
@@ -53,7 +57,7 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
         Expr valueFilterExpr = getFilterExpression(part, value);
         Triple triple = createTriple(part, varName, value, valueFilterExpr);
         group.addTriplePattern(triple);
-        if (valueFilterExpr!=null){
+        if (valueFilterExpr != null) {
             group.addElementFilter(new ElementFilter(valueFilterExpr));
         }
         return group;
@@ -69,7 +73,7 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
 
         for (Element element : baseGroup.getElements()) {
             if (element instanceof ElementTriplesBlock) {
-                if (baseVarName == null){
+                if (baseVarName == null) {
                     baseVarName = ((ElementTriplesBlock) element).patternElts().next().getSubject().getName();
                 }
                 group.addElement(element);
@@ -107,20 +111,32 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
     protected Query complete(Element criteria, Sort sort) {
         final List<String> resultVars = new ArrayList<>();
 
-        if (criteria instanceof ElementGroup){
+        if (criteria instanceof ElementGroup) {
             ElementGroup group = (ElementGroup) criteria;
             ElementTriplesBlock triples = Utils.getTriples(group);
             resultVars.add(triples.patternElts().next().getSubject().getName());
-        }
-        else {
+        } else {
             throw new UnsupportedOperationException("Not implemented yet");
         }
 
         Query query = QueryFactory.create();
         query.setQuerySelectType();
 
-        for (String varName: resultVars){
-            query.addResultVar(varName);
+        // see if this needs to be a counting query
+        if (parameterAccessor.needsCount()) {
+            //TODO: add "count" as an attribute of FedoraParameterAccessor
+            query.addResultVar("count", query.allocAggregate(AggregatorFactory.createCount(true)));
+        } else {
+            for (String varName : resultVars) {
+                query.addResultVar(varName);
+            }
+
+            if (parameterAccessor.getPageable() != null) {
+                Pageable pageable = parameterAccessor.getPageable();
+                // set limit and offset
+                query.setLimit(pageable.getPageSize());
+                query.setOffset(pageable.getOffset());
+            }
         }
 
         query.setQueryPattern(criteria);
@@ -167,10 +183,10 @@ public class FedoraRdfQueryCreator extends AbstractQueryCreator<Query, Element> 
         }
     }
 
-    private Triple createTriple(Part part, String varName, Object value, Expr valueFilterExpr){
+    private Triple createTriple(Part part, String varName, Object value, Expr valueFilterExpr) {
         Triple triple;
         Node subjectVar = NodeFactory.createVariable(varName);
-        Node predicate =NodeFactory.createURI(getPersistentProperty(part).getUri());
+        Node predicate = NodeFactory.createURI(getPersistentProperty(part).getUri());
         if (valueFilterExpr != null) {
             triple = new Triple(NodeFactory.createVariable(varName),
                     predicate,

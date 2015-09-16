@@ -4,6 +4,7 @@ package ch.unil.fcrepo4.spring.data.repository;
 
 import ch.unil.fcrepo4.beans.Vehicle;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraRdfQueryPageRequest;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import ch.unil.fcrepo4.utils.GraphExporter;
 import org.assertj.core.api.Condition;
@@ -135,7 +136,17 @@ public class SimpleFedoraRepositoryTestIT {
 
     @Test
     public void testFindByMilesGreaterThanInPageable() throws Exception {
-        Page<Vehicle> vehicles = repository.findByMilesGreaterThan(0, new PageRequest(0, 3));
+        Page<Vehicle> page1 = repository.findByMilesGreaterThan(0, new FedoraRdfQueryPageRequest(0, 3));
+        assertThat(page1.getNumber()).isEqualTo(0);
+        assertThat(page1.isFirst());
+        assertThat(page1.getNumberOfElements()).isEqualTo(3);
+        assertThat(page1.getTotalElements()).isEqualTo(5);
+        assertThat(page1.hasNext()).isTrue();
+        assertThat(page1.getContent()).extracting("miles", Integer.class).have(greaterThan(0));
+        Page<Vehicle> page2 = repository.findByMilesGreaterThan(0, page1.nextPageable());
+        assertThat(page2.getNumber()).isEqualTo(1);
+        assertThat(page2.isLast()).isTrue();
+        assertThat(page2.getNumberOfElements()).isEqualTo(2);
     }
 
     private <T> Condition<Comparable<T>> greaterThan(T checkValue) {
