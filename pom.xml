@@ -12,7 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipITs>false</skipITs>
-        <!-- use run to pause after indexer start -->
+        <!-- use "run" to pause after indexer start or "start" to run the tests and quit -->
         <indexer.start.mode>start</indexer.start.mode>
     </properties>
 
