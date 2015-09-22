@@ -62,20 +62,16 @@ public class SimpleFedoraRepositoryTestIT {
     @Value("#{environment.getProperty('triplestore.sparql.data.url')}")
     private String sparqlDataUrl;
 
-
     @Value("#{environment.getProperty('maven.profile.id')}")
     private String profileId;
-
-    // set to false to reinitialize
-    private boolean initialized = false;
 
     @Before
     public void setUp() throws Exception {
 
-        if (!initialized) {
 
             vehicleRepo.save(new Vehicle(1L, "Ford", "Green", 15000, 6.5f));
             vehicleRepo.save(new Vehicle(2L, "Toyota", "Light-green", 10000, 7.5f));
+
             vehicleRepo.save(new Vehicle(3L, "Honda", "Yellow", 20000, 8.5f));
             vehicleRepo.save(new Vehicle(4L, "Volkswagen", "Red", 30000, 5.0f));
             vehicleRepo.save(new Vehicle(5L, "BMW", "Gray", 5000, 7.5f));
@@ -83,13 +79,13 @@ public class SimpleFedoraRepositoryTestIT {
             fruitRepo.save(new Fruit(1L, 5.05d));
 
             // import only if running with the localhost profile
+/*
             if (profileId != null && profileId.equals("localhost")){
                 GraphExporter.getInstance().exportToFuseki("/vehicle", repoUrl,
                         sparqlDataUrl);
             }
+*/
 
-            initialized = true;
-        }
 
     }
 

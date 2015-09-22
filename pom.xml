@@ -12,7 +12,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipITs>false</skipITs>
-        <indexer.start.mode>run</indexer.start.mode>
+        <!-- use run to pause after indexer start -->
+        <indexer.start.mode>start</indexer.start.mode>
     </properties>
 
     <dependencies>
@@ -58,7 +59,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>1.11.0.BUILD-SNAPSHOT</version>
+            <version>1.11.0.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -197,9 +198,6 @@ See fuseki configuration at
     <profiles>
         <profile>
             <id>localhost</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <fedora.servlet.port>9090</fedora.servlet.port>
                 <triplestore.servlet.port>3030</triplestore.servlet.port>
@@ -225,7 +223,7 @@ See fuseki configuration at
         <profile>
             <id>cargo-integration-tests</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -252,6 +250,17 @@ See fuseki configuration at
             </dependencies>
             <build>
                 <plugins>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.18.1</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <maven.profile.id>cargo-integration-tests</maven.profile.id>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
 
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>

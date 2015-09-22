@@ -30,13 +30,20 @@ public class GraphExporterTest {
     @Value("#{environment.getProperty('triplestore.sparql.data.url')}")
     private String sparqlDataUrl;
 
+    @Value("#{environment.getProperty('maven.profile.id')}")
+    private String profileId;
+
     @Test
     public void testExportToFile() throws Exception {
-        GraphExporter.getInstance().exportToFile("/vehicle", repoUrl, "c:\\tmp");
+        if (profileId != null && profileId.equals("localhost")) {
+            GraphExporter.getInstance().exportToFile("/vehicle", repoUrl, "c:\\tmp");
+        }
     }
 
     @Test
     public void testExportToFuseki() throws Exception {
-        GraphExporter.getInstance().exportToFuseki("/vehicle", repoUrl, sparqlDataUrl);
+        if (profileId != null && profileId.equals("localhost")) {
+            GraphExporter.getInstance().exportToFuseki("/vehicle", repoUrl, sparqlDataUrl);
+        }
     }
 }

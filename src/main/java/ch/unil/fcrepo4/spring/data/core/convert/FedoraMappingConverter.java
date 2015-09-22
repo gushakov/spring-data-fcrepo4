@@ -20,6 +20,7 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
+import org.fcrepo.kernel.RdfLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -225,25 +226,40 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
+    @Override
+    public void updateIndex(FedoraResource fedoraResource) {
+        try {
+            String updateIndex = "INSERT DATA {<" + repository.getRepositoryUrl() + fedoraResource.getPath() + "> <" +
+                    RdfLexicon.INDEXING_NAMESPACE + "hasIndexingTransformation> \"default\" ; <" +
+                    RdfLexicon.RDF_NAMESPACE + "type> <" +
+                    RdfLexicon.INDEXING_NAMESPACE + "Indexable> .}";
+            logger.debug("Update (index): {}", updateIndex);
+            fedoraResource.updateProperties(updateIndex);
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void writeSimpleProperties(Object bean, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
-        final List<String> inserts = new ArrayList<>();
+        final List<String> updateProperties = new ArrayList<>();
         entity.doWithSimplePersistentProperties(property -> {
             SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
             // do not write read-only properties
-            if (!simpleProp.isReadOnly()){
+            if (!simpleProp.isReadOnly()) {
                 Object propValue = propsAccessor.getProperty(property);
                 // ignore if property value is null
                 if (propValue != null) {
-                    inserts.add("<> <" + simpleProp.getUri() + "> "
+                    updateProperties.add("<> <" + simpleProp.getUri() + "> "
                             + rdfDatatypeConverter.serializeLiteralValue(propValue));
                 }
             }
         });
-        if (inserts.size() > 0) {
-            logger.debug("Update: {}", "INSERT DATA { " + StringUtils.join(inserts, " . ") + " . }");
+        if (updateProperties.size() > 0) {
+            String insert = "INSERT DATA { " + StringUtils.join(updateProperties, " . ") + " . }";
+            logger.debug("Update (properties): {}", insert);
             try {
-                fedoraResource.updateProperties("INSERT DATA { " + StringUtils.join(inserts, " . ") + " . }");
+                fedoraResource.updateProperties(insert);
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }
@@ -268,7 +284,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
         entity.doWithSimplePersistentProperties(property -> {
             SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
-            if (simpleProp.isReadOnly()){
+            if (simpleProp.isReadOnly()) {
                 try {
                     Node literal = Utils.getObjectLiteral(fedoraResource.getProperties(),
                             simpleProp.getUri());

@@ -23,7 +23,7 @@ public class FedoraParametersParameterAccessor extends ParametersParameterAccess
 
     @Override
     public boolean needsCount() {
-        return getTotalCount() == -1;
+        return getPageable() != null && getTotalCount() == -1;
     }
 
     @Override

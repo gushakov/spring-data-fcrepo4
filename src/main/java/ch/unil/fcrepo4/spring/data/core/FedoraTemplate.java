@@ -80,6 +80,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     @Override
     public <T> String save(T bean) {
         FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
+        fedoraConverter.updateIndex(fedoraObject);
         fedoraConverter.write(bean, fedoraObject);
         try {
             return fedoraObject.getPath();
@@ -165,4 +166,5 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     private String parsePathFromUri(String uri) {
         return StringUtils.removeStart(uri, repository.getRepositoryUrl());
     }
+
 }
