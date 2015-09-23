@@ -156,7 +156,7 @@ public class Bean {
 }
 ```
 
-then the bean `new Bean(123456789L)` will be mapped to a resource with "/custom/123/456/789" path.
+then the bean `new Bean(123456789L)` will be mapped to a resource with `/custom/123/456/789` path.
 
 ### Spring Data Repository
 
