@@ -74,7 +74,7 @@ public class SimpleFedoraRepositoryTestIT {
             vehicleRepo.save(vehicle1);
 
             Vehicle vehicle2 = new Vehicle(2L, "Toyota", "Light-green", 10000, 7.5f);
-            vehicle2.setPicture(new VehiclePicture(new ClassPathResource("test.png").getInputStream()));
+            vehicle2.setPicture(new VehiclePicture(new ClassPathResource("picture.png").getInputStream()));
             vehicleRepo.save(vehicle2);
 
             vehicleRepo.save(new Vehicle(3L, "Honda", "Yellow", 20000, 8.5f));

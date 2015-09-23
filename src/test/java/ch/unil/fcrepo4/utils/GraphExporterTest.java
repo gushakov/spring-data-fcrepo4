@@ -29,10 +29,6 @@ public class GraphExporterTest {
     @Value("#{environment.getProperty('triplestore.sparql.query.url')}")
     private String sparqlQueryUrl;
 
-    @Value("#{environment.getProperty('triplestore.sparql.data.url')}")
-    private String sparqlDataUrl;
-
-
     @Test
     @Ignore
     public void testExportToFile() throws Exception {
@@ -42,6 +38,6 @@ public class GraphExporterTest {
     @Test
     @Ignore
     public void testExportToFuseki() throws Exception {
-        GraphExporter.getInstance().exportToFuseki("/vehicle", repoUrl, sparqlDataUrl);
+        GraphExporter.getInstance().exportToFuseki("/vehicle", repoUrl, "http://localhost:3030/test/data");
     }
 }
