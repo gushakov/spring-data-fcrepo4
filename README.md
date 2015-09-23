@@ -8,25 +8,25 @@ Spring Data module for Fedora Commons Repository (version 4.x or later) allowing
 
 Partially implemented:
 
-    * Mapping of resource properties (`uuid`, `created`, etc.)
-    * Mapping of simple properties (not collections)
-    * Custom RDF to Java mapper (based on XSD types)
-    * Datastream (binary) object persistence
-    * Lazy-load of datastreams
-    * Spring Data enabled repository implementation
-    * SPARQL queries for "findBy" query methods
-    * Paged queries
+* Mapping of resource properties (`uuid`, `created`, etc.)
+* Mapping of simple properties (not collections)
+* Custom RDF to Java mapper (based on XSD types)
+* Datastream (binary) object persistence
+* Lazy-load of datastreams
+* Spring Data enabled repository implementation
+* SPARQL queries for "findBy" query methods
+* Paged queries
 
 To be done:
 
-    * Enable custom extensions to Java to RDF converter
-    * RELS-EXT type relationships with lazy-load
-    * Transaction support
-    * Named queries
-    * Fluent SPARQL DSL for programmatic query specification
-    * Fixity checks support
-    * Support versions
-
+* Enable custom extensions to Java to RDF converter
+* RELS-EXT type relationships with lazy-load
+* Transaction support
+* Named queries
+* Fluent SPARQL DSL for programmatic query specification
+* Fixity checks support
+* Support versions
+* Javadoc
 
 ### Acknowledgements
 
@@ -39,11 +39,11 @@ This project is heavily based on the code from the following projects (including
 ### Running integration tests
 
 Executing `mvn verify` with default active profile `cargo-integration-tests` will use `cargo-maven2-plugin` to automatically download and setup the
-following test environment before running any integration tests (actual versions may vary):
+following test environment before running any integration tests (actual versions may vary, Tomcat 7.0.62 is used for deployment):
 
-    1. Tomcat 7.0.62 with an instance of `jena-fuseki-war` (v. 2.0.0), configured from `${basedir}/etc/fuseki`, sets up empty dataset `/test`
-    2. Tomcat 7.0.62 with an instance of `fcrepo-webapp` (v. 4.2.0), configured using `${basedir}/etc/fedora-node-types.cnd`, see [Indexable Node Type](https://wiki.duraspace.org/display/FEDORA40/Indexable+Node+Type)
-    3. Tomcat 7.0.62 with an instance of `fcrepo-message-consumer-webapp` (v. 4.2.0)
+1. `jena-fuseki-war` (v. 2.0.0), configured from `${basedir}/etc/fuseki`, sets up empty dataset `/test`
+2. `fcrepo-webapp` (v. 4.2.0), configured using `${basedir}/etc/fedora-node-types.cnd`, see [Indexable Node Type](https://wiki.duraspace.org/display/FEDORA40/Indexable+Node+Type)
+3. `fcrepo-message-consumer-webapp` (v. 4.2.0)
 
 All the ports needed for the setup are provided by `build-helper-maven-plugin` from the randomly selected available ports. Check the Maven build console
 output for actual port numbers.
