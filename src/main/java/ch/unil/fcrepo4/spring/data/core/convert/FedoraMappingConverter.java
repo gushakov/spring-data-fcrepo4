@@ -299,20 +299,19 @@ public class FedoraMappingConverter implements FedoraConverter {
     private void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
         entity.doWithDatastreams(dsProp -> {
             Object dsBean = entity.getPropertyAccessor(source).getProperty(dsProp);
-            // check if this is a dynamic proxy
-            if (dsBean instanceof DatastreamDynamicProxy) {
-                // then substitute target bean instead
-                dsBean = ((DatastreamDynamicProxy) dsBean).__getTargetDatastreamBean();
-                logger.debug("Substituted target datastream bean {}", dsBean);
-            }
-            if (dsBean == null) {
-                throw new MappingException("Datastream " + dsProp.getName() + " must not be null, entity " + entity.getType().getSimpleName());
-            }
+            if (dsBean != null){
+                // check if this is a dynamic proxy
+                if (dsBean instanceof DatastreamDynamicProxy) {
+                    // then substitute target bean instead
+                    dsBean = ((DatastreamDynamicProxy) dsBean).__getTargetDatastreamBean();
+                    logger.debug("Substituted target datastream bean {}", dsBean);
+                }
 
-            DatastreamPersistentEntity<?> dsEntity = (DatastreamPersistentEntity<?>) mappingContext.getPersistentEntity(dsProp.getType());
-            FedoraDatastream datastream = createDatastream(dsBean, (DatastreamPersistentProperty) dsProp, dsEntity, fedoraObject);
-            readCommonFedoraResourceProperties(dsBean, dsEntity, datastream);
-            writeSimpleProperties(dsBean, dsEntity, datastream);
+                DatastreamPersistentEntity<?> dsEntity = (DatastreamPersistentEntity<?>) mappingContext.getPersistentEntity(dsProp.getType());
+                FedoraDatastream datastream = createDatastream(dsBean, (DatastreamPersistentProperty) dsProp, dsEntity, fedoraObject);
+                readCommonFedoraResourceProperties(dsBean, dsEntity, datastream);
+                writeSimpleProperties(dsBean, dsEntity, datastream);
+            }
         });
     }
 

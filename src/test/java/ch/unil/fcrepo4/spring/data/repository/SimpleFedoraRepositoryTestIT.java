@@ -2,12 +2,13 @@ package ch.unil.fcrepo4.spring.data.repository;
 
 // based on code from org.springframework.data.solr.repository.ITestSolrRepositoryOperations
 
-import ch.unil.fcrepo4.beans.Fruit;
+import ch.unil.fcrepo4.assertj.Assertions;
 import ch.unil.fcrepo4.beans.Vehicle;
+import ch.unil.fcrepo4.beans.VehicleDescription;
+import ch.unil.fcrepo4.beans.VehiclePicture;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraRdfQueryPageRequest;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
-import ch.unil.fcrepo4.utils.GraphExporter;
 import org.assertj.core.api.Condition;
 import org.fcrepo.client.FedoraException;
 import org.junit.Before;
@@ -19,14 +20,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+
 
 /**
  * @author gushakov
@@ -52,10 +56,6 @@ public class SimpleFedoraRepositoryTestIT {
     @Autowired
     private VehicleCrudRepository vehicleRepo;
 
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    @Autowired
-    private FruitCrudRepository fruitRepo;
-
     @Value("#{environment.getProperty('fedora.repository.url')}")
     private String repoUrl;
 
@@ -65,34 +65,32 @@ public class SimpleFedoraRepositoryTestIT {
     @Value("#{environment.getProperty('maven.profile.id')}")
     private String profileId;
 
+    private boolean initialized = false;
+
     @Before
     public void setUp() throws Exception {
 
+        if (!initialized) {
 
-            vehicleRepo.save(new Vehicle(1L, "Ford", "Green", 15000, 6.5f));
-            vehicleRepo.save(new Vehicle(2L, "Toyota", "Light-green", 10000, 7.5f));
+            Vehicle vehicle1 = new Vehicle(1L, "Ford", "Green", 15000, 6.5f);
+            vehicle1.setDescription(new VehicleDescription(new ByteArrayInputStream("<car>lorem ipsum</car>".getBytes())));
+            vehicleRepo.save(vehicle1);
+
+            Vehicle vehicle2 = new Vehicle(2L, "Toyota", "Light-green", 10000, 7.5f);
+            vehicle2.setPicture(new VehiclePicture(new ClassPathResource("test.png").getInputStream()));
+            vehicleRepo.save(vehicle2);
 
             vehicleRepo.save(new Vehicle(3L, "Honda", "Yellow", 20000, 8.5f));
             vehicleRepo.save(new Vehicle(4L, "Volkswagen", "Red", 30000, 5.0f));
             vehicleRepo.save(new Vehicle(5L, "BMW", "Gray", 5000, 7.5f));
 
-            fruitRepo.save(new Fruit(1L, 5.05d));
-
-            // import only if running with the localhost profile
-/*
-            if (profileId != null && profileId.equals("localhost")){
-                GraphExporter.getInstance().exportToFuseki("/vehicle", repoUrl,
-                        sparqlDataUrl);
-            }
-*/
-
-
+            initialized = true;
+        }
     }
 
     @Test
-    public void testWireRepositories() throws Exception {
+    public void testWireRepository() throws Exception {
         assertThat(vehicleRepo).isNotNull();
-        assertThat(fruitRepo).isNotNull();
     }
 
     @Test
@@ -150,6 +148,19 @@ public class SimpleFedoraRepositoryTestIT {
         assertThat(page2.getNumber()).isEqualTo(1);
         assertThat(page2.isLast()).isTrue();
         assertThat(page2.getNumberOfElements()).isEqualTo(2);
+    }
+
+    @Test
+    public void testLoadDatastream() throws Exception {
+        Vehicle vehicle = vehicleRepo.findOne(1L);
+        Assertions.assertThat(vehicle.getDescription().getDesc()).hasXmlContentEquivalentTo("<car>lorem ipsum</car>");
+    }
+
+    @Test
+    public void testAccessResourceProperties() throws Exception {
+        Vehicle vehicle = vehicleRepo.findOne(1L);
+        assertThat(vehicle.getUuid()).isNotNull();
+        assertThat(vehicle.getCreatedDate()).isNotNull();
     }
 
     private <T> Condition<Comparable<T>> greaterThan(T checkValue) {

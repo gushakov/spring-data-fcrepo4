@@ -1,18 +1,22 @@
 package ch.unil.fcrepo4.beans;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 /**
- * @author gushakov
+ * Simple bean to be persisted in the Fedora repository. {@code FedoraObject} annotation may specify a namespace, a JCR
+ * path prefix where all instances of this bean will be stored.
  */
 @FedoraObject(namespace = "vehicle")
 public class Vehicle {
 
+    // mandatory ID property will be converted to the JCR path suffix
     @Path
     private long id;
 
+    // simple properties to be stored as attributes of JCR node
     @Property
     private String make;
 
@@ -24,6 +28,20 @@ public class Vehicle {
 
     @Property
     private float consumption;
+
+    // binary datastreams
+
+    private VehicleDescription description;
+
+    private VehiclePicture picture;
+
+    // resource (read-only) properties
+
+    @Uuid
+    private UUID uuid;
+
+    @Created
+    private ZonedDateTime createdDate;
 
     public Vehicle() {
     }
@@ -89,5 +107,37 @@ public class Vehicle {
 
     public void setConsumption(float consumption) {
         this.consumption = consumption;
+    }
+
+    public VehicleDescription getDescription() {
+        return description;
+    }
+
+    public void setDescription(VehicleDescription description) {
+        this.description = description;
+    }
+
+    public VehiclePicture getPicture() {
+        return picture;
+    }
+
+    public void setPicture(VehiclePicture picture) {
+        this.picture = picture;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 }
