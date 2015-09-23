@@ -212,5 +212,5 @@ from the `created` timestamp if needed.
 
 ### Java to RDF type conversion
 
-To serialize values of Java properties as RDF properties uses in SPARQL updates and queries this module uses (TypeMapper)[https://jena.apache.org/documentation/notes/typed-literals.html]
+To serialize values of Java properties as RDF properties uses in SPARQL updates and queries this module uses [TypeMapper](https://jena.apache.org/documentation/notes/typed-literals.html)
 provided by `jena-core` module and also used by Fedora repository. See [ExtendedXsdDatatypeConverter](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ExtendedXsdDatatypeConverter.java) for implementation details.
