@@ -6,7 +6,7 @@ Spring Data module for Fedora Commons Repository (version 4.x or later) allowing
 
 *This is just a proof-of-concept implementation and still largely work in progress.*
 
-Partially implemented:
+**Partially implemented:**
 
 * Mapping of resource properties (`uuid`, `created`, etc.)
 * Mapping of simple properties (not collections)
@@ -17,7 +17,7 @@ Partially implemented:
 * SPARQL queries for "findBy" query methods
 * Paged queries
 
-To be done:
+**To be done:**
 
 * Enable custom extensions to Java to RDF converter
 * RELS-EXT type relationships with lazy-load
@@ -109,7 +109,7 @@ Vehicle anotherVehicle = fedoraTemplate.load(1L, Vehicle.class);
 Assuming the Fedora instance is running under `http://localhost:9090/rest`, a set of corresponding [FeodoraResources](https://github.com/fcrepo4-labs/fcrepo4-client/blob/master/fcrepo-client/src/main/java/org/fcrepo/client/FedoraResource.java)
 will be created at the backend with the corresponding JCR properties (shown here as decoded RDF graph for clarity).
 
-```xml
+```turtle
 <http://localhost:9090/rest/vehicle/1>
 	<!-- default resource properties are omitted -->
 	<info:fedora/test/color>        "Green"^^<http://www.w3.org/2001/XMLSchema#string> ;
@@ -154,7 +154,7 @@ List<Vehicle> vehiclesWithLargeMileage = vehicleRepo.findByMilesGreaterThan(1500
 The module automatically converts the candidate query methods into [SPARQL](http://jena.apache.org/tutorials/sparql.html) queries run against the triplestore. For example,
 the call to the query method `findByMilesGreaterThan` will be translated into
 
-```
+```sparql
 SELECT  ?v1
 WHERE
   { ?v1  <info:fedora/test/miles>  ?v2 .
