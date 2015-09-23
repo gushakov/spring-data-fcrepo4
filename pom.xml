@@ -13,7 +13,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipITs>false</skipITs>
         <!-- use "run" to pause after indexer start or "start" to run the tests and quit -->
-        <indexer.start.mode>run</indexer.start.mode>
+        <indexer.start.mode>start</indexer.start.mode>
     </properties>
 
     <dependencies>
@@ -199,7 +199,7 @@ See fuseki configuration at
         <profile>
             <id>localhost</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
                 <fedora.servlet.port>9090</fedora.servlet.port>
@@ -226,7 +226,7 @@ See fuseki configuration at
         <profile>
             <id>cargo-integration-tests</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>

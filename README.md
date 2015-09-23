@@ -36,6 +36,22 @@ This project is heavily based on the code from the following projects (including
 
  * [spring-data-solr](https://github.com/spring-projects/spring-data-solr)
 
+### Running integration tests
+
+Executing `mvn verify` with default active profile `cargo-integration-tests` will use `cargo-maven2-plugin` to automatically download and setup the
+following test environment before running any integration tests (actual versions may vary):
+
+    1. Tomcat 7.0.62 with an instance of `jena-fuseki-war` (v. 2.0.0), configured from `${basedir}/etc/fuseki`, sets up empty dataset `/test`
+    2. Tomcat 7.0.62 with an instance of `fcrepo-webapp` (v. 4.2.0), configured using `${basedir}/etc/fedora-node-types.cnd`, see [Indexable Node Type](https://wiki.duraspace.org/display/FEDORA40/Indexable+Node+Type)
+    3. Tomcat 7.0.62 with an instance of `fcrepo-message-consumer-webapp` (v. 4.2.0)
+
+All the ports needed for the setup are provided by `build-helper-maven-plugin` from the randomly selected available ports. Check the Maven build console
+output for actual port numbers.
+
+There is a project property `indexer.start.mode` which can be set to `run` (instead of `start`) to pause Maven build
+(for example, `mvn pre-integration-test`) right after the indexer webapp has been configured. This allows to access all three applications
+online at the localhost instance (under the ports assigned by `build-helper-maven-plugin`).
+
 ### FedoraTemplate
 
 [FedoraTemplate](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/FedoraTemplate.java)

@@ -62,9 +62,6 @@ public class SimpleFedoraRepositoryTestIT {
     @Value("#{environment.getProperty('triplestore.sparql.data.url')}")
     private String sparqlDataUrl;
 
-    @Value("#{environment.getProperty('maven.profile.id')}")
-    private String profileId;
-
     private boolean initialized = false;
 
     @Before
