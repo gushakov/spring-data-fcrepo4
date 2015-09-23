@@ -4,7 +4,29 @@
 
 Spring Data module for Fedora Commons Repository (version 4.x or later) allowing for CRUD operations and query using annotated POJO beans.
 
-*This is still work in progress.*
+*This is just a proof-of-concept implementation and still largely work in progress.*
+
+Partially implemented:
+
+    * Mapping of resource properties (`uuid`, `created`, etc.)
+    * Mapping of simple properties (not collections)
+    * Custom RDF to Java mapper (based on XSD types)
+    * Datastream (binary) object persistence
+    * Lazy-load of datastreams
+    * Spring Data enabled repository implementation
+    * SPARQL queries for "findBy" query methods
+    * Paged queries
+
+To be done:
+
+    * Enable custom extensions to Java to RDF converter
+    * RELS-EXT type relationships with lazy-load
+    * Transaction support
+    * Named queries
+    * Fluent SPARQL DSL for programmatic query specification
+    * Fixity checks support
+    * Support versions
+
 
 ### Acknowledgements
 
@@ -73,21 +95,21 @@ will be created at the backend with the corresponding JCR properties (shown here
 
 ```xml
 <http://localhost:9090/rest/vehicle/1>
-	<!-- system properties are omitted -->
+	<!-- default resource properties are omitted -->
 	<info:fedora/test/color>        "Green"^^<http://www.w3.org/2001/XMLSchema#string> ;
 	<info:fedora/test/consumption>  "6.5"^^<http://www.w3.org/2001/XMLSchema#float> ;
 	<info:fedora/test/make>         "Ford"^^<http://www.w3.org/2001/XMLSchema#string> ;
 	<info:fedora/test/miles>        "15000"^^<http://www.w3.org/2001/XMLSchema#int> .
 ```
 
-## Spring Data Repository
+### Spring Data Repository
 
 This module implements [Spring Data repository](http://docs.spring.io/spring-data/data-commons/docs/1.11.0.RELEASE/reference/html/#repositories) abstraction,
-in order to facilitate queries against the triplestore.
-
-This is how to bootstrap a Spring Data enabled Fedora repository.
+in order to facilitate queries against the triplestore. This is how to create a Spring Data enabled repository.
 
 ```java
+// declare the interface
+
 public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Long> {
 
     List<Vehicle> findByMake(String make);
@@ -98,14 +120,9 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     // other useful queries
 }
-```
 
-Declare repository interface to extend [FedoraCrudRepository](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/repository/FedoraCrudRepository.java)
-interface.
+// use EnableFedoraRepositories annotation to scan the package for FedoraRepository interfaces
 
-Then bootstrap the repository using `EnableFedoraRepositories` annotation on the application context configuration.
-
-```java
 @Configuration
 @PropertySource("classpath:fcrepo4.properties")
 @EnableFedoraRepositories
@@ -118,7 +135,7 @@ public static class AppConfig {
 List<Vehicle> vehiclesWithLargeMileage = vehicleRepo.findByMilesGreaterThan(15000);
 ```
 
-The module automatically converts the candidate query methods into SPARQL queries run against the triplestore. For example,
+The module automatically converts the candidate query methods into [SPARQL](http://jena.apache.org/tutorials/sparql.html) queries run against the triplestore. For example,
 the call to the query method `findByMilesGreaterThan` will be translated into
 
 ```
@@ -129,7 +146,7 @@ WHERE
   }
 ```
 
-## Datastreams
+### Datastreams
 
 A relationship between object and a (binary) datastream can be declared as follows
 
@@ -158,7 +175,7 @@ annotation or the name of the datastream property (by default) as a the path suf
 All datastreams are lazy-loaded as dynamic proxies generated using [Byte Buddy](http://bytebuddy.net/#/), so datastream content is only requested
 only when the client code actually tries to access either content or properties of the datastream.
 
-## Resource properties
+### Resource properties
 
 Some of the default resource properties automatically generated and updated by the Fedora repository can be accessed by specifying bean properties
 with the corresponding annotations. For example, if one wants to access `http://fedora.info/definitions/v4/repository#uuid`
@@ -174,5 +191,10 @@ class Vehicle {
 }
 ```
 
-The module will automatically perform some useful conversions, i.e. to `UUID` from the `uuid` property or to `ZonedDateTime`
+This module will automatically perform some useful conversions, i.e. to `UUID` from the `uuid` property or to `ZonedDateTime`
 from the `created` timestamp if needed.
+
+### Java to RDF type conversion
+
+To serialize values of Java properties as RDF properties uses in SPARQL updates and queries this module uses (TypeMapper)[https://jena.apache.org/documentation/notes/typed-literals.html]
+provided by `jena-core` module and also used by Fedora repository. See [ExtendedXsdDatatypeConverter](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ExtendedXsdDatatypeConverter.java) for implementation details.
