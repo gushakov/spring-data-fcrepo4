@@ -197,9 +197,28 @@ See fuseki configuration at
 
     <profiles>
         <profile>
-            <id>cargo-integration-tests</id>
+            <id>travis-tests</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <!-- this is just to keep Intellij happy -->
+                <triplestore.ajp.port/>
+                <triplestore.servlet.port/>
+                <triplestore.rmi.port/>
+                <fedora.ajp.port/>
+                <fedora.servlet.port/>
+                <fedora.rmi.port/>
+                <indexer.ajp.port/>
+                <indexer.servlet.port/>
+                <indexer.rmi.port/>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>cargo-integration-tests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
