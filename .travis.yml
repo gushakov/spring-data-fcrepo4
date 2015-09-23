@@ -8,4 +8,4 @@ before_install:
     - "export JAVA_OPTS=-Xmx512"
 
 script:
-    - mvn test
+    - mvn test-compile
