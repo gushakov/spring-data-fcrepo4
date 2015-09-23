@@ -8,6 +8,7 @@ Spring Data module for Fedora Commons Repository (version 4.x or later) allowing
 
 **Partially implemented:**
 
+* ID to JCR path mapping
 * Mapping of resource properties (`uuid`, `created`, etc.)
 * Mapping of simple properties (not collections)
 * Custom RDF to Java mapper (based on XSD types)
@@ -117,6 +118,45 @@ will be created at the backend with the corresponding JCR properties (shown here
 	<info:fedora/test/make>         "Ford"^^<http://www.w3.org/2001/XMLSchema#string> ;
 	<info:fedora/test/miles>        "15000"^^<http://www.w3.org/2001/XMLSchema#int> .
 ```
+
+### PathCreator
+
+The mandatory `Path` annotation may specify a custom implementation of [PathCreator](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/mapping/PathCreator.java)
+interface to customize how JCR paths are created for the resources mapped to the instances of a bean. For example, if `pathCreator` is specified as follows
+
+```java
+public class CustomPathCreator<T> implements PathCreator<T, Long> {
+    @Override
+    public String createPath(String namespace, Class<T> beanType, Class<Long> pathPropType, String pathPropName, Long pathPropValue) {
+        String value = pathPropValue.toString();
+        String part1 = value.substring(0, 3);
+        String part2 = value.substring(3, 6);
+        String part3 = value.substring(6);
+        return "/" + namespace + "/" + part1 + "/" + part2 + "/" + part3;
+    }
+
+    @Override
+    public Long parsePath(String namespace, Class<T> beanType, Class<Long> pathPropType, String pathPropName, String path) {
+        return Long.parseLong(StringUtils.removeStart(StringUtils.remove(path, "/"), namespace));
+    }
+}
+
+// and the bean
+
+@FedoraObject(namespace = "custom")
+public class Bean {
+
+    @Path(pathCreator = CustomPathCreator.class)
+    private long id;
+
+    public Bean4(long id) {
+        this.id = id;
+    }
+
+}
+```
+
+then the bean `new Bean(123456789L)` will be mapped to a resource with "/custom/123/456/789" path.
 
 ### Spring Data Repository
 

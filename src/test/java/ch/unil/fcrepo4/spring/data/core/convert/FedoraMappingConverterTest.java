@@ -4,6 +4,7 @@ import ch.unil.fcrepo4.assertj.Assertions;
 import ch.unil.fcrepo4.beans.Bean1;
 import ch.unil.fcrepo4.beans.Bean2;
 import ch.unil.fcrepo4.beans.Bean2Datastream1;
+import ch.unil.fcrepo4.beans.Bean4;
 import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
@@ -26,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,6 +146,14 @@ public class FedoraMappingConverterTest {
         bean2.setXmlDs(xmlDs);
         mappingConverter.write(bean2, fedoraObject);
         verify(mockRepository, times(1)).createDatastream(eq(DS_PATH), any());
+    }
+
+    @Test
+    public void testCustomPathConverter() throws Exception {
+        FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
+        Bean4 bean4 = new Bean4(123456789L);
+        String path = mappingConverter.getFedoraObjectPath(bean4);
+        assertThat(path).isEqualTo("/custom/123/456/789");
     }
 
 }
