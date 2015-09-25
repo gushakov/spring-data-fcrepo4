@@ -1,6 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import org.fcrepo.kernel.RdfLexicon;
+import org.fcrepo.kernel.api.RdfLexicon;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 

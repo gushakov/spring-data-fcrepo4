@@ -12,7 +12,7 @@ public interface FedoraOperations {
 
    FedoraConverter getConverter();
 
-   <T> String save(T bean);
+   <T> void save(T bean);
 
    <T, ID> T load(ID id, Class<T> beanType);
 
@@ -21,5 +21,7 @@ public interface FedoraOperations {
    <T> List<T> query(Query rdfQuery, Class<T> beanType);
 
    long count(Query rdfQuery);
+
+   <T, ID> void delete(ID id, Class<T> beanType);
 
 }

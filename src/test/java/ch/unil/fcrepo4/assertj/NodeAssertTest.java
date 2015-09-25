@@ -2,7 +2,7 @@ package ch.unil.fcrepo4.assertj;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
-import org.fcrepo.kernel.RdfLexicon;
+import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Test;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;

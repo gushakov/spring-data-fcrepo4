@@ -25,6 +25,13 @@ public class Bean1 {
     @Property
     private String foo;
 
+    public Bean1() {
+    }
+
+    public Bean1(String path) {
+        this.path = path;
+    }
+
     public String getPath() {
         return path;
     }

@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
-import org.fcrepo.kernel.RdfLexicon;
+import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Test;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;

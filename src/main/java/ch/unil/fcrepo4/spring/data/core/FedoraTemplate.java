@@ -1,16 +1,14 @@
 package ch.unil.fcrepo4.spring.data.core;
 
+import ch.unil.fcrepo4.client.TransactionalFedoraRepository;
+import ch.unil.fcrepo4.client.TransactionalFedoraRepositoryImpl;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.sparql.expr.aggregate.AggCount;
-import com.hp.hpl.jena.sparql.expr.aggregate.AggregatorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
-import org.fcrepo.client.FedoraRepository;
-import org.fcrepo.client.impl.FedoraRepositoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -18,6 +16,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.util.Assert;
 
@@ -34,26 +33,46 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private FedoraConverter fedoraConverter;
 
-    private FedoraRepository repository;
+    private TransactionalFedoraRepository repository;
 
     private String triplestoreQueryUrl;
 
-    public FedoraTemplate(FedoraRepository repository) {
+    private static final FedoraExceptionTranslator EXCEPTION_TRANSLATOR = new FedoraExceptionTranslator();
+
+    public FedoraTemplate(TransactionalFedoraRepository repository) {
         Assert.notNull(repository);
         this.repository = repository;
     }
 
     public FedoraTemplate(String repositoryUrl) {
         Assert.notNull(repositoryUrl);
-        this.repository = new FedoraRepositoryImpl(repositoryUrl);
+        this.repository = new TransactionalFedoraRepositoryImpl(repositoryUrl);
     }
 
     public FedoraTemplate(String repositoryUrl, String triplestoreQueryUrl) {
         Assert.notNull(repositoryUrl);
         Assert.notNull(triplestoreQueryUrl);
-        this.repository = new FedoraRepositoryImpl(repositoryUrl);
+        this.repository = new TransactionalFedoraRepositoryImpl(repositoryUrl);
         this.triplestoreQueryUrl = triplestoreQueryUrl;
 
+    }
+
+    abstract class TransactionExecution {
+        public void execute(){
+            try {
+                repository.startTransaction();
+                doInTransaction();
+                repository.commitTransaction();
+            } catch (RuntimeException | FedoraException e) {
+                try {
+                    repository.rollbackTransaction();
+                } catch (FedoraException fe) {
+                    handleException(fe);
+                }
+                handleException(e);
+            }
+        }
+        public abstract void doInTransaction() throws FedoraException;
     }
 
     @Override
@@ -78,15 +97,15 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public <T> String save(T bean) {
-        FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
-        fedoraConverter.updateIndex(fedoraObject);
-        fedoraConverter.write(bean, fedoraObject);
-        try {
-            return fedoraObject.getPath();
-        } catch (FedoraException e) {
-            throw new RuntimeException(e);
-        }
+    public <T> void save(T bean) {
+        new TransactionExecution(){
+            @Override
+            public void doInTransaction() throws FedoraException {
+                FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
+                fedoraConverter.updateIndex(fedoraObject);
+                fedoraConverter.write(bean, fedoraObject);
+            }
+        }.execute();
     }
 
     @Override
@@ -143,11 +162,24 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         return number;
     }
 
+    @Override
+    public <T, ID> void delete(ID id, Class<T> beanType) {
+        new TransactionExecution(){
+            @Override
+            public void doInTransaction() throws FedoraException {
+                FedoraObject fedoraObject = fedoraConverter.getFedoraObject(id, beanType);
+                if (fedoraObject != null){
+                    fedoraObject.forceDelete();
+                }
+            }
+        }.execute();
+    }
+
     private void registerPersistenceExceptionTranslator() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
             if (applicationContext.getBeansOfType(PersistenceExceptionTranslator.class).isEmpty()) {
                 ((ConfigurableApplicationContext) applicationContext).getBeanFactory()
-                        .registerSingleton("fedoraExceptionTranslator", FedoraExceptionTranslator.class);
+                        .registerSingleton("fedoraExceptionTranslator", EXCEPTION_TRANSLATOR);
             }
         }
     }
@@ -165,6 +197,12 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private String parsePathFromUri(String uri) {
         return StringUtils.removeStart(uri, repository.getRepositoryUrl());
+    }
+
+    private void handleException(Exception e) {
+        RuntimeException wrapped = new RuntimeException(e);
+        DataAccessException dae = EXCEPTION_TRANSLATOR.translateExceptionIfPossible(wrapped);
+        throw dae != null ? dae : wrapped;
     }
 
 }

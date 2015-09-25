@@ -20,7 +20,7 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
-import org.fcrepo.kernel.RdfLexicon;
+import org.fcrepo.kernel.api.RdfLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -288,7 +288,10 @@ public class FedoraMappingConverter implements FedoraConverter {
                 try {
                     Node literal = Utils.getObjectLiteral(fedoraResource.getProperties(),
                             simpleProp.getUri());
-                    propsAccessor.setProperty(property, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), property.getType()));
+                    // can be null for some properties (e.g. "created") before transaction is committed
+                    if (literal != null){
+                        propsAccessor.setProperty(property, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), property.getType()));
+                    }
                 } catch (FedoraException e) {
                     throw new RuntimeException(e);
                 }
