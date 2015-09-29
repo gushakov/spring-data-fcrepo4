@@ -292,7 +292,7 @@ See fuseki configuration at
                         <executions>
                             <execution>
                                 <id>unpack</id>
-                                <phase>process-test-resources</phase>
+                                <phase>generate-test-resources</phase>
                                 <goals>
                                     <goal>unpack</goal>
                                 </goals>
@@ -324,7 +324,7 @@ See fuseki configuration at
                             -->
                             <execution>
                                 <id>copy-fuseki</id>
-                                <phase>generate-test-resources</phase>
+                                <phase>process-test-resources</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
                                 </goals>
@@ -341,7 +341,7 @@ See fuseki configuration at
                             </execution>
                             <execution>
                                 <id>copy-fedora-node-types</id>
-                                <phase>generate-test-resources</phase>
+                                <phase>process-test-resources</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
                                 </goals>
