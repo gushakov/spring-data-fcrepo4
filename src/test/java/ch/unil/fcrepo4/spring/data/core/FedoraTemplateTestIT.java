@@ -1,16 +1,15 @@
 package ch.unil.fcrepo4.spring.data.core;
 
-import ch.unil.fcrepo4.assertj.Assertions;
-import ch.unil.fcrepo4.beans.*;
-import ch.unil.fcrepo4.client.TransactionalFedoraRepositoryImpl;
-import ch.unil.fcrepo4.spring.data.core.convert.DatastreamDynamicProxy;
+import ch.unil.fcrepo4.beans.Bean1;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import com.hp.hpl.jena.graph.NodeFactory;
-import org.fcrepo.client.FedoraDatastream;
 import org.fcrepo.client.FedoraException;
-import org.fcrepo.client.FedoraRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.modeshape.jcr.ExecutionContext;
+import org.modeshape.jcr.query.QueryBuilder;
+import org.modeshape.jcr.query.model.Query;
+import org.modeshape.jcr.query.model.QueryCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +18,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.ByteArrayInputStream;
+import java.util.List;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,23 +38,14 @@ public class FedoraTemplateTestIT {
         private Environment env;
 
         @Bean
-        public TransactionalFedoraRepositoryImpl fedoraRepository() throws FedoraException {
-            String repoUrl = env.getProperty("fedora.repository.url");
-            return new TransactionalFedoraRepositoryImpl(repoUrl);
-        }
-
-        @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate(fedoraRepository());
+            return new FedoraTemplate(env.getProperty("fedora.host"), env.getProperty("fedora.port", Integer.class));
         }
 
     }
 
     @Autowired
     private FedoraTemplate fedoraTemplate;
-
-    @Autowired
-    private FedoraRepository fedoraRepository;
 
     @Test
     public void testSaveBean1() throws Exception {
@@ -66,8 +56,7 @@ public class FedoraTemplateTestIT {
         bean1.setFoo("bar");
         fedoraTemplate.save(bean1);
         assertThat(bean1).isNotNull();
-        assertThat(bean1.getUuid()).isNotNull();
-        org.fcrepo.client.FedoraObject fo = fedoraRepository.getObject(path);
+        org.fcrepo.client.FedoraObject fo = fedoraTemplate.getRepository().getObject(path);
         assertThat(fo.getProperties()).contains(NodeFactory.createURI("info:fedora/test/number"),
                 NodeFactory.createLiteral("3", XSDBaseNumericType.XSDinteger));
         assertThat(fo.getProperties()).contains(NodeFactory.createURI("info:fedora/test/foo"),
@@ -75,83 +64,13 @@ public class FedoraTemplateTestIT {
     }
 
     @Test
-    public void testLoadBean1() throws Exception {
-        Bean1 bean1Save = new Bean1();
-        String path = "/foobar/" + System.currentTimeMillis();
-        bean1Save.setPath(path);
-        bean1Save.setNumber(3);
-        bean1Save.setFoo("bar");
-        fedoraTemplate.save(bean1Save);
-        Bean1 bean1Load = fedoraTemplate.load(path, Bean1.class);
-        assertThat(bean1Load).isNotNull();
-        assertThat(bean1Load.getPath()).isEqualTo(path);
-        assertThat(bean1Load.getUuid()).isNotNull();
-        assertThat(bean1Load.getCreated()).isNotNull();
-        assertThat(bean1Load.getNumber()).isEqualTo(3);
-        assertThat(bean1Load.getFoo()).isEqualTo("bar");
-    }
-
-    @Test
-    public void testSaveBean2() throws Exception {
-        Bean2 bean2 = new Bean2();
-        String path = "/foobar/" + System.currentTimeMillis();
-        bean2.setPath(path);
-        Bean2Datastream1 dsBean = new Bean2Datastream1();
-        dsBean.setWam("baz");
-        dsBean.setXmlStream(new ByteArrayInputStream("<foo>bar</foo>".getBytes()));
-        bean2.setXmlDs(dsBean);
-        fedoraTemplate.save(bean2);
-        FedoraDatastream ds = fedoraRepository.getDatastream(path+"/xmlDs");
-        assertThat(ds.getProperties()).contains(NodeFactory.createURI("info:fedora/test/wam"),
-                NodeFactory.createLiteral("baz", XSDBaseNumericType.XSDstring));
-
-    }
-
-    @Test
-    public void testLoadBean2() throws Exception {
-        Bean2 bean2Save = new Bean2();
-        String path = "/foobar/" + System.currentTimeMillis();
-        bean2Save.setPath(path);
-        Bean2Datastream1 dsBean = new Bean2Datastream1();
-        dsBean.setWam("waz");
-        dsBean.setXmlStream(new ByteArrayInputStream("<foo>bar</foo>".getBytes()));
-        bean2Save.setXmlDs(dsBean);
-        fedoraTemplate.save(bean2Save);
-        Bean2 bean2Load = fedoraTemplate.load(path, Bean2.class);
-        assertThat(bean2Load).isNotNull();
-        assertThat(bean2Load.getXmlDs()).isNotNull();
-        assertThat(bean2Load.getXmlDs()).isInstanceOf(DatastreamDynamicProxy.class);
-        assertThat(bean2Load.getXmlDs().getUuid()).isNotNull();
-        assertThat(bean2Load.getXmlDs().getWam()).isEqualTo("waz");
-        Assertions.assertThat(bean2Load.getXmlDs().getXmlStream()).hasXmlContentEquivalentTo("<foo>bar</foo>");
-    }
-
-    @Test
-    public void testSaveLoadSaveBean3() throws Exception {
-        Bean3 bean3Save1 = new Bean3();
-        String path = "/wambaz/" + System.currentTimeMillis();
-        bean3Save1.setPath(path);
-        Bean3Datastream1 dsBeanSave1 = new Bean3Datastream1();
-        dsBeanSave1.setNumber(3);
-        dsBeanSave1.setXmlStream(new ByteArrayInputStream("<wam>waz</wam>".getBytes()));
-        bean3Save1.setXmlDs(dsBeanSave1);
-        fedoraTemplate.save(bean3Save1);
-        Bean3 bean3Load = fedoraTemplate.load(path, Bean3.class);
-        bean3Load.getXmlDs().setNumber(4);
-        fedoraTemplate.save(bean3Load);
-    }
-
-    @Test(expected = UncategorizedFedoraException.class)
-    public void testIllegalPathBean() throws Exception {
-        fedoraTemplate.save(new IllegalPathBean());
-    }
-
-    @Test
-    public void testDeleteById() throws Exception {
-        String path = "/foobar/" + System.currentTimeMillis();
-        fedoraTemplate.save(new Bean1(path));
-        fedoraTemplate.delete(path, Bean1.class);
-        assertThat(fedoraTemplate.exists(path, Bean1.class)).isFalse();
+    public void testQuery() throws Exception {
+        QueryBuilder builder = new QueryBuilder(new ExecutionContext().getValueFactories().getTypeSystem());
+        QueryCommand query = builder.selectDistinctStar()
+                .from("fedora:Resource")
+                .query();
+        List<Bean1> beans = fedoraTemplate.query((Query)query, Bean1.class);
+        System.out.println(beans);
     }
 
 }

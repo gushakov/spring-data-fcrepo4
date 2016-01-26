@@ -20,7 +20,6 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
-import org.fcrepo.kernel.api.RdfLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -226,20 +225,6 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
-    @Override
-    public void updateIndex(FedoraResource fedoraResource) {
-        try {
-            String updateIndex = "INSERT DATA {<" + repository.getRepositoryUrl() + fedoraResource.getPath() + "> <" +
-                    RdfLexicon.INDEXING_NAMESPACE + "hasIndexingTransformation> \"default\" ; <" +
-                    RdfLexicon.RDF_NAMESPACE + "type> <" +
-                    RdfLexicon.INDEXING_NAMESPACE + "Indexable> .}";
-            logger.debug("Update (index): {}", updateIndex);
-            fedoraResource.updateProperties(updateIndex);
-        } catch (FedoraException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private void writeSimpleProperties(Object bean, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
         final List<String> updateProperties = new ArrayList<>();
@@ -333,6 +318,9 @@ public class FedoraMappingConverter implements FedoraConverter {
         try {
             String dsPath = fedoraObject.getPath() + "/" +
                     (dsEntity.getDsName().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN) ? dsProp.getName() : dsEntity.getDsName());
+
+            //TODO: bug in fcrepo-client 4.4.1.snapshot
+            dsPath = dsPath.replaceFirst("/*", "/");
 
             if (repository.exists(dsPath)) {
                 FedoraDatastream datastream = repository.getDatastream(dsPath);

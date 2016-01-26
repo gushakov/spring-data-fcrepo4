@@ -13,9 +13,6 @@ public class Bean1 {
     @Path
     private String path;
 
-    @Uuid
-    private UUID uuid;
-
     @Created
     private Date created;
 
@@ -38,14 +35,6 @@ public class Bean1 {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
     }
 
     public Date getCreated() {

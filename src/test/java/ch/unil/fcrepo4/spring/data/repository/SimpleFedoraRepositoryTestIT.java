@@ -48,8 +48,9 @@ public class SimpleFedoraRepositoryTestIT {
 
         @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate(env.getProperty("fedora.repository.url"), env.getProperty("triplestore.sparql.query.url"));
+            return new FedoraTemplate(env.getProperty("fedora.host"), env.getProperty("fedora.port", Integer.class));
         }
+
     }
 
     @SuppressWarnings("SpringJavaAutowiringInspection")

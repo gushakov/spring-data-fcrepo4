@@ -7,12 +7,14 @@ public class SimplePathCreator<T, ID> implements PathCreator<T, ID> {
     @Override
     public String createPath(String namespace, Class<T> beanType, Class<ID> pathPropType, String pathPropName, ID pathPropValue) {
         // prepend namespace only if not null or empty
+
         String path = (namespace != null && !namespace.matches("\\s*")) ? "/" + namespace : "";
 
         if ((pathPropValue instanceof String && !((String) pathPropValue).startsWith("/"))
                 || !(pathPropValue instanceof String)) {
             path += "/";
         }
+//        String path = (namespace != null && !namespace.matches("\\s*")) ? namespace : "";
 
         path += pathPropValue;
         return path;

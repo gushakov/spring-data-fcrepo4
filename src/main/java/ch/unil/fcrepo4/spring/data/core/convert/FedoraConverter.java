@@ -36,5 +36,4 @@ public interface FedoraConverter extends EntityReader<Object, FedoraResource>, E
 
     boolean exists(String path);
 
-    void updateIndex(FedoraResource fedoraResource);
 }

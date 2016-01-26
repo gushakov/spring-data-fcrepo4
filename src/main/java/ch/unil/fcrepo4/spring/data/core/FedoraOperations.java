@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
-import com.hp.hpl.jena.query.Query;
+import org.modeshape.jcr.query.model.Query;
 
 import java.util.List;
 
@@ -18,10 +18,8 @@ public interface FedoraOperations {
 
    <T, ID> boolean exists(ID id, Class<T> beanType);
 
-   <T> List<T> query(Query rdfQuery, Class<T> beanType);
-
-   long count(Query rdfQuery);
-
    <T, ID> void delete(ID id, Class<T> beanType);
+
+   <T> List<T> query(Query jcrSqlQuery, Class<T> beanType);
 
 }

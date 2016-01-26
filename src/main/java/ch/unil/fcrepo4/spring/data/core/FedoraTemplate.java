@@ -1,14 +1,13 @@
 package ch.unil.fcrepo4.spring.data.core;
 
-import ch.unil.fcrepo4.client.TransactionalFedoraRepository;
-import ch.unil.fcrepo4.client.TransactionalFedoraRepositoryImpl;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
-import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
+import org.fcrepo.client.FedoraRepository;
+import org.fcrepo.client.impl.FedoraRepositoryImpl;
+import org.modeshape.jcr.query.model.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -18,10 +17,14 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,28 +36,23 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private FedoraConverter fedoraConverter;
 
-    private TransactionalFedoraRepository repository;
+    private String fedoraHost;
 
-    private String triplestoreQueryUrl;
+    private int fedoraPort;
+
+    private FedoraRepository repository;
+
+    private RestTemplate restTemplate;
 
     private static final FedoraExceptionTranslator EXCEPTION_TRANSLATOR = new FedoraExceptionTranslator();
 
-    public FedoraTemplate(TransactionalFedoraRepository repository) {
-        Assert.notNull(repository);
-        this.repository = repository;
-    }
-
-    public FedoraTemplate(String repositoryUrl) {
-        Assert.notNull(repositoryUrl);
-        this.repository = new TransactionalFedoraRepositoryImpl(repositoryUrl);
-    }
-
-    public FedoraTemplate(String repositoryUrl, String triplestoreQueryUrl) {
-        Assert.notNull(repositoryUrl);
-        Assert.notNull(triplestoreQueryUrl);
-        this.repository = new TransactionalFedoraRepositoryImpl(repositoryUrl);
-        this.triplestoreQueryUrl = triplestoreQueryUrl;
-
+    public FedoraTemplate(String fedoraHost, int fedoraPort) {
+        Assert.hasLength(fedoraHost);
+        Assert.isTrue(fedoraPort > 0);
+        this.fedoraHost = fedoraHost;
+        this.fedoraPort = fedoraPort;
+        this.repository = new FedoraRepositoryImpl("http://" + fedoraHost + ":" + fedoraPort + "/rest");
+        this.restTemplate = new RestTemplate();
     }
 
     abstract class TransactionExecution {
@@ -73,6 +71,10 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
             }
         }
         public abstract void doInTransaction() throws FedoraException;
+    }
+
+    public FedoraRepository getRepository() {
+        return repository;
     }
 
     @Override
@@ -102,7 +104,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
             @Override
             public void doInTransaction() throws FedoraException {
                 FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
-                fedoraConverter.updateIndex(fedoraObject);
                 fedoraConverter.write(bean, fedoraObject);
             }
         }.execute();
@@ -119,60 +120,31 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public <T> List<T> query(Query rdfQuery, Class<T> beanType) {
-        Assert.notNull(rdfQuery);
-        Assert.notNull(beanType);
-        Assert.notNull(triplestoreQueryUrl, "Triple store query URL must be specified");
-        List<T> beans = new ArrayList<>();
-        logger.debug("Query: {}", rdfQuery);
-        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(triplestoreQueryUrl, rdfQuery)) {
-            ResultSet results = queryExecution.execSelect();
-            while (results.hasNext()) {
-                List<String> resultVars = rdfQuery.getResultVars();
-                Resource queryResultResource = getFirstAvailableResource(results.next(), resultVars);
-                if (queryResultResource == null) {
-                    throw new IllegalStateException("Query solution has no resource for variables " + Arrays.toString(resultVars.toArray(new String[resultVars.size()])));
-                }
-                String path = parsePathFromUri(queryResultResource.getURI());
-                try {
-                    if (repository.exists(path)) {
-                        beans.add(fedoraConverter.read(beanType, repository.getObject(path)));
-                    } else {
-                        throw new IllegalStateException("Resource with path " + path + " was found in the triplestore but it does not exist in the repository");
-                    }
-                } catch (FedoraException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return beans;
-    }
-
-    @Override
-    public long count(Query rdfQuery) {
-        long number = -1;
-        logger.debug("Query (count): {}", rdfQuery);
-        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(triplestoreQueryUrl, rdfQuery)) {
-            ResultSet results = queryExecution.execSelect();
-            if (results.hasNext()){
-               number = Long.parseLong(results.next().getLiteral("count").getLexicalForm());
-            }
-        }
-        logger.debug("Query (count) result: {}", number);
-        return number;
-    }
-
-    @Override
     public <T, ID> void delete(ID id, Class<T> beanType) {
-        new TransactionExecution(){
+        new TransactionExecution() {
             @Override
             public void doInTransaction() throws FedoraException {
                 FedoraObject fedoraObject = fedoraConverter.getFedoraObject(id, beanType);
-                if (fedoraObject != null){
+                if (fedoraObject != null) {
                     fedoraObject.forceDelete();
                 }
             }
         }.execute();
+    }
+
+    @Override
+    public <T> List<T> query(Query jcrSqlQuery, Class<T> beanType) {
+        Assert.notNull(jcrSqlQuery);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("queryString", jcrSqlQuery.toString());
+        HttpEntity<String> httpEntity = new HttpEntity<>(headers);
+        ResponseEntity<String[]> responseEntity = restTemplate.exchange("http://" + fedoraHost + ":" + fedoraPort + "/query",
+                HttpMethod.GET, httpEntity, String[].class);
+        List<T> beans = new ArrayList<>();
+        for (String jcrPath: responseEntity.getBody()){
+            beans.add(load(jcrPath, beanType));
+        }
+        return beans;
     }
 
     private void registerPersistenceExceptionTranslator() {
@@ -182,17 +154,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                         .registerSingleton("fedoraExceptionTranslator", EXCEPTION_TRANSLATOR);
             }
         }
-    }
-
-    private Resource getFirstAvailableResource(QuerySolution querySolution, List<String> varNames) {
-        Resource resource = null;
-        for (String varName : varNames) {
-            resource = querySolution.getResource(varName);
-            if (resource != null) {
-                break;
-            }
-        }
-        return resource;
     }
 
     private String parsePathFromUri(String uri) {
