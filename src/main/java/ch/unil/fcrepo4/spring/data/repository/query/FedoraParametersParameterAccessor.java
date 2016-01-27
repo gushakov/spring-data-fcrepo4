@@ -21,22 +21,4 @@ public class FedoraParametersParameterAccessor extends ParametersParameterAccess
         super(parameters, values);
     }
 
-    @Override
-    public boolean needsCount() {
-        return getPageable() != null && getTotalCount() == -1;
-    }
-
-    @Override
-    public long getTotalCount() {
-        return getPageable() != null ? ((CountingPageable) getPageable()).getTotalCount() : -1;
-    }
-
-    @Override
-    public void setTotalCount(long totalCount) {
-        CountingPageable pageable = (CountingPageable) getPageable();
-        if (pageable != null) {
-            pageable.setTotalCount(totalCount);
-        }
-    }
-
 }
