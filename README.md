@@ -4,6 +4,9 @@
 
 Spring Data module for Fedora Commons Repository (version 4.x or later) allowing for CRUD operations and query using annotated POJO beans.
 
+Note: This branch uses JCR-SQL2 queries against a patched Fedora webapp. For version using SPARQL queries against a triplestore
+see [query-triplestore](https://github.com/gushakov/spring-data-fcrepo4/tree/query-triplestore) branch.
+
 *This is just a proof-of-concept implementation and still largely work in progress.*
 
 **Partially implemented:**
@@ -15,7 +18,7 @@ Spring Data module for Fedora Commons Repository (version 4.x or later) allowing
 * Datastream (binary) object persistence
 * Lazy-load of datastreams
 * Spring Data enabled repository implementation
-* SPARQL queries for "findBy" query methods
+* JSR-SQL2 queries for "findBy" query methods (some types of queries only)
 * Paged queries
 
 **To be done:**
@@ -24,7 +27,6 @@ Spring Data module for Fedora Commons Repository (version 4.x or later) allowing
 * RELS-EXT type relationships with lazy-load
 * Transaction support
 * Named queries
-* Fluent SPARQL DSL for programmatic query specification
 * Fixity checks support
 * Support versions
 * Javadoc
@@ -36,22 +38,6 @@ This project is heavily based on the code from the following projects (including
  * [fcrepo4-client](https://github.com/fcrepo4-labs/fcrepo4-client)
 
  * [spring-data-solr](https://github.com/spring-projects/spring-data-solr)
-
-### Running integration tests
-
-Executing `mvn verify` with default active profile `cargo-integration-tests` will use `cargo-maven2-plugin` to automatically download and setup the
-following test environment before running any integration tests (actual versions may vary, Tomcat 7.0.62 is used for deployment):
-
-1. `jena-fuseki-war` (v. 2.0.0), configured from `${basedir}/etc/fuseki`, sets up empty dataset `/test`
-2. `fcrepo-webapp` (v. 4.2.0), configured using `${basedir}/etc/fedora-node-types.cnd`, see [Indexable Node Type](https://wiki.duraspace.org/display/FEDORA40/Indexable+Node+Type)
-3. `fcrepo-message-consumer-webapp` (v. 4.2.0)
-
-All the ports needed for the setup are provided by `build-helper-maven-plugin` from the randomly selected available ports. Check the Maven build console
-output for actual port numbers.
-
-There is a project property `indexer.start.mode` which can be set to `run` (instead of `start`) to pause Maven build
-(for example, `mvn pre-integration-test`) right after the indexer webapp has been configured. This allows to access all three applications
-online at the localhost instance (under the ports assigned by `build-helper-maven-plugin`).
 
 ### FedoraTemplate
 
@@ -191,15 +177,11 @@ public static class AppConfig {
 List<Vehicle> vehiclesWithLargeMileage = vehicleRepo.findByMilesGreaterThan(15000);
 ```
 
-The module automatically converts the candidate query methods into [SPARQL](http://jena.apache.org/tutorials/sparql.html) queries run against the triplestore. For example,
-the call to the query method `findByMilesGreaterThan` will be translated into
+The module automatically converts the candidate query methods into [JCR-SQL2](https://docs.jboss.org/author/display/MODE/JCR-SQL2) queries. For example,
+the call to the query method `findByColorLike` with argument "green" will be translated into
 
-```sparql
-SELECT  ?v1
-WHERE
-  { ?v1  <info:fedora/test/miles>  ?v2 .
-    FILTER ( ?v2 > "15000"^^<http://www.w3.org/2001/XMLSchema#int> )
-  }
+```sql
+SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[test:make] = 'Ford^^http://www.w3.org/2001/XMLSchema#string')
 ```
 
 ### Datastreams
@@ -239,18 +221,14 @@ or `http://fedora.info/definitions/v4/repository#created` properties of the pers
 
 ```java
 class Vehicle {
-    @Uuid
-    private UUID uuid;
-
     @Created
     private ZonedDateTime createdDate;
 }
 ```
 
-This module will automatically perform some useful conversions, i.e. to `UUID` from the `uuid` property or to `ZonedDateTime`
-from the `created` timestamp if needed.
+This module will automatically perform some useful conversions, i.e. to `ZonedDateTime` from the `created` timestamp if needed.
 
 ### Java to RDF type conversion
 
-To serialize values of Java properties as RDF properties uses in SPARQL updates and queries this module uses [TypeMapper](https://jena.apache.org/documentation/notes/typed-literals.html)
+To serialize values of Java properties as RDF properties uses in SPARQL updates and JCR-SQL2 queries this module uses [TypeMapper](https://jena.apache.org/documentation/notes/typed-literals.html)
 provided by `jena-core` module and also used by Fedora repository. See [ExtendedXsdDatatypeConverter](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ExtendedXsdDatatypeConverter.java) for implementation details.

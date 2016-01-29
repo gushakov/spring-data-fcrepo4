@@ -69,7 +69,7 @@ public class SimpleFedoraRepositoryTest {
         doAnswer(invocation -> {
             Query query = (Query) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND CONTAINS(n.[test:color],'green'))");
+                    .isEqualTo("SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[test:color] LIKE '%green%')");
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(), any());
 

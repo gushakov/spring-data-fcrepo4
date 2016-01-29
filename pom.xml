@@ -15,7 +15,6 @@
         <skipTests>false</skipTests>
         <skipITs>false</skipITs>
         <random.fedora.servlet.port>${fedora.servlet.port}</random.fedora.servlet.port>
-        <cargo.jvmargs.javaagent/>
         <cargo.fedora.webapp.mode>start</cargo.fedora.webapp.mode>
     </properties>
 
@@ -284,11 +283,6 @@
                             <version>7.0.62</version>
                         </artifactInstaller>
                     </container>
-                    <configuration>
-                        <properties>
-                            <cargo.jvmargs>${cargo.jvmargs.javaagent}</cargo.jvmargs>
-                        </properties>
-                    </configuration>
                 </configuration>
                 <executions>
                     <execution>
@@ -340,34 +334,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>jrebel</id>
-            <properties>
-                <cargo.jvmarg.jrebel.javaagent>-javaagent:${jrebel.home}/jrebel.jar</cargo.jvmarg.jrebel.javaagent>
-                <cargo.fedora.webapp.mode>run</cargo.fedora.webapp.mode>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.zeroturnaround</groupId>
-                        <artifactId>jrebel-maven-plugin</artifactId>
-                        <version>1.1.5</version>
-                        <executions>
-                            <execution>
-                                <id>generate-rebel-xml</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencyManagement>
         <dependencies>
