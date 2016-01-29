@@ -8,8 +8,9 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import org.modeshape.jcr.ExecutionContext;
 import org.modeshape.jcr.query.QueryBuilder;
 import org.modeshape.jcr.query.model.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
@@ -26,6 +27,8 @@ import java.util.Iterator;
  * @author gushakov
  */
 public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, QueryBuilder.ConstraintBuilder> {
+
+    private static final Logger logger = LoggerFactory.getLogger(FedoraJcrSqlQueryCreator.class);
 
     private static final String FEDORA_RESOURCE_NODE = "fedora:Resource";
     private static final String DEFAULT_ALIAS = "n";
@@ -67,10 +70,12 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, QueryB
 
     @Override
     protected Query complete(QueryBuilder.ConstraintBuilder criteria, Sort sort) {
-        return (Query) criteria.end().query();
+        Query query = (Query) criteria.end().query();
+        logger.debug("JCR-SQL2 query: {}", query.toString());
+        return query;
     }
 
-    private String getNamespace(Part part){
+    private String getNamespace(Part part) {
         FedoraObjectPersistentEntity persistentEntity = (FedoraObjectPersistentEntity) mappingContext.getPersistentEntity(part.getProperty().getOwningType());
         return persistentEntity.getNamespace();
     }
@@ -95,6 +100,11 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, QueryB
             case SIMPLE_PROPERTY:
                 return constraintBuilder.propertyValue(DEFAULT_ALIAS, serializeJcrProperty(property))
                         .isEqualTo(serializeJcrValue(property, value));
+            case LIKE:
+                // for some reason CONTAINS does not work
+//                return constraintBuilder.search(DEFAULT_ALIAS, serializeJcrProperty(property), value.toString());
+                return constraintBuilder.propertyValue(DEFAULT_ALIAS, serializeJcrProperty(property))
+                        .isLike("%" + value + "%");
             default:
                 throw new UnsupportedOperationException("Expressions containing " +
                         Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");

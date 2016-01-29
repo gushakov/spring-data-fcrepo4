@@ -12,8 +12,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <fcrepo.version>4.4.1-SNAPSHOT</fcrepo.version>
-        <skipITs>true</skipITs>
+        <skipTests>false</skipTests>
+        <skipITs>false</skipITs>
         <random.fedora.servlet.port>${fedora.servlet.port}</random.fedora.servlet.port>
+        <cargo.jvmargs.javaagent/>
+        <cargo.fedora.webapp.mode>start</cargo.fedora.webapp.mode>
     </properties>
 
     <dependencies>
@@ -198,9 +201,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
                 <configuration>
-                    <excludes>
-                        <exclude>**/GraphExporterTest.java</exclude>
-                    </excludes>
+                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
 
@@ -217,21 +218,6 @@
                         <configuration>
                             <skipITs>${skipITs}</skipITs>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.zeroturnaround</groupId>
-                <artifactId>jrebel-maven-plugin</artifactId>
-                <version>1.1.5</version>
-                <executions>
-                    <execution>
-                        <id>generate-rebel-xml</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -276,35 +262,10 @@
                         <phase>process-test-resources</phase>
                         <configuration>
                             <outputDirectory>${project.build.directory}/fedora-webapp/WEB-INF/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <executions>
-                    <execution>
-                        <id>configure-fedora-webapp</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/fedora-webapp
-                            </outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/src/test/etc/fedora-webapp</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>WEB-INF/web.xml</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                            <overwrite>true</overwrite>
+                            <includes>
+                                <include>ch/unil/fcrepo4/servlet/*</include>
+                            </includes>
+                            <finalName>spring-data-fcrepo4-query.${pom.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -325,7 +286,7 @@
                     </container>
                     <configuration>
                         <properties>
-                            <cargo.jvmargs>-javaagent:${jrebel.home}/jrebel.jar</cargo.jvmargs>
+                            <cargo.jvmargs>${cargo.jvmargs.javaagent}</cargo.jvmargs>
                         </properties>
                     </configuration>
                 </configuration>
@@ -333,7 +294,7 @@
                     <execution>
                         <id>fedora-start</id>
                         <goals>
-                            <goal>run</goal>
+                            <goal>${cargo.fedora.webapp.mode}</goal>
                         </goals>
                         <phase>pre-integration-test</phase>
                         <configuration>
@@ -377,9 +338,36 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jrebel</id>
+            <properties>
+                <cargo.jvmarg.jrebel.javaagent>-javaagent:${jrebel.home}/jrebel.jar</cargo.jvmarg.jrebel.javaagent>
+                <cargo.fedora.webapp.mode>run</cargo.fedora.webapp.mode>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.zeroturnaround</groupId>
+                        <artifactId>jrebel-maven-plugin</artifactId>
+                        <version>1.1.5</version>
+                        <executions>
+                            <execution>
+                                <id>generate-rebel-xml</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>

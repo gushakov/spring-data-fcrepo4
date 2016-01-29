@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.assertj;
 
+import ch.unil.fcrepo4.beans.Vehicle;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import org.fcrepo.client.FedoraResource;
@@ -30,5 +31,9 @@ public class Assertions  {
 
     public static XmlInputStreamAssert assertThat(InputStream xmlStream){
         return new XmlInputStreamAssert(xmlStream);
+    }
+
+    public static VehicleAssert assertThat(Vehicle vehicle) {
+        return new VehicleAssert(vehicle);
     }
 }

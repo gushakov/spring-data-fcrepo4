@@ -30,7 +30,7 @@
 
   <servlet>
     <servlet-name>jcr-query-servlet</servlet-name>
-    <servlet-class>ch.unil.fcrepo4.servlet.JcrQueryServlet</servlet-class>
+    <servlet-class>ch.unil.fcrepo4.servlet.JcrSqlQueryServlet</servlet-class>
   </servlet>
 
 

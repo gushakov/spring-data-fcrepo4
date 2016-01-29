@@ -63,4 +63,18 @@ public class SimpleFedoraRepositoryTest {
 
     }
 
+    @Test
+    public void testQueryLikeStringValue() throws Exception {
+
+        doAnswer(invocation -> {
+            Query query = (Query) invocation.getArguments()[0];
+            assertThat(query.toString())
+                    .isEqualTo("SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND CONTAINS(n.[test:color],'green'))");
+            return Collections.emptyList();
+        }).when(mockFedoraTemplate).query(any(), any());
+
+        vehicleRepo.findByColorLike("green");
+
+    }
+
 }

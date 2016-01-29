@@ -9,6 +9,7 @@ import javax.jcr.Repository;
 import javax.jcr.Session;
 import javax.jcr.query.*;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +20,8 @@ import java.util.ArrayList;
 /**
  * @author gushakov
  */
-public class JcrQueryServlet extends HttpServlet {
+@WebServlet("/query")
+public class JcrSqlQueryServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
