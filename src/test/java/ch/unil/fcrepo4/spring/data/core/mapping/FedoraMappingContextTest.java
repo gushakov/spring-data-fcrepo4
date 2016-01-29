@@ -7,7 +7,9 @@ import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,9 +24,6 @@ public class FedoraMappingContextTest {
         @Path
         long id = 1L;
 
-        @Uuid
-        String uuid;
-
     }
 
     @FedoraObject
@@ -32,9 +31,6 @@ public class FedoraMappingContextTest {
 
         @Path
         long id = 1L;
-
-        @Uuid
-        UUID uniqueId;
 
     }
 
@@ -76,10 +72,6 @@ public class FedoraMappingContextTest {
         GenericFedoraPersistentEntity<?> entity1 = context.getPersistentEntity(Bean1.class);
         assertThat(entity1).isNotNull();
         assertThat(entity1.getIdProperty()).isNotNull();
-        GenericFedoraPersistentEntity<?> entity2 = context.getPersistentEntity(Bean2.class);
-        UuidPersistentProperty uniqueIdProp = (UuidPersistentProperty) entity2.getPersistentProperty(Uuid.class);
-        assertThat(uniqueIdProp.getLocalName()).isEqualTo(RdfLexicon.HAS_PRIMARY_IDENTIFIER.getLocalName());
-        assertThat(uniqueIdProp.getUriNs()).isEqualTo(RdfLexicon.HAS_PRIMARY_IDENTIFIER.getNameSpace());
         GenericFedoraPersistentEntity<?> entity3 = context.getPersistentEntity(Bean3.class);
         CreatedPersistentProperty createdAtProperty = (CreatedPersistentProperty) entity3.getPersistentProperty("createdAt");
         assertThat(createdAtProperty.getLocalName()).isEqualTo(RdfLexicon.CREATED_DATE.getLocalName());

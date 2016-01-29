@@ -32,6 +32,10 @@ public class FedoraObjectPersistentEntity<T> extends GenericFedoraPersistentEnti
         return foAnnot.uriNs();
     }
 
+    public String getPrefix(){
+        return foAnnot.prefix();
+    }
+
     public void doWithDatastreams(SimplePropertyHandler datastreamPropertyHandler){
         doWithAssociations((Association<? extends PersistentProperty<?>> association) -> {
              if (association.getInverse() instanceof DatastreamPersistentProperty){

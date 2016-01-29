@@ -77,6 +77,11 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         return repository;
     }
 
+    // for testing
+    RestTemplate getRestTemplate(){
+        return restTemplate;
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -142,7 +147,11 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                 HttpMethod.GET, httpEntity, String[].class);
         List<T> beans = new ArrayList<>();
         for (String jcrPath: responseEntity.getBody()){
-            beans.add(load(jcrPath, beanType));
+            try {
+                beans.add(fedoraConverter.read(beanType, repository.getObject(jcrPath)));
+            } catch (FedoraException e) {
+                throw new RuntimeException(e);
+            }
         }
         return beans;
     }

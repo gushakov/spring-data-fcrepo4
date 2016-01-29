@@ -15,4 +15,5 @@ import java.lang.annotation.*;
 public @interface Property {
     String localName() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
     String uriNs() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
+    String prefix() default Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN;
 }

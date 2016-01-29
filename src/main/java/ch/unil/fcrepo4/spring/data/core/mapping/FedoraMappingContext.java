@@ -40,11 +40,7 @@ public class FedoraMappingContext extends AbstractMappingContext<GenericFedoraPe
             logger.debug("Found " + Path.class.getSimpleName() +
                     " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
             prop = new PathPersistentProperty(field, descriptor, owner, simpleTypeHolder);
-        } else if (field != null && field.getAnnotation(Uuid.class) != null) {
-            logger.debug("Found " + Uuid.class.getSimpleName() +
-                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
-            prop = new UuidPersistentProperty(field, descriptor, owner, simpleTypeHolder);
-        } else if (field != null && field.getAnnotation(Created.class) != null) {
+        }  else if (field != null && field.getAnnotation(Created.class) != null) {
             logger.debug("Found " + Created.class.getSimpleName() +
                     " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
             prop = new CreatedPersistentProperty(field, descriptor, owner, simpleTypeHolder);

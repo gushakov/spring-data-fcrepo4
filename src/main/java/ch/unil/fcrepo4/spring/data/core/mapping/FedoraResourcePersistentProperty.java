@@ -9,6 +9,8 @@ public interface FedoraResourcePersistentProperty extends FedoraPersistentProper
 
     String getUriNs();
 
+    String getPrefix();
+
     String getLocalName();
 
     String getUri();

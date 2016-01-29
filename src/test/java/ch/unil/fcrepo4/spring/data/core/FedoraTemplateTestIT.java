@@ -1,6 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.beans.Bean1;
+import ch.unil.fcrepo4.beans.Vehicle;
 import com.hp.hpl.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import com.hp.hpl.jena.graph.NodeFactory;
 import org.fcrepo.client.FedoraException;
@@ -71,6 +72,14 @@ public class FedoraTemplateTestIT {
                 .query();
         List<Bean1> beans = fedoraTemplate.query((Query)query, Bean1.class);
         System.out.println(beans);
+    }
+
+    @Test
+    public void testSaveVehicle() throws Exception {
+        long id = System.currentTimeMillis();
+        Vehicle vehicle = new Vehicle(id, "Ford");
+        fedoraTemplate.save(vehicle);
+        assertThat(fedoraTemplate.getRepository().exists("/vehicle/" + id));
     }
 
 }

@@ -14,6 +14,7 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -32,6 +33,7 @@ import org.springframework.util.Assert;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author gushakov
@@ -171,7 +173,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
 
         if (!PathPersistentProperty.class.isAssignableFrom(idProp.getClass())) {
-            throw new MappingException("ID property " + idProp.getName() + " is not of type UuidPersistentProperty");
+            throw new MappingException("ID property " + idProp.getName() + " is not of type " + idProp.getClass().getName());
         }
 
         final PathPersistentProperty pathProp = (PathPersistentProperty) idProp;
@@ -258,7 +260,9 @@ public class FedoraMappingConverter implements FedoraConverter {
             try {
                 Node literal = Utils.getObjectLiteral(fedoraResource.getProperties(),
                         simpleProp.getUri());
-                propsAccessor.setProperty(property, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), property.getType()));
+                if (literal != null){
+                    propsAccessor.setProperty(property, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), property.getType()));
+                }
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }

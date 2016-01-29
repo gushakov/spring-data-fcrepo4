@@ -37,9 +37,6 @@ public class Vehicle {
 
     // resource (read-only) properties
 
-    @Uuid
-    private UUID uuid;
-
     @Created
     private ZonedDateTime createdDate;
 
@@ -123,14 +120,6 @@ public class Vehicle {
 
     public void setPicture(VehiclePicture picture) {
         this.picture = picture;
-    }
-
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
     }
 
     public ZonedDateTime getCreatedDate() {

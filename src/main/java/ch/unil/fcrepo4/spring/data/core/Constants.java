@@ -17,7 +17,12 @@ public class Constants {
     public static final String MIME_TYPE_TEXT_XML = "text/xml";
 
     /**
-     * Default (test) URI.
+     * Default (test) URI. Must be declared in {@code fedora-node-types.cnd}.
      */
     public static final String TEST_FEDORA_URI_NAMESPACE = "info:fedora/test/";
+
+    /**
+     * Namespace prefix for default (test) namespace. Must be declared in {@code fedora-node-types.cnd}.
+     */
+    public static final String TEST_FEDORA_NS_PREFIX = "test";
 }

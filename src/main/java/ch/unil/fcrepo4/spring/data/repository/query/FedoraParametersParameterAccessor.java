@@ -2,7 +2,6 @@ package ch.unil.fcrepo4.spring.data.repository.query;
 
 // based on code from org.springframework.data.solr.repository.query.SolrParametersParameterAccessor
 
-import ch.unil.fcrepo4.spring.data.core.query.CountingPageable;
 import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 

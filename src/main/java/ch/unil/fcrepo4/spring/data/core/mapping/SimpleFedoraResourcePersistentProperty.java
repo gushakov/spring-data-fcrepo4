@@ -37,18 +37,39 @@ public class SimpleFedoraResourcePersistentProperty extends GenericFedoraPersist
 
     @Override
     public String getUriNs(){
-        // if this is a property of a Fedora object entity
+        // if no namespace was explicitly set on the property,
+        // return the namespace of the property's owner entity
         if (propAnnot.uriNs().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN)){
             if (owner instanceof FedoraObjectPersistentEntity){
                 return ((FedoraObjectPersistentEntity<?>)owner).getUriNs();
             }
             else {
                 // or if this is a property of a datastream entity
+                // return the namespace of the datastream's owner entity
                 return ((DatastreamPersistentEntity<?>)owner).getFedoraObjectEntity().getUriNs();
             }
         }
         else {
             return propAnnot.uriNs();
+        }
+    }
+
+    @Override
+    public String getPrefix() {
+        // if no namespace was explicitly set on the property,
+        // return the prefix of the property's owner entity
+        if (propAnnot.prefix().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN)){
+            if (owner instanceof FedoraObjectPersistentEntity){
+                return ((FedoraObjectPersistentEntity<?>)owner).getPrefix();
+            }
+            else {
+                // or if this is a property of a datastream entity
+                // return the prefix of the datastream's owner entity
+                return ((DatastreamPersistentEntity<?>)owner).getFedoraObjectEntity().getPrefix();
+            }
+        }
+        else {
+            return propAnnot.prefix();
         }
     }
 
