@@ -39,22 +39,30 @@ This project is heavily based on the code from the following projects (including
 
  * [spring-data-solr](https://github.com/spring-projects/spring-data-solr)
 
+### Patch for JCR-SQL2 query
+
+Since as of this writting (v. 4.4.0) Fedora repository does not expose any way to query the underlying JCR implementation. This module
+provides a [JcrSqlQueryServlet](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/servlet/JcrSqlQueryServlet.java) which allows
+a REST-based access to the querying of the JCR implementations via a JCR-SQL2 query (supported by Modeshape).
+
+So the functionning of this Spring Data module depends on having a JAR with this servet on in the `WEB-INF/lib` directory of the Fedora web application.
+
 ### FedoraTemplate
 
 [FedoraTemplate](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/FedoraTemplate.java)
 is the main object responsible for executing CRUD and query operations against Fedora backend.
 
-This is an example of configuring `FedoraTemplate` using Spring Java configuration. It uses two URLs one for the Fedora repository itself,
-and one for [external triplestore](https://wiki.duraspace.org/display/FEDORA40/External+Search) indexed by the repository.
+This is an example of configuring `FedoraTemplate` using Spring Java configuration. It just requires a hostname and a port of Fedora installation.
 
 ```java
 @Autowired
 private Environment env;
 
 @Bean
-public FedoraTemplate fedoraTemplate() throws FedoraException {
-	return new FedoraTemplate(env.getProperty("fedora.repository.url"),
-	    env.getProperty("triplestore.sparql.query.url"));
+        public FedoraTemplate fedoraTemplate() throws FedoraException {
+            return new FedoraTemplate(env.getProperty("fedora.host"),
+                    env.getProperty("fedora.port", Integer.class));
+
 }
 ```
 
@@ -178,10 +186,10 @@ List<Vehicle> vehiclesWithLargeMileage = vehicleRepo.findByMilesGreaterThan(1500
 ```
 
 The module automatically converts the candidate query methods into [JCR-SQL2](https://docs.jboss.org/author/display/MODE/JCR-SQL2) queries. For example,
-the call to the query method `findByColorLike` with argument "green" will be translated into
+the call to the query method `findByMake` with argument "Ford" will be translated into
 
 ```sql
-SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[test:make] = 'Ford^^http://www.w3.org/2001/XMLSchema#string')
+SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[test:make] = 'Ford[CAN]^^[CAN]http://www.w3.org/2001/XMLSchema#string')
 ```
 
 ### Datastreams
@@ -216,8 +224,8 @@ only when the client code actually tries to access either content or properties 
 ### Resource properties
 
 Some of the default resource properties automatically generated and updated by the Fedora repository can be accessed by specifying bean properties
-with the corresponding annotations. For example, if one wants to access `http://fedora.info/definitions/v4/repository#uuid`
-or `http://fedora.info/definitions/v4/repository#created` properties of the persisted resource
+with the corresponding annotations. For example, if one wants to access `http://fedora.info/definitions/v4/repository#created`
+properties of the persisted resource, then the corresponding attribute of the bean should be annotated as following:
 
 ```java
 class Vehicle {
