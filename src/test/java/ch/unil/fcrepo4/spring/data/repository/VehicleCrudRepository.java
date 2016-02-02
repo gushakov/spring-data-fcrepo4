@@ -19,13 +19,16 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     List<Vehicle> findByMilesGreaterThan(int miles);
 
+    Page<Vehicle> findByMilesGreaterThan(int miles, Pageable pageable);
+
     List<Vehicle> findByColorLike(String color);
 
     List<Vehicle> findByMilesGreaterThanAndConsumptionGreaterThan(int miles, float consumption);
 
     List<Vehicle> findByMakeAndMilesOrColorAndConsumption(String make, int miles, String color, float consumption);
 
-    Page<Vehicle> findByMilesGreaterThan(int miles, Pageable pageable);
-
     List<Vehicle> findByCreatedGreaterThan(Date date);
+
+    Page<Vehicle> findByCreatedGreaterThan(Date date, Pageable pageable);
+
 }

@@ -7,9 +7,8 @@ import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
+import org.modeshape.jcr.query.model.Limit;
 import org.modeshape.jcr.query.model.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +16,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,7 +33,6 @@ import java.util.List;
  * @author gushakov
  */
 public class FedoraTemplate implements FedoraOperations, InitializingBean, ApplicationContextAware {
-    private static final Logger logger = LoggerFactory.getLogger(FedoraTemplate.class);
     private ApplicationContext applicationContext;
 
     private FedoraConverter fedoraConverter;
@@ -140,11 +141,28 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     @Override
     public <T> List<T> query(Query jcrSqlQuery, Class<T> beanType) {
         Assert.notNull(jcrSqlQuery);
+        return processJcrSqlQueryQueryResponse(executeJcrSqlQuery(jcrSqlQuery), beanType);
+    }
+
+    @Override
+    public <T> Page<T> queryForPage(Query jcrSqlQuery, Class<T> beanType) {
+        Limit limits = jcrSqlQuery.getLimits();
+        Assert.state(!limits.isUnlimited());
+        int pageSize = limits.getRowLimit();
+        int page = limits.getOffset() / pageSize;
+        return new PageImpl<>(processJcrSqlQueryQueryResponse(executeJcrSqlQuery(jcrSqlQuery), beanType),
+                new PageRequest(page, pageSize), Integer.MAX_VALUE);
+    }
+
+    private ResponseEntity<String[]> executeJcrSqlQuery(Query jcrSqlQuery){
         HttpHeaders headers = new HttpHeaders();
         headers.set("queryString", jcrSqlQuery.toString());
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
-        ResponseEntity<String[]> responseEntity = restTemplate.exchange("http://" + fedoraHost + ":" + fedoraPort + "/query",
+        return restTemplate.exchange("http://" + fedoraHost + ":" + fedoraPort + "/query",
                 HttpMethod.GET, httpEntity, String[].class);
+    }
+
+    private <T> List<T> processJcrSqlQueryQueryResponse(ResponseEntity<String[]> responseEntity, Class<T> beanType){
         List<T> beans = new ArrayList<>();
         for (String jcrPath: responseEntity.getBody()){
             try {

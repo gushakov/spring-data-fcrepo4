@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -115,7 +116,7 @@ public class SimpleFedoraRepositoryTest {
     }
 
     @Test
-    public void testFindByCreatedGreaterThen() throws Exception {
+    public void testFindByCreatedGreaterThan() throws Exception {
         doAnswer(invocation -> {
             Query query = (Query) invocation.getArguments()[0];
             assertThat(query.toString())
@@ -124,6 +125,17 @@ public class SimpleFedoraRepositoryTest {
         }).when(mockFedoraTemplate).query(any(), any());
         vehicleRepo.findByCreatedGreaterThan(new Date(0L));
 
+    }
+
+    @Test
+    public void testFindByCreatedGreaterThanByPage() throws Exception {
+        doAnswer(invocation -> {
+            Query query = (Query) invocation.getArguments()[0];
+            assertThat(query.toString())
+                    .isEqualTo("SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[jcr:created] > CAST('1970-01-01T01:00:00.000+01:00' AS DATE)) LIMIT 10 OFFSET 10");
+            return Collections.emptyList();
+        }).when(mockFedoraTemplate).query(any(), any());
+        vehicleRepo.findByCreatedGreaterThan(new Date(0L), new PageRequest(1, 10));
     }
 
 }

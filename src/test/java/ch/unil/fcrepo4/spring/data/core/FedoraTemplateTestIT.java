@@ -5,12 +5,16 @@ import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
+import ch.unil.fcrepo4.spring.data.repository.Vehicle;
 import com.hp.hpl.jena.graph.NodeFactory;
 import org.assertj.jodatime.api.Assertions;
 import org.fcrepo.client.FedoraException;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.modeshape.jcr.ExecutionContext;
+import org.modeshape.jcr.query.QueryBuilder;
+import org.modeshape.jcr.query.model.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -96,5 +100,12 @@ public class FedoraTemplateTestIT {
         Assertions.assertThat(new DateTime(read.created.getTime())).isAfter(before);
     }
 
-
+/*
+    @Test
+    public void testCount() throws Exception {
+        QueryBuilder queryBuilder = new QueryBuilder(new ExecutionContext().getValueFactories().getTypeSystem());
+        Query query = (Query) queryBuilder.selectStar().fromAllNodes().limit(10).query();
+        fedoraTemplate.query(query, Vehicle.class);
+    }
+*/
 }

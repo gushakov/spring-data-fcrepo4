@@ -25,9 +25,13 @@ public abstract class AbstractJcrSqlQuery implements RepositoryQuery {
     public Object execute(Object[] parameters) {
         FedoraParameterAccessor parameterAccessor = new FedoraParametersParameterAccessor(fedoraQueryMethod.getParameters(),
                 parameters);
-
-        return fedoraOperations.query(createQuery(parameterAccessor),
-                fedoraQueryMethod.getEntityInformation().getJavaType());
+        Query query = createQuery(parameterAccessor);
+        if (query.getLimits().isUnlimited()){
+            return fedoraOperations.query(query, fedoraQueryMethod.getEntityInformation().getJavaType());
+        }
+        else {
+            return fedoraOperations.queryForPage(query, fedoraQueryMethod.getEntityInformation().getJavaType());
+        }
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.modeshape.jcr.query.QueryBuilder;
 import org.modeshape.jcr.query.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.context.MappingContext;
@@ -37,22 +38,21 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
     private static final String NODES = "fedora:Resource";
     private static final String ALIAS = "n";
 
-    // see org.fcrepo.kernel.modeshape.rdf.converters.ValueConverter.RdfLiteralJcrValueBuilder
-    private static final String SEPARATOR = "\30^^\30";
+    // see org.fcrepo.kernel.modeshape.rdf.converters.ValueConverter.RdfLiteralJcrValueBuilder  \30 = \u0018 = [CANCEL] control character
+    private static final String SEPARATOR = "\u0018^^\u0018";
 
-
-    private QueryBuilder queryBuilder;
     private FedoraObjectPersistentEntity entity;
     private FedoraParameterAccessor parameterAccessor;
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
     private RdfDatatypeConverter rdfDatatypeConverter;
+    private QueryBuilder queryBuilder;
 
     public FedoraJcrSqlQueryCreator(PartTree tree, FedoraParameterAccessor parameters, MappingContext<?, FedoraPersistentProperty> mappingContext, RdfDatatypeConverter rdfDatatypeConverter) {
         super(tree, parameters);
-        queryBuilder = new QueryBuilder(new ExecutionContext().getValueFactories().getTypeSystem());
         this.parameterAccessor = parameters;
         this.mappingContext = mappingContext;
         this.rdfDatatypeConverter = rdfDatatypeConverter;
+        queryBuilder = new PatchedQueryBuilder(new ExecutionContext().getValueFactories().getTypeSystem());
     }
 
     @Override
@@ -98,7 +98,14 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
             }
         }
 
-        Query query = (Query) constraintBuilder.closeParen().end().query();
+        constraintBuilder.closeParen().end();
+
+        Pageable pageable = parameterAccessor.getPageable();
+        if (pageable != null) {
+            queryBuilder.limit(pageable.getPageSize()).offset(pageable.getPageNumber() * pageable.getPageSize());
+        }
+
+        Query query = (Query) queryBuilder.query();
         logger.debug("Query: {}", query);
         return query;
     }
@@ -230,6 +237,28 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
                         Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");
         }
 
+    }
+
+    /**
+     * Patches MODE-2564 issue
+     */
+    private class PatchedQueryBuilder extends QueryBuilder {
+
+        public PatchedQueryBuilder(TypeSystem context) {
+            super(context);
+        }
+
+        @Override
+        public QueryBuilder limit(int rowLimit) {
+            this.limit = this.limit.withRowLimit(rowLimit);
+            return this;
+        }
+
+        @Override
+        public QueryBuilder offset(int offset) {
+            this.limit  = this.limit.withOffset(offset);
+            return this;
+        }
     }
 
 }
