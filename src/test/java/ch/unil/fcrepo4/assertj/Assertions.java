@@ -1,6 +1,6 @@
 package ch.unil.fcrepo4.assertj;
 
-import ch.unil.fcrepo4.beans.Vehicle;
+import ch.unil.fcrepo4.spring.data.repository.Vehicle;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import org.fcrepo.client.FedoraResource;
@@ -35,5 +35,9 @@ public class Assertions  {
 
     public static VehicleAssert assertThat(Vehicle vehicle) {
         return new VehicleAssert(vehicle);
+    }
+
+    public static VehiclesIterableAssert assertThat(Iterable<Vehicle> vehicles){
+        return new VehiclesIterableAssert(vehicles);
     }
 }

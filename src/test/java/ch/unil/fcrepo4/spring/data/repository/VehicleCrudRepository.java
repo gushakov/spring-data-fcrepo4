@@ -1,9 +1,9 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
-import ch.unil.fcrepo4.beans.Vehicle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,6 +12,10 @@ import java.util.List;
 public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Long> {
 
     List<Vehicle> findByMake(String make);
+
+    List<Vehicle> findByMakeAndColor(String make, String color);
+
+    List<Vehicle> findByMakeOrColorLike(String make, String color);
 
     List<Vehicle> findByMilesGreaterThan(int miles);
 
@@ -23,4 +27,5 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     Page<Vehicle> findByMilesGreaterThan(int miles, Pageable pageable);
 
+    List<Vehicle> findByCreatedGreaterThan(Date date);
 }

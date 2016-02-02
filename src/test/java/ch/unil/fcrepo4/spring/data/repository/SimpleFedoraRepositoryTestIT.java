@@ -1,9 +1,9 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
-import ch.unil.fcrepo4.beans.Vehicle;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.fcrepo.client.FedoraException;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +18,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.List;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -55,6 +54,10 @@ public class SimpleFedoraRepositoryTestIT {
             vehicleRepo.save(greenFord);
         }
 
+        if (!vehicleRepo.exists(2L)) {
+            Vehicle redToyota = new Vehicle(2L, "Toyota", "red", 15000, 4.5f);
+            vehicleRepo.save(redToyota);
+        }
     }
 
     @Test
@@ -62,6 +65,23 @@ public class SimpleFedoraRepositoryTestIT {
         List<Vehicle> vehicles = vehicleRepo.findByMake("Ford");
         assertThat(vehicles).isNotEmpty();
         assertThat(vehicles.get(0)).hasMake("Ford");
+        System.out.println(vehicles.get(0).getCreated());
+    }
+
+    @Test
+    public void testFindByMilesGreaterThan() throws Exception {
+       List<Vehicle> vehicles = vehicleRepo.findByMilesGreaterThan(14000);
+       assertThat(vehicles).withMilesGreaterThan(14000)
+               .extracting("id").containsExactly(2L);
+    }
+
+    @Test
+    public void testFindByMakeAndColor() throws Exception {
+        List<Vehicle> vehicles = vehicleRepo.findByMakeAndColor("Ford", "light green");
+        assertThat(vehicles).isNotEmpty();
+        assertThat(vehicles.get(0))
+                .hasMake("Ford")
+                .hasColor("light green");
     }
 
     @Test
@@ -71,4 +91,15 @@ public class SimpleFedoraRepositoryTestIT {
         assertThat(vehicles.get(0)).hasColorLike("green");
     }
 
+    @Test
+    public void testFindByMakeOrColor() throws Exception {
+        List<Vehicle> vehicles = vehicleRepo.findByMakeOrColorLike("Ford", "red");
+        assertThat(vehicles).extracting("id").containsOnly(1L, 2L);
+    }
+
+    @Test
+    public void testFindByCreatedGreaterThan() throws Exception {
+        List<Vehicle> vehicles = vehicleRepo.findByCreatedGreaterThan(DateTime.now().minusDays(2).toDate());
+        assertThat(vehicles).isNotEmpty();
+    }
 }

@@ -22,6 +22,16 @@ public class Constants {
     public static final String TEST_FEDORA_URI_NAMESPACE = "info:fedora/test/";
 
     /**
+     * Fedora namespace prefix as declared in {@code fedora-node-types.cnd}.
+     */
+    public static final String FEDORA_NS_PREFIX = "fedora";
+
+    /**
+     * JCR namespace prefix as declared in {@code fedora-node-types.cnd}.
+     */
+    public static final String JCR_NS_PREFIX = "jcr";
+
+    /**
      * Namespace prefix for default (test) namespace. Must be declared in {@code fedora-node-types.cnd}.
      */
     public static final String TEST_FEDORA_NS_PREFIX = "test";

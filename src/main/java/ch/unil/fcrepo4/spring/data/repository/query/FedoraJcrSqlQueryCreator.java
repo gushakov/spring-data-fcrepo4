@@ -7,7 +7,7 @@ import ch.unil.fcrepo4.spring.data.core.mapping.SimpleFedoraResourcePersistentPr
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import org.modeshape.jcr.ExecutionContext;
 import org.modeshape.jcr.query.QueryBuilder;
-import org.modeshape.jcr.query.model.Query;
+import org.modeshape.jcr.query.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -18,26 +18,31 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
+import javax.jcr.query.qom.QueryObjectModelConstants;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 // based on code from org.springframework.data.solr.repository.query.SolrQueryCreator
 
 /**
  * @author gushakov
  */
-public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, QueryBuilder.ConstraintBuilder> {
+public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, ComparisonCriteria> {
 
     private static final Logger logger = LoggerFactory.getLogger(FedoraJcrSqlQueryCreator.class);
 
-    private static final String FEDORA_RESOURCE_NODE = "fedora:Resource";
-    private static final String DEFAULT_ALIAS = "n";
+    private static final String NODES = "fedora:Resource";
+    private static final String ALIAS = "n";
 
     // see org.fcrepo.kernel.modeshape.rdf.converters.ValueConverter.RdfLiteralJcrValueBuilder
-    private static final String LITERAL_SEPARATOR = "\30^^\30";
+    private static final String SEPARATOR = "\30^^\30";
 
 
     private QueryBuilder queryBuilder;
+    private FedoraObjectPersistentEntity entity;
     private FedoraParameterAccessor parameterAccessor;
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
     private RdfDatatypeConverter rdfDatatypeConverter;
@@ -51,33 +56,74 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, QueryB
     }
 
     @Override
-    protected QueryBuilder.ConstraintBuilder create(Part part, Iterator<Object> iterator) {
-        return setConstraintProperty(queryBuilder.selectStar()
-                        .from(FEDORA_RESOURCE_NODE + " AS " + DEFAULT_ALIAS)
-                        .where().isBelowPath(DEFAULT_ALIAS, "/" + getNamespace(part)),
-                part, iterator.next());
+    protected ComparisonCriteria create(Part part, Iterator<Object> iterator) {
+        if (entity == null) {
+            entity = (FedoraObjectPersistentEntity) mappingContext.getPersistentEntity(part.getProperty().getOwningType());
+        }
+        return new ComparisonCriteria(buildComparison(part, iterator.next()));
     }
 
     @Override
-    protected QueryBuilder.ConstraintBuilder and(Part part, QueryBuilder.ConstraintBuilder base, Iterator<Object> iterator) {
-        return base;
+    protected ComparisonCriteria and(Part part, ComparisonCriteria baseCriteria, Iterator<Object> iterator) {
+        return new ComparisonCriteria(baseCriteria, buildComparison(part, iterator.next()));
     }
 
     @Override
-    protected QueryBuilder.ConstraintBuilder or(QueryBuilder.ConstraintBuilder base, QueryBuilder.ConstraintBuilder criteria) {
-        return base;
+    protected ComparisonCriteria or(ComparisonCriteria baseCriteria, ComparisonCriteria additionalCriteria) {
+        return new ComparisonCriteria(baseCriteria, additionalCriteria);
     }
 
     @Override
-    protected Query complete(QueryBuilder.ConstraintBuilder criteria, Sort sort) {
-        Query query = (Query) criteria.end().query();
-        logger.debug("JCR-SQL2 query: {}", query.toString());
+    protected Query complete(ComparisonCriteria criteria, Sort sort) {
+        queryBuilder.clear();
+
+        QueryBuilder.ConstraintBuilder constraintBuilder = queryBuilder.selectStar().from(NODES + " AS " + ALIAS)
+                .where().isBelowPath(ALIAS, "/" + entity.getNamespace()).and().openParen();
+
+        List<Comparison> baseComparisons = criteria.getBaseComparisons();
+        addComparisonConstraint(constraintBuilder, baseComparisons.get(0));
+        if (baseComparisons.size() > 1) {
+            for (int i = 1; i < baseComparisons.size(); i++) {
+                addComparisonConstraint(constraintBuilder.and(), baseComparisons.get(i));
+            }
+        }
+
+        List<Comparison> additionalComparisons = criteria.getAdditionalComparisons();
+        if (additionalComparisons != null) {
+            addComparisonConstraint(constraintBuilder.or(), additionalComparisons.get(0));
+            if (additionalComparisons.size() > 1) {
+                for (int i = 1; i < additionalComparisons.size(); i++) {
+                    addComparisonConstraint(constraintBuilder, additionalComparisons.get(i));
+                }
+            }
+        }
+
+        Query query = (Query) constraintBuilder.closeParen().end().query();
+        logger.debug("Query: {}", query);
         return query;
     }
 
-    private String getNamespace(Part part) {
-        FedoraObjectPersistentEntity persistentEntity = (FedoraObjectPersistentEntity) mappingContext.getPersistentEntity(part.getProperty().getOwningType());
-        return persistentEntity.getNamespace();
+    private QueryBuilder.ConstraintBuilder addComparisonConstraint(QueryBuilder.ConstraintBuilder constraintBuilder, Comparison comparison) {
+        PropertyValue propValue = (PropertyValue) comparison.getOperand1();
+        Literal literal = (Literal) comparison.getOperand2();
+        QueryBuilder.ComparisonBuilder comparisonBuilder = constraintBuilder.propertyValue(propValue.getSelectorName(), propValue.getPropertyName());
+        String operator = comparison.getOperator();
+        switch (operator) {
+            case QueryObjectModelConstants.JCR_OPERATOR_EQUAL_TO:
+                return comparisonBuilder.isEqualTo(literal);
+            case QueryObjectModelConstants.JCR_OPERATOR_GREATER_THAN:
+                return comparisonBuilder.isGreaterThan(literal);
+            case QueryObjectModelConstants.JCR_OPERATOR_GREATER_THAN_OR_EQUAL_TO:
+                return comparisonBuilder.isGreaterThanOrEqualTo(literal);
+            case QueryObjectModelConstants.JCR_OPERATOR_LESS_THAN:
+                return comparisonBuilder.isLessThan(literal);
+            case QueryObjectModelConstants.JCR_OPERATOR_LESS_THAN_OR_EQUAL_TO:
+                return comparisonBuilder.isLessThanOrEqualTo(literal);
+            case QueryObjectModelConstants.JCR_OPERATOR_LIKE:
+                return comparisonBuilder.isLike(literal);
+            default:
+                throw new IllegalArgumentException("Cannot resolve operator: " + operator);
+        }
     }
 
     private SimpleFedoraResourcePersistentProperty getPersistentProperty(Part part) {
@@ -94,20 +140,17 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, QueryB
 
     }
 
-    private QueryBuilder.ConstraintBuilder setConstraintProperty(QueryBuilder.ConstraintBuilder constraintBuilder, Part part, Object value) {
-        SimpleFedoraResourcePersistentProperty property = getPersistentProperty(part);
-        switch (part.getType()) {
-            case SIMPLE_PROPERTY:
-                return constraintBuilder.propertyValue(DEFAULT_ALIAS, serializeJcrProperty(property))
-                        .isEqualTo(serializeJcrValue(property, value));
-            case LIKE:
-                // for some reason CONTAINS does not work
-//                return constraintBuilder.search(DEFAULT_ALIAS, serializeJcrProperty(property), value.toString());
-                return constraintBuilder.propertyValue(DEFAULT_ALIAS, serializeJcrProperty(property))
-                        .isLike("%" + value + "%");
-            default:
-                throw new UnsupportedOperationException("Expressions containing " +
-                        Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");
+    private class ComparisonVisitor extends Visitors.AbstractVisitor {
+
+        private Comparison comparison;
+
+        @Override
+        public void visit(Comparison comparison) {
+            this.comparison = comparison;
+        }
+
+        public Comparison getComparison() {
+            return comparison;
         }
     }
 
@@ -117,8 +160,75 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, QueryB
 
     private String serializeJcrValue(SimpleFedoraResourcePersistentProperty property, Object value) {
         RDFDatatype rdfDatatype = rdfDatatypeConverter.convert(property.getType());
-        return value.toString() + LITERAL_SEPARATOR + rdfDatatype.getURI();
+        if (isDate(value)) {
+            return rdfDatatype.unparse(value);
+        } else {
+            return rdfDatatype.unparse(value) + SEPARATOR + rdfDatatype.getURI();
+        }
+    }
 
+    private boolean isDate(Object value) {
+        return Date.class.isInstance(value) || ZonedDateTime.class.isInstance(value);
+    }
+
+    private Comparison getComparison(Visitable visitable) {
+        ComparisonVisitor comparisonVisitor = new ComparisonVisitor();
+        Visitors.visitAll(visitable, comparisonVisitor);
+        return comparisonVisitor.getComparison();
+    }
+
+    private Comparison buildComparison(Part part, Object value) {
+        QueryBuilder.ConstraintBuilder constraintBuilder = queryBuilder.clear().where();
+        SimpleFedoraResourcePersistentProperty property = getPersistentProperty(part);
+        QueryBuilder.ComparisonBuilder comparisonBuilder = constraintBuilder.propertyValue(ALIAS, serializeJcrProperty(property));
+        switch (part.getType()) {
+            case SIMPLE_PROPERTY:
+                if (isDate(value)) {
+                    return getComparison(comparisonBuilder.isEqualTo()
+                            .cast(serializeJcrValue(property, value)).asDate().end().query());
+                } else {
+                    return getComparison(comparisonBuilder
+                            .isEqualTo(serializeJcrValue(property, value)).end().query());
+                }
+            case GREATER_THAN:
+                if (isDate(value)) {
+                    return getComparison(comparisonBuilder.isGreaterThan()
+                            .cast(serializeJcrValue(property, value)).asDate().end().query());
+                } else {
+                    return getComparison(comparisonBuilder
+                            .isGreaterThan(serializeJcrValue(property, value)).end().query());
+                }
+            case GREATER_THAN_EQUAL:
+                if (isDate(value)) {
+                    return getComparison(comparisonBuilder.isGreaterThanOrEqualTo()
+                            .cast(serializeJcrValue(property, value)).asDate().end().query());
+                } else {
+                    return getComparison(comparisonBuilder
+                            .isGreaterThanOrEqualTo(serializeJcrValue(property, value)).end().query());
+                }
+            case LESS_THAN:
+                if (isDate(value)) {
+                    return getComparison(comparisonBuilder.isLessThan()
+                            .cast(serializeJcrValue(property, value)).asDate().end().query());
+                } else {
+                    return getComparison(comparisonBuilder
+                            .isLessThan(serializeJcrValue(property, value)).end().query());
+                }
+            case LESS_THAN_EQUAL:
+                if (isDate(value)) {
+                    return getComparison(comparisonBuilder.isLessThanOrEqualTo()
+                            .cast(serializeJcrValue(property, value)).asDate().end().query());
+                } else {
+                    return getComparison(comparisonBuilder
+                            .isLessThanOrEqualTo(serializeJcrValue(property, value)).end().query());
+                }
+            case LIKE:
+                return getComparison(comparisonBuilder
+                        .isLike("%" + value + "%").end().query());
+            default:
+                throw new UnsupportedOperationException("Expressions containing " +
+                        Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");
+        }
 
     }
 

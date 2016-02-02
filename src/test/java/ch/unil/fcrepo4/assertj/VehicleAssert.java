@@ -2,7 +2,7 @@ package ch.unil.fcrepo4.assertj;
 
 // based on http://www.petrikainulainen.net/programming/unit-testing/turning-assertions-into-a-domain-specific-language/
 
-import ch.unil.fcrepo4.beans.Vehicle;
+import ch.unil.fcrepo4.spring.data.repository.Vehicle;
 import org.assertj.core.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,11 +23,27 @@ public class VehicleAssert extends AbstractAssert<VehicleAssert, Vehicle> {
         return this;
     }
 
+    public VehicleAssert hasColor(String color){
+        isNotNull();
+        String actualColor = actual.getColor();
+        assertThat(actualColor).isEqualTo(color)
+                .overridingErrorMessage("Expecting vehicle to have color: <%s> but was <%s>", color, actualColor);
+        return this;
+    }
+
+    public VehicleAssert hasMilesGreaterThan(int miles){
+        isNotNull();
+        int actualMiles = actual.getMiles();
+        assertThat(actualMiles).isGreaterThan(miles)
+                .overridingErrorMessage("Expecting vehicle to have miles greater than: <%d> but was <%d>", miles, actualMiles);
+        return this;
+    }
+
     public VehicleAssert hasColorLike(String color){
         isNotNull();
         String actualColor = actual.getColor();
         assertThat(actualColor)
-                .overridingErrorMessage("Expecting vehicle to have color: <%s> but was <%s>", color, actualColor)
+                .overridingErrorMessage("Expecting vehicle to have color like: <%s> but was <%s>", color, actualColor)
                 .containsIgnoringCase(color);
         return this;
     }

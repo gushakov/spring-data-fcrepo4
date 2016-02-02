@@ -1,4 +1,4 @@
-package ch.unil.fcrepo4.beans;
+package ch.unil.fcrepo4.spring.data.repository;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Datastream;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.DsContent;

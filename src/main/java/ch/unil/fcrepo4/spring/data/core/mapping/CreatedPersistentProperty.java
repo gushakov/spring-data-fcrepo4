@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
+import ch.unil.fcrepo4.spring.data.core.Constants;
 import org.fcrepo.kernel.api.RdfLexicon;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
@@ -29,5 +30,10 @@ public class CreatedPersistentProperty extends SimpleFedoraResourcePersistentPro
     @Override
     public String getUriNs() {
         return RdfLexicon.CREATED_DATE.getNameSpace();
+    }
+
+    @Override
+    public String getPrefix() {
+        return Constants.JCR_NS_PREFIX;
     }
 }

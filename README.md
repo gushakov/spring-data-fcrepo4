@@ -12,7 +12,7 @@ see [query-triplestore](https://github.com/gushakov/spring-data-fcrepo4/tree/que
 **Partially implemented:**
 
 * ID to JCR path mapping
-* Mapping of resource properties (`uuid`, `created`, etc.)
+* Mapping of resource properties (`created`, etc.)
 * Mapping of simple properties (not collections)
 * Custom RDF to Java mapper (based on XSD types)
 * Datastream (binary) object persistence
@@ -41,11 +41,10 @@ This project is heavily based on the code from the following projects (including
 
 ### Patch for JCR-SQL2 query
 
-Since as of this writting (v. 4.4.0) Fedora repository does not expose any way to query the underlying JCR implementation. This module
+As of this writting (v. 4.4.0), Fedora repository does not expose any way to query the underlying JCR implementation by clients. This module, then,
 provides a [JcrSqlQueryServlet](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/servlet/JcrSqlQueryServlet.java) which allows
-a REST-based access to the querying of the JCR implementations via a JCR-SQL2 query (supported by Modeshape).
-
-So the functionning of this Spring Data module depends on having a JAR with this servet on in the `WEB-INF/lib` directory of the Fedora web application.
+allows a REST-based client to execute a a JCR-SQL2 query against the JCR implementation (Modeshape). For this to work, a JAR with this servlet needs to be
+put in the `WEB-INF/lib` directory of the Fedora web application.
 
 ### FedoraTemplate
 

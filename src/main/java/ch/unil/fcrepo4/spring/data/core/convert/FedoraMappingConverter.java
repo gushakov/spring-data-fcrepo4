@@ -14,7 +14,6 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -33,7 +32,6 @@ import org.springframework.util.Assert;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author gushakov
@@ -185,8 +183,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         Object path = entity.getPropertyAccessor(bean).getProperty(pathProp);
 
         // create full path for the target Fedora object
-        return pathCreator.createPath(entity.isDefaultNamespace() ? null : entity.getNamespace(), entity.getType(),
-                idProp.getType(), idProp.getName(), path);
+        return pathCreator.createPath(entity.getNamespace(), entity.getType(), idProp.getType(), idProp.getName(), path);
     }
 
     @Override
@@ -213,8 +210,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         final PathCreator pathCreator = pathProp.getPathCreator();
 
         // create full path for the target Fedora object
-        return pathCreator.createPath(entity.isDefaultNamespace() ? null : entity.getNamespace(), entity.getType(),
-                idProp.getType(), idProp.getName(), id);
+        return pathCreator.createPath(entity.getNamespace(), entity.getType(), idProp.getType(), idProp.getName(), id);
     }
 
     @Override

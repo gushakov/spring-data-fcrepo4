@@ -8,6 +8,7 @@ import org.springframework.data.mapping.PersistentProperty;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 
@@ -62,6 +63,12 @@ public class FedoraMappingContextTest {
         InputStream dsContent;
     }
 
+    @FedoraObject(namespace = "")
+    static class Bean5 {
+        @Path
+        long id = 1L;
+    }
+
 
     @Test
     public void testFedoraObjectProperties() throws Exception {
@@ -94,6 +101,23 @@ public class FedoraMappingContextTest {
             }
         });
         assertThat(count[0]).isEqualTo(1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankNamespace() throws Exception {
+        FedoraMappingContext context = new FedoraMappingContext();
+        context.setInitialEntitySet(new HashSet<>(Collections.singleton(Bean5.class)));
+        context.initialize();
+    }
+
+    @Test
+    public void testDefaultNamespace() throws Exception {
+        FedoraMappingContext context = new FedoraMappingContext();
+        context.setInitialEntitySet(new HashSet<>(Collections.singleton(Bean1.class)));
+        context.initialize();
+        FedoraObjectPersistentEntity<?> entity = (FedoraObjectPersistentEntity<?>) context.getPersistentEntity(Bean1.class);
+        assertThat(entity.isDefaultNamespace()).isTrue();
+        assertThat(entity.getNamespace()).isEqualTo("bean1");
     }
 
 }

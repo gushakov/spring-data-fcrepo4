@@ -1,9 +1,9 @@
-package ch.unil.fcrepo4.beans;
+package ch.unil.fcrepo4.spring.data.repository;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
+import java.util.Date;
 
 /**
  * Simple bean to be persisted in the Fedora repository. {@code FedoraObject} annotation may specify a namespace, a JCR
@@ -15,6 +15,10 @@ public class Vehicle {
     // mandatory ID property will be converted to the JCR path suffix
     @Path
     private long id;
+
+    // default resource property
+    @Created
+    private Date created;
 
     // simple properties to be stored as attributes of JCR node
     @Property
@@ -72,6 +76,10 @@ public class Vehicle {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Date getCreated() {
+        return created;
     }
 
     public String getMake() {

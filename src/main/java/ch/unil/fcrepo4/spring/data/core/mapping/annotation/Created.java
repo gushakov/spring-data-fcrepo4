@@ -10,6 +10,6 @@ import java.lang.annotation.*;
 @Inherited
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Property
+@Persistent
 public @interface Created {
 }
