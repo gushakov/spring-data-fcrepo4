@@ -1,6 +1,7 @@
 package ch.unil.fcrepo4.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.binary.Base64;
 import org.fcrepo.kernel.api.exception.RepositoryRuntimeException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -25,12 +26,14 @@ public class JcrSqlQueryServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String queryString = req.getHeader("queryString");
+        String queryStringHeader = req.getHeader("queryString");
 
-        if (queryString == null){
+        if (queryStringHeader == null){
             // will throw 500 error
             throw new RepositoryRuntimeException("Query string is null");
         }
+
+        String queryString = new String(Base64.decodeBase64(queryStringHeader));
 
         Session jcrSession = null;
         try {

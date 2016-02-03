@@ -3,7 +3,6 @@ package ch.unil.fcrepo4.spring.data.repository;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
-import org.assertj.core.api.Assertions;
 import org.fcrepo.client.FedoraException;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -68,17 +67,22 @@ public class SimpleFedoraRepositoryTestIT {
     @Test
     public void testFindByMake() throws Exception {
         List<Vehicle> vehicles = vehicleRepo.findByMake("Ford");
-//        List<Vehicle> vehicles = vehicleRepo.findByMake("Citroën");
         ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
-//        assertThat(vehicles.get(0)).hasMake("Citroën");
         assertThat(vehicles.get(0)).hasMake("Ford");
+    }
+
+    @Test
+    public void testFindByMakeWithAccents() throws Exception {
+        List<Vehicle> vehicles = vehicleRepo.findByMake("Citroën");
+        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
+        assertThat(vehicles.get(0)).hasMake("Citroën");
     }
 
     @Test
     public void testFindByMilesGreaterThan() throws Exception {
         List<Vehicle> vehicles = vehicleRepo.findByMilesGreaterThan(14000);
         ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).withMilesGreaterThan(14000)
-                .extracting("id").containsExactly(2L, 4L);
+                .extracting("id").containsOnly(2L, 4L);
     }
 
     @Test

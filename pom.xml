@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <fcrepo.version>4.4.1-SNAPSHOT</fcrepo.version>
+        <fcrepo.version>4.4.0</fcrepo.version>
         <skipTests>false</skipTests>
         <skipITs>false</skipITs>
         <random.fedora.servlet.port>${fedora.servlet.port}</random.fedora.servlet.port>
@@ -295,6 +295,11 @@
                             <version>7.0.62</version>
                         </artifactInstaller>
                     </container>
+                    <configuration>
+                        <properties>
+                            <cargo.jvmargs>-Dfile.encoding=UTF-8</cargo.jvmargs>
+                        </properties>
+                    </configuration>
                 </configuration>
                 <executions>
                     <execution>

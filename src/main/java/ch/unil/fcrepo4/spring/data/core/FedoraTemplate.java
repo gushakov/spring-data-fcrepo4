@@ -5,6 +5,7 @@ import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import ch.unil.fcrepo4.spring.data.core.query.result.FedoraResultPage;
+import org.apache.commons.codec.binary.Base64;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
@@ -58,23 +59,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         this.restTemplate = new RestTemplate();
     }
 
-    abstract class TransactionExecution {
-        public void execute(){
-            try {
-                repository.startTransaction();
-                doInTransaction();
-                repository.commitTransaction();
-            } catch (RuntimeException | FedoraException e) {
-                try {
-                    repository.rollbackTransaction();
-                } catch (FedoraException fe) {
-                    handleException(fe);
-                }
-                handleException(e);
-            }
-        }
-        public abstract void doInTransaction() throws FedoraException;
-    }
 
     public FedoraRepository getRepository() {
         return repository;
@@ -103,13 +87,8 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     @Override
     public <T> void save(T bean) {
-        new TransactionExecution(){
-            @Override
-            public void doInTransaction() throws FedoraException {
-                FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
-                fedoraConverter.write(bean, fedoraObject);
-            }
-        }.execute();
+        FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
+        fedoraConverter.write(bean, fedoraObject);
     }
 
     @Override
@@ -124,15 +103,14 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     @Override
     public <T, ID> void delete(ID id, Class<T> beanType) {
-        new TransactionExecution() {
-            @Override
-            public void doInTransaction() throws FedoraException {
-                FedoraObject fedoraObject = fedoraConverter.getFedoraObject(id, beanType);
-                if (fedoraObject != null) {
-                    fedoraObject.forceDelete();
-                }
+        FedoraObject fedoraObject = fedoraConverter.getFedoraObject(id, beanType);
+        if (fedoraObject != null) {
+            try {
+                fedoraObject.forceDelete();
+            } catch (FedoraException e) {
+                handleException(e);
             }
-        }.execute();
+        }
     }
 
     @Override
@@ -152,7 +130,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private ResponseEntity<String[]> executeQuery(FedoraQuery query){
         HttpHeaders headers = new HttpHeaders();
-        headers.set("queryString", query.toString());
+        headers.set("queryString", Base64.encodeBase64String(query.toString().getBytes()));
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
         return restTemplate.exchange("http://" + fedoraHost + ":" + fedoraPort + "/query",
                 HttpMethod.GET, httpEntity, String[].class);
@@ -164,7 +142,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
             try {
                 beans.add(fedoraConverter.read(beanType, repository.getObject(path)));
             } catch (FedoraException e) {
-                throw new RuntimeException(e);
+                handleException(e);
             }
         }
         return beans;

@@ -27,6 +27,7 @@ public class ExtendedXsdDatatypeConverter implements RdfDatatypeConverter {
         if (delegateRdfMapper.getTypeByClass(UuidRdfDatatype.getInstance().getJavaClass()) == null){
             delegateRdfMapper.registerDatatype(UuidRdfDatatype.getInstance());
         }
+
     }
 
     @Override
