@@ -3,8 +3,14 @@ package ch.unil.fcrepo4.spring.data.repository.support;
 // based on code from org.springframework.data.solr.repository.support.SimpleSolrRepository
 
 import ch.unil.fcrepo4.spring.data.core.FedoraOperations;
+import ch.unil.fcrepo4.spring.data.core.mapping.FedoraObjectPersistentEntity;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraJcrSqlQuery;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraJcrSqlQueryBuilder;
 import ch.unil.fcrepo4.spring.data.repository.FedoraCrudRepository;
 import ch.unil.fcrepo4.spring.data.repository.query.FedoraEntityInformation;
+import org.modeshape.jcr.ExecutionContext;
+import org.modeshape.jcr.query.QueryBuilder;
+import org.modeshape.jcr.query.model.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -50,7 +56,19 @@ public class SimpleFedoraRepository<T, ID extends Serializable> implements Fedor
 
     @Override
     public Page<T> findAll(Pageable pageable) {
-        return null;
+        FedoraObjectPersistentEntity<?> entity = (FedoraObjectPersistentEntity<?>) fedoraOperations.getConverter().getMappingContext().getPersistentEntity(entityClass);
+        FedoraJcrSqlQueryBuilder queryBuilder = new FedoraJcrSqlQueryBuilder();
+        return fedoraOperations.queryForPage(new FedoraJcrSqlQuery(
+                queryBuilder.selectStar()
+                        .from(FedoraJcrSqlQueryBuilder.FROM)
+                        .where()
+                        .isBelowPath(FedoraJcrSqlQueryBuilder.VAR, "/" + entity.getNamespace())
+                        .end()
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize())
+                        .query(),
+                true
+        ), entityClass);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
-import org.modeshape.jcr.query.model.Query;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -21,8 +21,8 @@ public interface FedoraOperations {
 
    <T, ID> void delete(ID id, Class<T> beanType);
 
-   <T> List<T> query(Query jcrSqlQuery, Class<T> beanType);
+   <T> List<T> query(FedoraQuery query, Class<T> beanType);
 
-   <T> Page<T> queryForPage(Query jcrSqlQuery, Class<T> beanType);
+   <T> Page<T> queryForPage(FedoraQuery query, Class<T> beanType);
 
 }

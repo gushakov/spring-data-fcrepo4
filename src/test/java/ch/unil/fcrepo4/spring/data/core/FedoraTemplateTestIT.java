@@ -100,12 +100,10 @@ public class FedoraTemplateTestIT {
         Assertions.assertThat(new DateTime(read.created.getTime())).isAfter(before);
     }
 
-/*
     @Test
     public void testCount() throws Exception {
         QueryBuilder queryBuilder = new QueryBuilder(new ExecutionContext().getValueFactories().getTypeSystem());
-        Query query = (Query) queryBuilder.selectStar().fromAllNodes().limit(10).query();
-        fedoraTemplate.query(query, Vehicle.class);
+        Query query = (Query) queryBuilder.selectStar().fromAllNodes().limit(Integer.MAX_VALUE).query();
+        System.out.println(query.getLimits().isUnlimited());
     }
-*/
 }

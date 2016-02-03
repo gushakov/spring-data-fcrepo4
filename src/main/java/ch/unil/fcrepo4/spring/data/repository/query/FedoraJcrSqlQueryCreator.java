@@ -4,12 +4,11 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraObjectPersistentEntity;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
 import ch.unil.fcrepo4.spring.data.core.mapping.SimpleFedoraResourcePersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraJcrSqlQuery;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraJcrSqlQueryBuilder;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
-import org.modeshape.jcr.ExecutionContext;
 import org.modeshape.jcr.query.QueryBuilder;
 import org.modeshape.jcr.query.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PersistentProperty;
@@ -26,17 +25,15 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import static ch.unil.fcrepo4.spring.data.core.query.FedoraJcrSqlQueryBuilder.FROM;
+import static ch.unil.fcrepo4.spring.data.core.query.FedoraJcrSqlQueryBuilder.VAR;
+
 // based on code from org.springframework.data.solr.repository.query.SolrQueryCreator
 
 /**
  * @author gushakov
  */
-public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, ComparisonCriteria> {
-
-    private static final Logger logger = LoggerFactory.getLogger(FedoraJcrSqlQueryCreator.class);
-
-    private static final String NODES = "fedora:Resource";
-    private static final String ALIAS = "n";
+public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<FedoraJcrSqlQuery, ComparisonCriteria> {
 
     // see org.fcrepo.kernel.modeshape.rdf.converters.ValueConverter.RdfLiteralJcrValueBuilder  \30 = \u0018 = [CANCEL] control character
     private static final String SEPARATOR = "\u0018^^\u0018";
@@ -45,14 +42,14 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
     private FedoraParameterAccessor parameterAccessor;
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
     private RdfDatatypeConverter rdfDatatypeConverter;
-    private QueryBuilder queryBuilder;
+    private FedoraJcrSqlQueryBuilder queryBuilder;
 
     public FedoraJcrSqlQueryCreator(PartTree tree, FedoraParameterAccessor parameters, MappingContext<?, FedoraPersistentProperty> mappingContext, RdfDatatypeConverter rdfDatatypeConverter) {
         super(tree, parameters);
         this.parameterAccessor = parameters;
         this.mappingContext = mappingContext;
         this.rdfDatatypeConverter = rdfDatatypeConverter;
-        queryBuilder = new PatchedQueryBuilder(new ExecutionContext().getValueFactories().getTypeSystem());
+        queryBuilder = new FedoraJcrSqlQueryBuilder();
     }
 
     @Override
@@ -74,11 +71,11 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
     }
 
     @Override
-    protected Query complete(ComparisonCriteria criteria, Sort sort) {
+    protected FedoraJcrSqlQuery complete(ComparisonCriteria criteria, Sort sort) {
         queryBuilder.clear();
 
-        QueryBuilder.ConstraintBuilder constraintBuilder = queryBuilder.selectStar().from(NODES + " AS " + ALIAS)
-                .where().isBelowPath(ALIAS, "/" + entity.getNamespace()).and().openParen();
+        QueryBuilder.ConstraintBuilder constraintBuilder = queryBuilder.selectStar().from(FROM)
+                .where().isBelowPath(VAR, "/" + entity.getNamespace()).and().openParen();
 
         List<Comparison> baseComparisons = criteria.getBaseComparisons();
         addComparisonConstraint(constraintBuilder, baseComparisons.get(0));
@@ -104,10 +101,7 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
         if (pageable != null) {
             queryBuilder.limit(pageable.getPageSize()).offset(pageable.getPageNumber() * pageable.getPageSize());
         }
-
-        Query query = (Query) queryBuilder.query();
-        logger.debug("Query: {}", query);
-        return query;
+        return new FedoraJcrSqlQuery(queryBuilder.query(), pageable != null);
     }
 
     private QueryBuilder.ConstraintBuilder addComparisonConstraint(QueryBuilder.ConstraintBuilder constraintBuilder, Comparison comparison) {
@@ -187,7 +181,7 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
     private Comparison buildComparison(Part part, Object value) {
         QueryBuilder.ConstraintBuilder constraintBuilder = queryBuilder.clear().where();
         SimpleFedoraResourcePersistentProperty property = getPersistentProperty(part);
-        QueryBuilder.ComparisonBuilder comparisonBuilder = constraintBuilder.propertyValue(ALIAS, serializeJcrProperty(property));
+        QueryBuilder.ComparisonBuilder comparisonBuilder = constraintBuilder.propertyValue(VAR, serializeJcrProperty(property));
         switch (part.getType()) {
             case SIMPLE_PROPERTY:
                 if (isDate(value)) {
@@ -237,28 +231,6 @@ public class FedoraJcrSqlQueryCreator extends AbstractQueryCreator<Query, Compar
                         Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");
         }
 
-    }
-
-    /**
-     * Patches MODE-2564 issue
-     */
-    private class PatchedQueryBuilder extends QueryBuilder {
-
-        public PatchedQueryBuilder(TypeSystem context) {
-            super(context);
-        }
-
-        @Override
-        public QueryBuilder limit(int rowLimit) {
-            this.limit = this.limit.withRowLimit(rowLimit);
-            return this;
-        }
-
-        @Override
-        public QueryBuilder offset(int offset) {
-            this.limit  = this.limit.withOffset(offset);
-            return this;
-        }
     }
 
 }

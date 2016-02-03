@@ -2,13 +2,15 @@ package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
-import org.apache.commons.lang3.StringUtils;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import ch.unil.fcrepo4.spring.data.core.query.result.FedoraResultPage;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
 import org.fcrepo.client.impl.FedoraRepositoryImpl;
-import org.modeshape.jcr.query.model.Limit;
-import org.modeshape.jcr.query.model.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -17,8 +19,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,6 +33,8 @@ import java.util.List;
  * @author gushakov
  */
 public class FedoraTemplate implements FedoraOperations, InitializingBean, ApplicationContextAware {
+    private static final Logger logger = LoggerFactory.getLogger(FedoraTemplate.class);
+
     private ApplicationContext applicationContext;
 
     private FedoraConverter fedoraConverter;
@@ -76,11 +78,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     public FedoraRepository getRepository() {
         return repository;
-    }
-
-    // for testing
-    RestTemplate getRestTemplate(){
-        return restTemplate;
     }
 
     @Override
@@ -139,34 +136,33 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public <T> List<T> query(Query jcrSqlQuery, Class<T> beanType) {
-        Assert.notNull(jcrSqlQuery);
-        return processJcrSqlQueryQueryResponse(executeJcrSqlQuery(jcrSqlQuery), beanType);
+    public <T> List<T> query(FedoraQuery query, Class<T> beanType) {
+        Assert.notNull(query);
+        logger.debug("Query: {}", query);
+        return processQueryQueryResponse(executeQuery(query), beanType);
     }
 
     @Override
-    public <T> Page<T> queryForPage(Query jcrSqlQuery, Class<T> beanType) {
-        Limit limits = jcrSqlQuery.getLimits();
-        Assert.state(!limits.isUnlimited());
-        int pageSize = limits.getRowLimit();
-        int page = limits.getOffset() / pageSize;
-        return new PageImpl<>(processJcrSqlQueryQueryResponse(executeJcrSqlQuery(jcrSqlQuery), beanType),
-                new PageRequest(page, pageSize), Integer.MAX_VALUE);
+    public <T> Page<T> queryForPage(FedoraQuery query, Class<T> beanType) {
+        Assert.state(query.isPaged());
+        logger.debug("Query: {}", query);
+        return new FedoraResultPage<>(processQueryQueryResponse(executeQuery(query), beanType),
+                new FedoraPageRequest(query.getOffset(), query.getRowLimit()));
     }
 
-    private ResponseEntity<String[]> executeJcrSqlQuery(Query jcrSqlQuery){
+    private ResponseEntity<String[]> executeQuery(FedoraQuery query){
         HttpHeaders headers = new HttpHeaders();
-        headers.set("queryString", jcrSqlQuery.toString());
+        headers.set("queryString", query.toString());
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
         return restTemplate.exchange("http://" + fedoraHost + ":" + fedoraPort + "/query",
                 HttpMethod.GET, httpEntity, String[].class);
     }
 
-    private <T> List<T> processJcrSqlQueryQueryResponse(ResponseEntity<String[]> responseEntity, Class<T> beanType){
+    private <T> List<T> processQueryQueryResponse(ResponseEntity<String[]> responseEntity, Class<T> beanType){
         List<T> beans = new ArrayList<>();
-        for (String jcrPath: responseEntity.getBody()){
+        for (String path: responseEntity.getBody()){
             try {
-                beans.add(fedoraConverter.read(beanType, repository.getObject(jcrPath)));
+                beans.add(fedoraConverter.read(beanType, repository.getObject(path)));
             } catch (FedoraException e) {
                 throw new RuntimeException(e);
             }
@@ -181,10 +177,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                         .registerSingleton("fedoraExceptionTranslator", EXCEPTION_TRANSLATOR);
             }
         }
-    }
-
-    private String parsePathFromUri(String uri) {
-        return StringUtils.removeStart(uri, repository.getRepositoryUrl());
     }
 
     private void handleException(Exception e) {
