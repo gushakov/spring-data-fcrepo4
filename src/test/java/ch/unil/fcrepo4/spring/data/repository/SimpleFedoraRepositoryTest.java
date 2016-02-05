@@ -146,7 +146,7 @@ public class SimpleFedoraRepositoryTest {
             FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
             assertThat(query.toString())
                     .isIn("SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[jcr:created] > CAST('1970-01-01T01:00:00.000+01:00' AS DATE)) LIMIT 10 OFFSET 10",
-                            "SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[jcr:created] > CAST('1970-01-01T01:00:00.000Z' AS DATE)) LIMIT 10 OFFSET 10");
+                            "SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[jcr:created] > CAST('1970-01-01T00:00:00.000Z' AS DATE)) LIMIT 10 OFFSET 10");
             return new FedoraResultPage<Vehicle>(Collections.emptyList(), null);
         }).when(mockFedoraTemplate).queryForPage(any(), any());
         vehicleRepo.findByCreatedGreaterThan(new Date(0L), new FedoraPageRequest(10, 10));
