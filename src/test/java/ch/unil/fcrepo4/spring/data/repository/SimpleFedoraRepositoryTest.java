@@ -142,7 +142,6 @@ public class SimpleFedoraRepositoryTest {
 
     @Test
     public void testFindByCreatedGreaterThanByPage() throws Exception {
-        final Date startOfEpoch = new Date(0L);
         doAnswer(invocation -> {
             FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
             assertThat(query.toString())
