@@ -1,12 +1,10 @@
 package ch.unil.fcrepo4.spring.data.core.convert.rdf;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
 import org.junit.Test;
 
 import java.time.Month;
-import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
