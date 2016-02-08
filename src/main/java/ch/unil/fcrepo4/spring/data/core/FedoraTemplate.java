@@ -4,6 +4,7 @@ import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import ch.unil.fcrepo4.spring.data.core.query.qom.Query;
 import ch.unil.fcrepo4.spring.data.core.query.result.FedoraResultPage;
 import org.apache.commons.codec.binary.Base64;
 import org.fcrepo.client.FedoraException;
@@ -114,21 +115,19 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     }
 
     @Override
-    public <T> List<T> query(FedoraQuery query, Class<T> beanType) {
-        Assert.notNull(query);
+    public <T> List<T> query(Query query, Class<T> beanType) {
         logger.debug("Query: {}", query);
         return processQueryQueryResponse(executeQuery(query), beanType);
     }
 
     @Override
-    public <T> Page<T> queryForPage(FedoraQuery query, Class<T> beanType) {
-        Assert.state(query.isPaged());
+    public <T> Page<T> queryForPage(Query query, Class<T> beanType) {
         logger.debug("Query: {}", query);
         return new FedoraResultPage<>(processQueryQueryResponse(executeQuery(query), beanType),
                 new FedoraPageRequest(query.getOffset(), query.getRowLimit()));
     }
 
-    private ResponseEntity<String[]> executeQuery(FedoraQuery query){
+    private ResponseEntity<String[]> executeQuery(Query query){
         HttpHeaders headers = new HttpHeaders();
         headers.set("queryString", Base64.encodeBase64String(query.toString().getBytes()));
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);

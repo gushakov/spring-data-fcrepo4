@@ -74,6 +74,11 @@ public class SimpleFedoraResourcePersistentProperty extends GenericFedoraPersist
     }
 
     @Override
+    public String getPrefixedName() {
+        return getPrefix() + ":" + getName();
+    }
+
+    @Override
     public String getUri(){
         return getUriNs() + getLocalName();
     }

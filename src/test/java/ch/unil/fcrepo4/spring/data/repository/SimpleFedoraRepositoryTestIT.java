@@ -78,6 +78,7 @@ public class SimpleFedoraRepositoryTestIT {
         assertThat(vehicles.get(0)).hasMake("Citroën");
     }
 
+    /*
     @Test
     public void testFindByMilesGreaterThan() throws Exception {
         List<Vehicle> vehicles = vehicleRepo.findByMilesGreaterThan(14000);
@@ -133,5 +134,5 @@ public class SimpleFedoraRepositoryTestIT {
     public void testFindAllByPage() throws Exception {
         assertThat(vehicleRepo.findAll(new FedoraPageRequest(0, Integer.MAX_VALUE)).getNumberOfElements())
                 .isEqualTo(8);
-    }
+    }*/
 }

@@ -4,6 +4,7 @@ import ch.unil.fcrepo4.spring.data.core.FedoraOperations;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import ch.unil.fcrepo4.spring.data.core.query.qom.Query;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.query.parser.PartTree;
 
@@ -12,13 +13,13 @@ import org.springframework.data.repository.query.parser.PartTree;
 /**
  * @author gushakov
  */
-public class PartTreeJcrSqlQuery extends AbstractFedoraQuery {
+public class PartTreeJcrQuery extends AbstractFedoraQuery {
 
     private PartTree tree;
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
     private RdfDatatypeConverter rdfDatatypeConverter;
 
-    public PartTreeJcrSqlQuery(FedoraQueryMethod method, FedoraOperations fedoraOperations) {
+    public PartTreeJcrQuery(FedoraQueryMethod method, FedoraOperations fedoraOperations) {
         super(fedoraOperations, method);
         this.tree = new PartTree(method.getName(), method.getEntityInformation().getJavaType());
         this.mappingContext = fedoraOperations.getConverter().getMappingContext();
@@ -26,7 +27,7 @@ public class PartTreeJcrSqlQuery extends AbstractFedoraQuery {
     }
 
     @Override
-    protected FedoraQuery createQuery(FedoraParameterAccessor parameterAccessor) {
-        return new FedoraJcrSqlQueryCreator(tree, parameterAccessor, mappingContext, rdfDatatypeConverter).createQuery();
+    protected Query createQuery(FedoraParameterAccessor parameterAccessor) {
+        return new FedoraJcrQueryCreator(tree, parameterAccessor, mappingContext, rdfDatatypeConverter).createQuery();
     }
 }

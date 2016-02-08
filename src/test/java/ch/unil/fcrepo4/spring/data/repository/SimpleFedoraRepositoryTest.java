@@ -5,6 +5,7 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import ch.unil.fcrepo4.spring.data.core.query.qom.Query;
 import ch.unil.fcrepo4.spring.data.core.query.result.FedoraResultPage;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.fcrepo.client.FedoraException;
@@ -63,14 +64,28 @@ public class SimpleFedoraRepositoryTest {
     @Test
     public void testFindByMake() throws Exception {
         doAnswer(invocation -> {
-            FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
+            Query query = (Query) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string')");
+                    .isEqualTo("SELECT DISTINCT * FROM [fedora:Resource] AS Vehicle WHERE ISDESCENDANTNODE(Vehicle, '/vehicle') AND Vehicle.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string'");
             return Collections.emptyList();
-        }).when(mockFedoraTemplate).query(any(), any());
+        }).when(mockFedoraTemplate).query(any(Query.class), any());
+
         vehicleRepo.findByMake("Ford");
     }
 
+    @Test
+    public void testFindByMakeAndColor() throws Exception {
+        doAnswer(invocation -> {
+            Query query = (Query) invocation.getArguments()[0];
+            assertThat(query.toString())
+                    .isEqualTo("SELECT DISTINCT * FROM [fedora:Resource] AS Vehicle WHERE ISDESCENDANTNODE(Vehicle, '/vehicle') AND Vehicle.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string' AND Vehicle.[test:color] = 'green\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string'");
+            return Collections.emptyList();
+        }).when(mockFedoraTemplate).query(any(Query.class), any());
+
+        vehicleRepo.findByMakeAndColor("Ford", "green");
+    }
+
+    /*
     @Test
     public void testFindByMilesGreaterThan() throws Exception {
         doAnswer(invocation -> {
@@ -91,17 +106,6 @@ public class SimpleFedoraRepositoryTest {
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(), any());
         vehicleRepo.findByColorLike("green");
-    }
-
-    @Test
-    public void testFindByMakeAndColor() throws Exception {
-        doAnswer(invocation -> {
-            FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
-            assertThat(query.toString())
-                    .isEqualTo("SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND (n.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string' AND n.[test:color] = 'green\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string'))");
-            return Collections.emptyList();
-        }).when(mockFedoraTemplate).query(any(), any());
-        vehicleRepo.findByMakeAndColor("Ford", "green");
     }
 
     @Test
@@ -162,5 +166,5 @@ public class SimpleFedoraRepositoryTest {
         }).when(mockFedoraTemplate).queryForPage(any(), any());
         vehicleRepo.findAll(new FedoraPageRequest(0, Integer.MAX_VALUE));
     }
-
+*/
 }
