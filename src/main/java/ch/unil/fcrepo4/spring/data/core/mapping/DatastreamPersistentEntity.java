@@ -1,9 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import ch.unil.fcrepo4.spring.data.core.Constants;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Datastream;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.DsContent;
-import org.springframework.data.mapping.model.MappingException;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Binary;
 import org.springframework.data.util.TypeInformation;
 
 /**
@@ -11,21 +8,10 @@ import org.springframework.data.util.TypeInformation;
  */
 public class DatastreamPersistentEntity<T> extends GenericFedoraPersistentEntity<T> implements FedoraPersistentEntity<T> {
 
-    private Datastream dsAnnot;
-
     private FedoraObjectPersistentEntity<?> foEntity;
 
     public DatastreamPersistentEntity(TypeInformation<T> information) {
         super(information);
-        this.dsAnnot = findAnnotation(Datastream.class);
-        checkName();
-    }
-
-    private void checkName(){
-        // name must not contain slashes
-        if (!isDefaultDatastreamName() &&  dsAnnot.name().contains("/")){
-            throw new MappingException("Invalid datastream name: " + dsAnnot);
-        }
     }
 
     public FedoraObjectPersistentEntity<?> getFedoraObjectEntity() {
@@ -36,28 +22,8 @@ public class DatastreamPersistentEntity<T> extends GenericFedoraPersistentEntity
         this.foEntity = foEntity;
     }
 
-    /**
-     * Name of the datastream as specified on {@code @Datastream} type annotation.
-     * @return datastream resource name
-     */
-    public String getDsName(){
-        return dsAnnot.name();
+    public BinaryPersistentProperty getContentProperty() {
+        return (BinaryPersistentProperty) getPersistentProperty(Binary.class);
     }
-
-    public boolean isDefaultDatastreamName(){
-        return dsAnnot.name().equals(Constants.DEFAULT_ANNOTATION_STRING_VALUE_TOKEN) || dsAnnot.name().matches("\\s*");
-    }
-
-    /**
-     * Content type (mimetype) of the datastream as specified on {@code @Datastream} type annotation.
-     * @return content type of the datastream
-     */
-    public String getMimetype(){
-        return dsAnnot.mimetype();
-    }
-
-   public DatastreamContentPersistentProperty getContentProperty(){
-       return (DatastreamContentPersistentProperty) getPersistentProperty(DsContent.class);
-   }
 
 }

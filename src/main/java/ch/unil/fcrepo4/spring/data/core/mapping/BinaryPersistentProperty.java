@@ -1,6 +1,6 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.DsContent;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Binary;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.MappingException;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
@@ -12,13 +12,17 @@ import java.lang.reflect.Field;
 /**
  * @author gushakov
  */
-public class DatastreamContentPersistentProperty extends GenericFedoraPersistentProperty {
+public class BinaryPersistentProperty extends GenericFedoraPersistentProperty {
 
-    private DsContent dsContentAnnot;
+    private Binary binaryAnnot;
 
-    public DatastreamContentPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
+    public String getMimetype(){
+        return binaryAnnot.mimetype();
+    }
+
+    public BinaryPersistentProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, FedoraPersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-        this.dsContentAnnot = findAnnotation(DsContent.class);
+        this.binaryAnnot = findAnnotation(Binary.class);
 
         // this annotation must only be used with properties of type InputStream
         if (!InputStream.class.isAssignableFrom(field.getType())){

@@ -12,5 +12,6 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Persistent
-public @interface DsContent {
+public @interface Binary {
+    String mimetype() default Constants.MIME_TYPE_TEXT_XML;
 }

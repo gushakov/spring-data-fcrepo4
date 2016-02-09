@@ -52,14 +52,14 @@ public class FedoraMappingContextTest {
         @Path
         long id = 1L;
 
+        @Datastream
         Datastream1 datastream1 = new Datastream1();
 
     }
 
-    @Datastream
     static class Datastream1 {
 
-        @DsContent
+        @Binary(mimetype = "text/plain")
         InputStream dsContent;
     }
 
@@ -97,7 +97,7 @@ public class FedoraMappingContextTest {
                 count[0]++;
                 DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) association.getInverse();
                 DatastreamPersistentEntity<?> dsEntity = (DatastreamPersistentEntity<?>) context.getPersistentEntity(dsProp.getType());
-                assertThat(dsEntity.getPersistentProperty(DsContent.class)).isNotNull();
+                assertThat(dsEntity.getPersistentProperty(Binary.class)).isNotNull();
             }
         });
         assertThat(count[0]).isEqualTo(1);

@@ -1,17 +1,15 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Datastream;
-import ch.unil.fcrepo4.spring.data.core.mapping.annotation.DsContent;
+import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Binary;
 
 import java.io.InputStream;
 
 /**
  * @author gushakov
  */
-@Datastream(mimetype = "text/xml")
 public class VehicleDescription {
 
-    @DsContent
+    @Binary(mimetype = "text/xml")
     private InputStream desc;
 
     public VehicleDescription() {
