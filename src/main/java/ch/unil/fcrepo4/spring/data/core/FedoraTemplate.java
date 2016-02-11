@@ -127,9 +127,20 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                 new FedoraPageRequest(query.getOffset(), query.getRowLimit()));
     }
 
+
+    // test, maybe move to operations
+    public <T> List<T> query(String query, Class<T> beanType){
+        logger.debug("Query: {}", query);
+        return processQueryQueryResponse(executeQuery(query), beanType);
+    }
+
     private ResponseEntity<String[]> executeQuery(Query query){
+        return executeQuery(query.toString());
+    }
+
+    private ResponseEntity<String[]> executeQuery(String query){
         HttpHeaders headers = new HttpHeaders();
-        headers.set("queryString", Base64.encodeBase64String(query.toString().getBytes()));
+        headers.set("queryString", Base64.encodeBase64String(query.getBytes()));
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
         return restTemplate.exchange("http://" + fedoraHost + ":" + fedoraPort + "/query",
                 HttpMethod.GET, httpEntity, String[].class);

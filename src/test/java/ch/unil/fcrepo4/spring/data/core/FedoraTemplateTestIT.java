@@ -6,15 +6,15 @@ import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
 import ch.unil.fcrepo4.spring.data.repository.Vehicle;
+import ch.unil.fcrepo4.spring.data.repository.VehicleDescription;
 import com.hp.hpl.jena.graph.NodeFactory;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.assertj.jodatime.api.Assertions;
 import org.fcrepo.client.FedoraException;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.modeshape.jcr.ExecutionContext;
-import org.modeshape.jcr.query.QueryBuilder;
-import org.modeshape.jcr.query.model.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +23,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.ByteArrayInputStream;
 import java.util.Date;
+import java.util.List;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,9 +103,24 @@ public class FedoraTemplateTestIT {
     }
 
     @Test
-    public void testCount() throws Exception {
-        QueryBuilder queryBuilder = new QueryBuilder(new ExecutionContext().getValueFactories().getTypeSystem());
-        Query query = (Query) queryBuilder.selectStar().fromAllNodes().limit(Integer.MAX_VALUE).query();
-        System.out.println(query.getLimits().isUnlimited());
+    public void testSaveWithDatastream() throws Exception {
+        Vehicle vehicle = new Vehicle(System.currentTimeMillis(), "Batmobile");
+        vehicle.setDescription(new VehicleDescription(new ByteArrayInputStream("foobar".getBytes())));
+        fedoraTemplate.save(vehicle);
+    }
+
+    @Test
+    public void testQuery() throws Exception {
+       List<Vehicle> vehicles = fedoraTemplate.query(
+                "SELECT * from [fedora:Container] as v where v.[ns001:beans] = 'object'",
+                Vehicle.class
+        );
+
+        StringBuilderWriter writer = new StringBuilderWriter();
+
+        IOUtils.copy(vehicles.get(0).getDescription().getDesc(), writer);
+
+        System.out.println(writer.toString());
+
     }
 }

@@ -35,6 +35,7 @@ public class Vehicle {
 
     // binary datastreams
 
+    @Datastream
     private VehicleDescription description;
 
     private VehiclePicture picture;
