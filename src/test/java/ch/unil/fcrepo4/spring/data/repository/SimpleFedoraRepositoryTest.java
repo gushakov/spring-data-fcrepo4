@@ -66,7 +66,7 @@ public class SimpleFedoraRepositoryTest {
         doAnswer(invocation -> {
             Query query = (Query) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT DISTINCT * FROM [fedora:Resource] AS Vehicle WHERE ISDESCENDANTNODE(Vehicle, '/vehicle') AND Vehicle.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string'");
+                    .isEqualTo("SELECT DISTINCT * FROM [fedora:Container] AS Vehicle WHERE ISDESCENDANTNODE(Vehicle, '/vehicle') AND Vehicle.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string'");
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(Query.class), any());
 
@@ -78,11 +78,23 @@ public class SimpleFedoraRepositoryTest {
         doAnswer(invocation -> {
             Query query = (Query) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT DISTINCT * FROM [fedora:Resource] AS Vehicle WHERE ISDESCENDANTNODE(Vehicle, '/vehicle') AND Vehicle.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string' AND Vehicle.[test:color] = 'green\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string'");
+                    .isEqualTo("SELECT DISTINCT * FROM [fedora:Container] AS Vehicle WHERE ISDESCENDANTNODE(Vehicle, '/vehicle') AND Vehicle.[test:make] = 'Ford\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string' AND Vehicle.[test:color] = 'green\u0018^^\u0018http://www.w3.org/2001/XMLSchema#string'");
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(Query.class), any());
 
         vehicleRepo.findByMakeAndColor("Ford", "green");
+    }
+
+    @Test
+    public void testFindByMakeAndDescription_Type() throws Exception {
+        doAnswer(invocation -> {
+            Query query = (Query) invocation.getArguments()[0];
+            assertThat(query.toString())
+                    .isEqualTo("");
+            return Collections.emptyList();
+        }).when(mockFedoraTemplate).query(any(Query.class), any());
+
+        vehicleRepo.findByMakeAndDescription_Type("Batmobile", "full");
     }
 
     /*

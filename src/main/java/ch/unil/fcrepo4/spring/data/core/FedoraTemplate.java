@@ -149,11 +149,12 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     private <T> List<T> processQueryQueryResponse(ResponseEntity<String[]> responseEntity, Class<T> beanType){
         List<T> beans = new ArrayList<>();
         for (String path: responseEntity.getBody()){
-            try {
+            System.out.println(path);
+            /*try {
                 beans.add(fedoraConverter.read(beanType, repository.getObject(path)));
             } catch (FedoraException e) {
                 handleException(e);
-            }
+            }*/
         }
         return beans;
     }

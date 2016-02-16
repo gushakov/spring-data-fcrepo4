@@ -105,22 +105,15 @@ public class FedoraTemplateTestIT {
     @Test
     public void testSaveWithDatastream() throws Exception {
         Vehicle vehicle = new Vehicle(System.currentTimeMillis(), "Batmobile");
-        vehicle.setDescription(new VehicleDescription(new ByteArrayInputStream("foobar".getBytes())));
+        VehicleDescription description = new VehicleDescription(new ByteArrayInputStream("toto".getBytes()));
+        description.setType("full");
+        vehicle.setDescription(description);
         fedoraTemplate.save(vehicle);
     }
 
     @Test
     public void testQuery() throws Exception {
-       List<Vehicle> vehicles = fedoraTemplate.query(
-                "SELECT * from [fedora:Container] as v where v.[ns001:beans] = 'object'",
-                Vehicle.class
-        );
-
-        StringBuilderWriter writer = new StringBuilderWriter();
-
-        IOUtils.copy(vehicles.get(0).getDescription().getDesc(), writer);
-
-        System.out.println(writer.toString());
-
+        List<Vehicle> descriptions = fedoraTemplate.query("select a.* from [nt:resource] as a", Vehicle.class);
+        System.out.println(descriptions.size());
     }
 }

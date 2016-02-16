@@ -7,7 +7,7 @@ import ch.unil.fcrepo4.spring.data.core.mapping.FedoraObjectPersistentEntity;
  */
 public class SelectorImpl implements Selector {
 
-    private static final String FEDORA_RESOURCE_NODE_TYPE_NAME = "[fedora:Resource]";
+    private static final String FEDORA_RESOURCE_NODE_TYPE_NAME = "[fedora:Container]";
 
     FedoraObjectPersistentEntity<?> entity;
 

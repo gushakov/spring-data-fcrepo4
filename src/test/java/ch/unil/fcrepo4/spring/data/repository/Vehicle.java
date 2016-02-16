@@ -38,6 +38,7 @@ public class Vehicle {
     @Datastream
     private VehicleDescription description;
 
+    @Datastream
     private VehiclePicture picture;
 
     // resource (read-only) properties

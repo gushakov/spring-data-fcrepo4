@@ -31,4 +31,6 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     Page<Vehicle> findByCreatedGreaterThan(Date date, Pageable pageable);
 
+    List<Vehicle> findByMakeAndDescription_Type(String make, String type);
+
 }
