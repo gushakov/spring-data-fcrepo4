@@ -3,11 +3,8 @@ package ch.unil.fcrepo4.spring.data.repository.support;
 // based on code from org.springframework.data.solr.repository.support.SimpleSolrRepository
 
 import ch.unil.fcrepo4.spring.data.core.FedoraOperations;
-import ch.unil.fcrepo4.spring.data.core.mapping.FedoraObjectPersistentEntity;
-import ch.unil.fcrepo4.spring.data.core.query.qom.*;
 import ch.unil.fcrepo4.spring.data.repository.FedoraCrudRepository;
 import ch.unil.fcrepo4.spring.data.repository.query.FedoraEntityInformation;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,7 +12,6 @@ import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
-import java.util.HashMap;
 
 /**
  * @author gushakov
@@ -54,13 +50,7 @@ public class SimpleFedoraRepository<T, ID extends Serializable> implements Fedor
 
     @Override
     public Page<T> findAll(Pageable pageable) {
-        FedoraObjectPersistentEntity<?> entity = (FedoraObjectPersistentEntity<?>) fedoraOperations.getConverter().getMappingContext().getPersistentEntity(entityClass);
-        SelectorImpl selector = new SelectorImpl(entity);
-        return fedoraOperations.queryForPage(new JcrQuery(
-                MapUtils.putAll(new HashMap<>(), new Selector[]{selector}),
-                new DescendantNodeImpl(selector),
-                new LimitImpl()
-        ), entityClass);
+        return null;
     }
 
     @Override

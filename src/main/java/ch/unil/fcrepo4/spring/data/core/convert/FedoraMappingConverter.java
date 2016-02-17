@@ -20,6 +20,7 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.StringUtils;
 import org.fcrepo.client.*;
+import org.fcrepo.kernel.api.RdfLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -215,6 +216,20 @@ public class FedoraMappingConverter implements FedoraConverter {
         Assert.notNull(path);
         try {
             return repository.exists(path);
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void updateIndex(FedoraResource fedoraResource) {
+        try {
+            String updateIndex = "INSERT DATA {<" + repository.getRepositoryUrl() + fedoraResource.getPath() + "> <" +
+                    RdfLexicon.INDEXING_NAMESPACE + "hasIndexingTransformation> \"default\" ; <" +
+                    RdfLexicon.RDF_NAMESPACE + "type> <" +
+                    RdfLexicon.INDEXING_NAMESPACE + "Indexable> .}";
+            logger.debug("Update (index): {}", updateIndex);
+            fedoraResource.updateProperties(updateIndex);
         } catch (FedoraException e) {
             throw new RuntimeException(e);
         }

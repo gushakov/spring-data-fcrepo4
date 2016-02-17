@@ -8,11 +8,7 @@ import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
 import ch.unil.fcrepo4.spring.data.repository.Vehicle;
 import ch.unil.fcrepo4.spring.data.repository.VehicleDescription;
 import com.hp.hpl.jena.graph.NodeFactory;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.assertj.jodatime.api.Assertions;
 import org.fcrepo.client.FedoraException;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +16,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -49,7 +41,9 @@ public class FedoraTemplateTestIT {
 
         @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate(env.getProperty("fedora.host"), env.getProperty("fedora.port", Integer.class));
+            return new FedoraTemplate(env.getProperty("fedora.host"),
+                    env.getProperty("fedora.port", Integer.class),
+                    env.getProperty("triplestore.port", Integer.class));
         }
 
     }
@@ -91,6 +85,7 @@ public class FedoraTemplateTestIT {
                 rdfDatatypeConverter.encodeLiteralValue("bar"));
     }
 
+/*
     @Test
     public void testLoadBean1() throws Exception {
         DateTime before = DateTime.now();
@@ -104,6 +99,7 @@ public class FedoraTemplateTestIT {
         assertThat(read.created).isNotNull();
         Assertions.assertThat(new DateTime(read.created.getTime())).isAfter(before);
     }
+*/
 
     @Test
     public void testSaveWithDatastream() throws Exception {

@@ -6,7 +6,7 @@ import ch.unil.fcrepo4.spring.data.core.FedoraOperations;
 import ch.unil.fcrepo4.spring.data.repository.query.FedoraEntityInformationCreator;
 import ch.unil.fcrepo4.spring.data.repository.query.FedoraEntityInformationCreatorImpl;
 import ch.unil.fcrepo4.spring.data.repository.query.FedoraQueryMethod;
-import ch.unil.fcrepo4.spring.data.repository.query.PartTreeJcrQuery;
+import ch.unil.fcrepo4.spring.data.repository.query.PartTreeFedoraQuery;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.core.RepositoryInformation;
@@ -63,7 +63,7 @@ public class FedoraRepositoryFactory extends RepositoryFactorySupport {
 
         @Override
         public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, NamedQueries namedQueries) {
-            return new PartTreeJcrQuery(new FedoraQueryMethod(method, metadata), fedoraOperations);
+            return new PartTreeFedoraQuery(new FedoraQueryMethod(method, metadata), fedoraOperations);
         }
     }
 

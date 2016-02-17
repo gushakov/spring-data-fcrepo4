@@ -3,7 +3,7 @@ package ch.unil.fcrepo4.spring.data.repository.query;
 // based on code from org.springframework.data.solr.repository.query.AbstractSolrQuery
 
 import ch.unil.fcrepo4.spring.data.core.FedoraOperations;
-import ch.unil.fcrepo4.spring.data.core.query.qom.Query;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 
@@ -26,7 +26,7 @@ public abstract class AbstractFedoraQuery implements RepositoryQuery {
     public Object execute(Object[] parameters) {
         FedoraParameterAccessor parameterAccessor = new FedoraParametersParameterAccessor(fedoraQueryMethod.getParameters(),
                 parameters);
-        Query query = createQuery(parameterAccessor);
+        FedoraQuery query = createQuery(parameterAccessor);
         return fedoraOperations.query(query, fedoraQueryMethod.getEntityInformation().getJavaType());
 
     }
@@ -36,5 +36,5 @@ public abstract class AbstractFedoraQuery implements RepositoryQuery {
         return fedoraQueryMethod;
     }
 
-    protected abstract Query createQuery(FedoraParameterAccessor parameterAccessor);
+    protected abstract FedoraQuery createQuery(FedoraParameterAccessor parameterAccessor);
 }

@@ -1,10 +1,8 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
-import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.fcrepo.client.FedoraException;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,14 +11,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Page;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -40,7 +36,8 @@ public class SimpleFedoraRepositoryTestIT {
         @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
             return new FedoraTemplate(env.getProperty("fedora.host"),
-                    env.getProperty("fedora.port", Integer.class));
+                    env.getProperty("fedora.port", Integer.class),
+                    env.getProperty("triplestore.port", Integer.class));
         }
 
     }
