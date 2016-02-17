@@ -20,10 +20,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
