@@ -33,4 +33,6 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     List<Vehicle> findByMakeAndDescription_Type(String make, String type);
 
+    List<Vehicle> findByDescription_Type(String type);
+
 }

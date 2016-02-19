@@ -5,6 +5,7 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.fcrepo.client.FedoraException;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,6 +49,15 @@ public class SimpleFedoraRepositoryTest {
 
     @Autowired
     private RdfDatatypeConverter rdfDatatypeConverter;
+
+
+    @Test
+    public void testQueryCriteria() throws Exception {
+//         vehicleRepo.findByMake("Ford");
+//        vehicleRepo.findByMakeAndDescription_Type("Ford", "full");
+        vehicleRepo.findByDescription_Type("full");
+    }
+
 
     /*
     @Test
