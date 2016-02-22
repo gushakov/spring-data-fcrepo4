@@ -17,16 +17,19 @@ public class PartTreeFedoraQuery extends AbstractFedoraQuery {
     private PartTree tree;
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
     private RdfDatatypeConverter rdfDatatypeConverter;
+    private FedoraQueryMethod method;
 
     public PartTreeFedoraQuery(FedoraQueryMethod method, FedoraOperations fedoraOperations) {
         super(fedoraOperations, method);
-        this.tree = new PartTree(method.getName(), method.getEntityInformation().getJavaType());
+        this.method = method;
+        this.tree = new PartTree(method.getName(), this.method.getEntityInformation().getJavaType());
         this.mappingContext = fedoraOperations.getConverter().getMappingContext();
         this.rdfDatatypeConverter = fedoraOperations.getConverter().getRdfDatatypeConverter();
     }
 
     @Override
     protected FedoraQuery createQuery(FedoraParameterAccessor parameterAccessor) {
-        return new FedoraSparqlQueryCreator(tree, parameterAccessor, mappingContext, rdfDatatypeConverter).createQuery();
+        return new FedoraSparqlQueryCreator(tree, parameterAccessor, this.method.getEntityInformation().getJavaType(),
+                mappingContext, rdfDatatypeConverter).createQuery();
     }
 }

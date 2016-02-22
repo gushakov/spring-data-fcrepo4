@@ -8,4 +8,4 @@ before_install:
     - "export JAVA_OPTS=-Xmx512"
 
 script:
-    - mvn verify
+    - mvn -Ptravis-tests test

@@ -319,6 +319,11 @@
                             <version>7.0.62</version>
                         </artifactInstaller>
                     </container>
+                    <configuration>
+                        <properties>
+                            <cargo.jvmargs>-Dfile.encoding=UTF-8</cargo.jvmargs>
+                        </properties>
+                    </configuration>
                 </configuration>
                 <executions>
                     <execution>

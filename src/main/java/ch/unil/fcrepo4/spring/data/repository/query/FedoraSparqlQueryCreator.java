@@ -6,13 +6,16 @@ import ch.unil.fcrepo4.spring.data.core.mapping.FedoraResourcePersistentProperty
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import ch.unil.fcrepo4.spring.data.core.query.sparql.BgpCriteria;
 import ch.unil.fcrepo4.spring.data.core.query.sparql.Criteria;
+import ch.unil.fcrepo4.spring.data.core.query.sparql.SparqlQuery;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.context.PersistentPropertyPath;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
+import org.springframework.data.util.TypeInformation;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -22,40 +25,56 @@ public class FedoraSparqlQueryCreator extends AbstractQueryCreator<FedoraQuery, 
     private FedoraParameterAccessor parameterAccessor;
     private MappingContext<?, FedoraPersistentProperty> mappingContext;
     private RdfDatatypeConverter rdfDatatypeConverter;
-
+    private TypeInformation<?> domainTypeInfo;
 
     public FedoraSparqlQueryCreator(PartTree tree, FedoraParameterAccessor parameters,
-                                    MappingContext<?, FedoraPersistentProperty> mappingContext,
+                                    Class<?> domainClass, MappingContext<?, FedoraPersistentProperty> mappingContext,
                                     RdfDatatypeConverter rdfDatatypeConverter) {
         super(tree, parameters);
         this.parameterAccessor = parameters;
+        this.domainTypeInfo = mappingContext.getPersistentEntity(domainClass).getTypeInformation();
         this.mappingContext = mappingContext;
         this.rdfDatatypeConverter = rdfDatatypeConverter;
     }
 
-
     @Override
-    protected Criteria create(Part part, Iterator<Object> iterator) {
+    protected Criteria create(Part part, Iterator<Object> arguments) {
         PersistentPropertyPath<FedoraPersistentProperty> persistentPropertyPath = mappingContext.getPersistentPropertyPath(part.getProperty());
-        BgpCriteria bgpCriteria = new BgpCriteria<>(persistentPropertyPath);
-        bgpCriteria.substitutePropertyNodeValue((FedoraResourcePersistentProperty) persistentPropertyPath.getLeafProperty(),
-                rdfDatatypeConverter.encodeExpressionValue(iterator.next()));
-        System.out.println(bgpCriteria);
+        BgpCriteria bgpCriteria = new BgpCriteria(persistentPropertyPath, domainTypeInfo);
+        processCriteriaForPart(persistentPropertyPath, bgpCriteria, part, arguments);
         return bgpCriteria;
     }
 
     @Override
     protected Criteria and(Part part, Criteria base, Iterator<Object> iterator) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected Criteria or(Criteria base, Criteria criteria) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected FedoraQuery complete(Criteria criteria, Sort sort) {
-        return null;
+        return new SparqlQuery(criteria);
+    }
+
+    private void processCriteriaForPart(PersistentPropertyPath<FedoraPersistentProperty> persistentPropertyPath,
+                                        BgpCriteria bgpCriteria, Part part, Iterator<Object> arguments) {
+        switch (part.getType()) {
+            case SIMPLE_PROPERTY:
+                bgpCriteria.substitutePropertyNodeValue((FedoraResourcePersistentProperty) persistentPropertyPath.getLeafProperty(),
+                        rdfDatatypeConverter.encodeExpressionValue(arguments.next()));
+                break;
+
+            case GREATER_THAN:
+                bgpCriteria.addGreaterThanFilter((FedoraResourcePersistentProperty) persistentPropertyPath.getLeafProperty(),
+                        rdfDatatypeConverter.encodeExpressionValue(arguments.next()));
+                break;
+            default:
+                throw new UnsupportedOperationException("Expressions containing " +
+                        Arrays.toString(part.getType().getKeywords().toArray()) + " are not supported yet");
+        }
     }
 }

@@ -62,6 +62,11 @@ public class SimpleFedoraRepositoryTestIT {
     }
 
     @Test
+    public void testInsert() throws Exception {
+//        vehicleRepo.save(new Vehicle(1L, "Ford", "light green", 1000, 6.5f));
+    }
+
+    @Test
     public void testFindByMake() throws Exception {
         List<Vehicle> vehicles = vehicleRepo.findByMake("Ford");
         ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();

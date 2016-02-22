@@ -27,6 +27,9 @@ public abstract class AbstractFedoraQuery implements RepositoryQuery {
         FedoraParameterAccessor parameterAccessor = new FedoraParametersParameterAccessor(fedoraQueryMethod.getParameters(),
                 parameters);
         FedoraQuery query = createQuery(parameterAccessor);
+
+        System.out.println(query);
+
         return fedoraOperations.query(query, fedoraQueryMethod.getEntityInformation().getJavaType());
 
     }
