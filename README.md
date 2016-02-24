@@ -2,10 +2,7 @@
 
 [![Build status](https://travis-ci.org/gushakov/spring-data-fcrepo4.svg?branch=master)](https://travis-ci.org/gushakov/spring-data-fcrepo4)
 
-Spring Data module for Fedora Commons Repository (version 4.x or later) allowing for CRUD operations and query using annotated POJO beans.
-
-Note: This branch uses JCR-SQL2 queries against a patched Fedora webapp. For version using SPARQL queries against a triplestore
-see [query-triplestore](https://github.com/gushakov/spring-data-fcrepo4/tree/query-triplestore) branch.
+Spring Data module for Fedora Commons Repository (version 4.x) allowing for CRUD operations and query using annotated POJO beans.
 
 *This is just a proof-of-concept implementation and still largely work in progress.*
 
@@ -17,9 +14,8 @@ see [query-triplestore](https://github.com/gushakov/spring-data-fcrepo4/tree/que
 * Custom RDF to Java mapper (based on XSD types)
 * Datastream (binary) object persistence
 * Lazy-load of datastreams
-* Spring Data enabled repository implementation
-* JSR-SQL2 queries for "findBy" query methods (some types of queries only)
-* Paged queries
+* Spring Data enabled repository implementation (work in progress...)
+* Paged queries (work in progress...)
 
 **To be done:**
 
@@ -38,13 +34,6 @@ This project is heavily based on the code from the following projects (including
  * [fcrepo4-client](https://github.com/fcrepo4-labs/fcrepo4-client)
 
  * [spring-data-solr](https://github.com/spring-projects/spring-data-solr)
-
-### Patch for JCR-SQL2 query
-
-As of this writting (v. 4.4.0), Fedora repository does not expose any way to query the underlying JCR implementation by clients. This module, then,
-provides a [JcrSqlQueryServlet](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/servlet/JcrSqlQueryServlet.java) which allows
-allows a REST-based client to execute a a JCR-SQL2 query against the JCR implementation (Modeshape). For this to work, a JAR with this servlet needs to be
-put in the `WEB-INF/lib` directory of the Fedora web application.
 
 ### FedoraTemplate
 
@@ -184,11 +173,15 @@ public static class AppConfig {
 List<Vehicle> vehiclesWithLargeMileage = vehicleRepo.findByMilesGreaterThan(15000);
 ```
 
-The module automatically converts the candidate query methods into [JCR-SQL2](https://docs.jboss.org/author/display/MODE/JCR-SQL2) queries. For example,
-the call to the query method `findByMake` with argument "Ford" will be translated into
+The module will then issue a SPARQL query (approximately) as follows
 
-```sql
-SELECT * FROM [fedora:Resource] AS n WHERE (ISDESCENDANTNODE(n,'/vehicle') AND n.[test:make] = 'Ford[CAN]^^[CAN]http://www.w3.org/2001/XMLSchema#string')
+```sparql
+SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle
+WHERE
+  { ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/miles> ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles
+	FILTER ( ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles > "1000"^^<http://www.w3.org/2001/XMLSchema#int> )
+  }
+
 ```
 
 ### Datastreams
@@ -212,8 +205,7 @@ class Vehicle {
 }
 ```
 
-A datastream type must be annotated with `Datastream` annotation optionally specifying the name and the mimetype of the
-datastream. The `InputStream` property providing the actual content of the datastream must be annotated with `DsContent`
+A datastream property must be annotated with `Datastream` annotation. The `java.io.InputStream` property providing the actual binary content of the datastream must be annotated with `Binary`
 annotation. The datastreams will be persisted as direct children of their parent `FedoraObject` bean, using the name specified with `Datastream`
 annotation or the name of the datastream property (by default) as a the path suffix.
 
@@ -237,5 +229,5 @@ This module will automatically perform some useful conversions, i.e. to `ZonedDa
 
 ### Java to RDF type conversion
 
-To serialize values of Java properties as RDF properties uses in SPARQL updates and JCR-SQL2 queries this module uses [TypeMapper](https://jena.apache.org/documentation/notes/typed-literals.html)
+To serialize values of Java properties as RDF properties uses in SPARQL updates and queries this module uses [TypeMapper](https://jena.apache.org/documentation/notes/typed-literals.html)
 provided by `jena-core` module and also used by Fedora repository. See [ExtendedXsdDatatypeConverter](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ExtendedXsdDatatypeConverter.java) for implementation details.

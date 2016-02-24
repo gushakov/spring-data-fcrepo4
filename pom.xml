@@ -11,12 +11,21 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <skipITs>false</skipITs>
-        <fcrepo.client.version>4.3.0</fcrepo.client.version>
-        <fcrepo.webapp.version>4.3.0</fcrepo.webapp.version>
-        <fcrepo.message.consumer.webapp.version>4.3.0</fcrepo.message.consumer.webapp.version>
-        <random.fedora.servlet.port>${fedora.servlet.port}</random.fedora.servlet.port>
-        <random.triplestore.servlet.port>${triplestore.servlet.port}</random.triplestore.servlet.port>
+        <skipTests>true</skipTests>
+        <skipITs>true</skipITs>
+
+        <assertj.core.version>3.3.0</assertj.core.version>
+        <byte.buddy.version>1.2.2</byte.buddy.version>
+        <commons.collections4.version>4.1</commons.collections4.version>
+        <fcrepo.client.version>4.4.0</fcrepo.client.version>
+        <junit.version>4.11</junit.version>
+        <logback.version>1.1.3</logback.version>
+        <mockito.version>1.10.8</mockito.version>
+        <spring.version>4.1.6.RELEASE</spring.version>
+        <spring.data.version>1.11.0.RELEASE</spring.data.version>
+        <slf4j.version>1.7.11</slf4j.version>
+        <xml.matchers.version>1.0-RC1</xml.matchers.version>
+        <xml.apis.version>1.4.01</xml.apis.version>
     </properties>
 
     <dependencies>
@@ -26,20 +35,15 @@
         -->
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
-        </dependency>
-
-        <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.2.2</version>
+            <version>${byte.buddy.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>
@@ -51,6 +55,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -60,25 +65,21 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>1.11.0.RELEASE</version>
+            <version>${spring.data.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-oxm</artifactId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.0.0</version>
+            <version>${assertj.core.version}</version>
         </dependency>
 
         <!--
@@ -88,6 +89,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -95,6 +97,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -105,66 +108,41 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.xmlmatchers</groupId>
             <artifactId>xml-matchers</artifactId>
-            <version>1.0-RC1</version>
+            <version>${xml.matchers.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-fuseki-war</artifactId>
-            <version>2.0.0</version>
-            <type>war</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.fcrepo</groupId>
-            <artifactId>fcrepo-webapp</artifactId>
-            <version>${fcrepo.webapp.version}</version>
-            <type>war</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.fcrepo</groupId>
-            <artifactId>fcrepo-message-consumer-webapp</artifactId>
-            <version>${fcrepo.message.consumer.webapp.version}</version>
-            <type>war</type>
+            <version>${xml.apis.version}</version>
             <scope>test</scope>
         </dependency>
 
     </dependencies>
 
     <build>
-        <testResources>
-            <testResource>
-                <directory>${basedir}/src/test/resources</directory>
-                <filtering>true</filtering>
-            </testResource>
-        </testResources>
 
         <plugins>
             <plugin>
@@ -181,6 +159,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -200,326 +181,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
-                <executions>
-                    <execution>
-                        <id>reserve-network-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>triplestore.ajp.port</portName>
-                                <portName>triplestore.servlet.port</portName>
-                                <portName>triplestore.rmi.port</portName>
-                                <portName>fedora.ajp.port</portName>
-                                <portName>fedora.servlet.port</portName>
-                                <portName>fedora.rmi.port</portName>
-                                <portName>indexer.ajp.port</portName>
-                                <portName>indexer.servlet.port</portName>
-                                <portName>indexer.rmi.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.fcrepo</groupId>
-                                    <artifactId>fcrepo-webapp</artifactId>
-                                    <version>${fcrepo.webapp.version}</version>
-                                    <type>war</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/fedora-webapp</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <executions>
-                    <!--
-                    copies in-memory database "test" from test/etc/fuseki to FUSEKI_BASE/
-                    -->
-                    <execution>
-                        <id>copy-fuseki</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/etc/fuseki</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/src/test/etc/fuseki</directory>
-                                    <filtering>false</filtering>
-                                </resource>
-                            </resources>
-                            <overwrite>true</overwrite>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-fedora-node-types</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/fedora-webapp/WEB-INF/classes
-                            </outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/src/test/etc</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>fedora-node-types.cnd</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                            <overwrite>true</overwrite>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.4.14</version>
-                <configuration>
-                    <container>
-                        <containerId>tomcat7x</containerId>
-                        <artifactInstaller>
-                            <groupId>org.apache.tomcat</groupId>
-                            <artifactId>tomcat</artifactId>
-                            <version>7.0.62</version>
-                        </artifactInstaller>
-                    </container>
-                    <configuration>
-                        <properties>
-                            <cargo.jvmargs>-Dfile.encoding=UTF-8</cargo.jvmargs>
-                        </properties>
-                    </configuration>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>triplestore-start</id>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <container>
-                                <systemProperties>
-                                    <FUSEKI_BASE>${project.build.directory}/etc/fuseki</FUSEKI_BASE>
-                                </systemProperties>
-                            </container>
-                            <configuration>
-                                <properties>
-                                    <cargo.tomcat.ajp.port>${triplestore.ajp.port}</cargo.tomcat.ajp.port>
-                                    <cargo.servlet.port>${triplestore.servlet.port}</cargo.servlet.port>
-                                    <cargo.rmi.port>${triplestore.rmi.port}</cargo.rmi.port>
-                                </properties>
-                                <home>${project.build.directory}/triplestore</home>
-                            </configuration>
-                            <deployables>
-                                <deployable>
-                                    <groupId>org.apache.jena</groupId>
-                                    <artifactId>jena-fuseki-war</artifactId>
-                                    <type>war</type>
-                                    <properties>
-                                        <context>ROOT</context>
-                                    </properties>
-                                </deployable>
-                            </deployables>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>triplestore-stop</id>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                        <phase>post-integration-test</phase>
-                        <configuration>
-                            <configuration>
-                                <properties>
-                                    <cargo.tomcat.ajp.port>${triplestore.ajp.port}</cargo.tomcat.ajp.port>
-                                    <cargo.servlet.port>${triplestore.servlet.port}</cargo.servlet.port>
-                                    <cargo.rmi.port>${triplestore.rmi.port}</cargo.rmi.port>
-                                </properties>
-                                <home>${project.build.directory}/triplestore</home>
-                            </configuration>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>fedora-start</id>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <configuration>
-                                <properties>
-                                    <cargo.tomcat.ajp.port>${fedora.ajp.port}</cargo.tomcat.ajp.port>
-                                    <cargo.servlet.port>${fedora.servlet.port}</cargo.servlet.port>
-                                    <cargo.rmi.port>${fedora.rmi.port}</cargo.rmi.port>
-                                </properties>
-                                <home>${project.build.directory}/fedora</home>
-                            </configuration>
-                            <deployables>
-                                <deployable>
-                                    <groupId>org.fcrepo</groupId>
-                                    <artifactId>fcrepo-webapp</artifactId>
-                                    <type>war</type>
-                                    <location>${project.build.directory}/fedora-webapp</location>
-                                    <properties>
-                                        <context>ROOT</context>
-                                    </properties>
-                                </deployable>
-                            </deployables>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>fedora-stop</id>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                        <phase>post-integration-test</phase>
-                        <configuration>
-                            <configuration>
-                                <properties>
-                                    <cargo.tomcat.ajp.port>${fedora.ajp.port}</cargo.tomcat.ajp.port>
-                                    <cargo.servlet.port>${fedora.servlet.port}</cargo.servlet.port>
-                                    <cargo.rmi.port>${fedora.rmi.port}</cargo.rmi.port>
-                                </properties>
-                                <home>${project.build.directory}/fedora</home>
-                            </configuration>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>indexer-start</id>
-                        <goals>
-                            <goal>${indexer.start.mode}</goal>
-                        </goals>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <container>
-                                <systemProperties>
-                                    <fcrepo.port>${fedora.servlet.port}</fcrepo.port>
-                                    <fuseki.port>${triplestore.servlet.port}</fuseki.port>
-                                    <fuseki.dynamic.test.port>${triplestore.servlet.port}</fuseki.dynamic.test.port>
-                                </systemProperties>
-                            </container>
-                            <configuration>
-                                <properties>
-                                    <cargo.tomcat.ajp.port>${indexer.ajp.port}</cargo.tomcat.ajp.port>
-                                    <cargo.servlet.port>${indexer.servlet.port}</cargo.servlet.port>
-                                    <cargo.rmi.port>${indexer.rmi.port}</cargo.rmi.port>
-                                </properties>
-                                <home>${project.build.directory}/indexer</home>
-                            </configuration>
-                            <deployables>
-                                <deployable>
-                                    <groupId>org.fcrepo</groupId>
-                                    <artifactId>fcrepo-message-consumer-webapp</artifactId>
-                                    <type>war</type>
-                                    <properties>
-                                        <context>ROOT</context>
-                                    </properties>
-                                </deployable>
-                            </deployables>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>indexer-stop</id>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                        <phase>post-integration-test</phase>
-                        <configuration>
-                            <configuration>
-                                <properties>
-                                    <cargo.tomcat.ajp.port>${indexer.ajp.port}</cargo.tomcat.ajp.port>
-                                    <cargo.servlet.port>${indexer.servlet.port}</cargo.servlet.port>
-                                    <cargo.rmi.port>${indexer.rmi.port}</cargo.rmi.port>
-                                </properties>
-                                <home>${project.build.directory}/indexer</home>
-                            </configuration>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
-
-
-    <!--
-Cargo config based on
-    http://stackoverflow.com/questions/8820977/maven-cargo-plugin-embedded-tomcat-7-configuration
-    http://kaczanowscy.pl/tomek/2013-01/cargo-maven-two-tomcats
-See fuseki configuration at
-    http://jena.apache.org/documentation/fuseki2/fuseki-configuration.html
--->
-
-
-    <profiles>
-        <profile>
-            <id>travis-tests</id>
-            <properties>
-                <indexer.start.mode>start</indexer.start.mode>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>cargo-integration-tests</id>
-            <properties>
-                <indexer.start.mode>run</indexer.start.mode>
-            </properties>
-        </profile>
-    </profiles>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.spring.platform</groupId>
-                <artifactId>platform-bom</artifactId>
-                <version>1.1.2.RELEASE</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>spring-libs-snapshot</id>
-            <url>https://repo.spring.io/libs-snapshot</url>
-        </repository>
-    </repositories>
 
 </project>

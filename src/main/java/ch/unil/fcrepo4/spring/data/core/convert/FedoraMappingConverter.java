@@ -221,6 +221,7 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
+/*
     @Override
     public void updateIndex(FedoraResource fedoraResource) {
         try {
@@ -234,6 +235,7 @@ public class FedoraMappingConverter implements FedoraConverter {
             throw new RuntimeException(e);
         }
     }
+*/
 
     private void writeSimpleProperties(Object bean, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);

@@ -19,6 +19,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -44,16 +45,29 @@ public class SparqlQueryTestIT {
     }
 
 
-    @Autowired
-    private Environment env;
+//    @Autowired
+//    private Environment env;
+
+    @Value("#{environment.getProperty('triplestore.host')}")
+    private String triplestoreHost;
+
+    @Value("#{environment.getProperty('triplestore.port')}")
+    private int triplestorePort;
+
+    @Value("#{environment.getProperty('triplestore.path')}")
+    private String triplestorePath;
+
+    @Value("#{environment.getProperty('triplestore.db')}")
+    private String triplestoreDb;
+
 
     @Test
     public void testAskQuery() throws Exception {
 
         String queryUrl = new URIBuilder().setScheme("http")
-                .setHost(env.getProperty("fedora.host"))
-                .setPort(env.getProperty("triplestore.port", Integer.class))
-                .setPath("/test/query").toString();
+                .setHost(triplestoreHost)
+                .setPort(triplestorePort)
+                .setPath(triplestorePath+"/"+triplestoreDb+"/query").toString();
 
         System.out.println(queryUrl);
 

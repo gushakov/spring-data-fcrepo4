@@ -3,6 +3,7 @@ package ch.unil.fcrepo4.spring.data.core;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import org.apache.http.client.utils.URIBuilder;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
 import org.fcrepo.client.FedoraRepository;
@@ -35,21 +36,48 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private int fedoraPort;
 
+    private String fedoraPath;
+
+    private String triplestoreHost;
+
     private int triplestorePort;
+
+    private String triplestorePath;
+    
+    private String triplestoreDb;
 
     private FedoraRepository repository;
 
     private static final FedoraExceptionTranslator EXCEPTION_TRANSLATOR = new FedoraExceptionTranslator();
 
-    public FedoraTemplate(String fedoraHost, int fedoraPort, int triplestorePort) {
-        Assert.hasLength(fedoraHost);
-        Assert.isTrue(fedoraPort > 0);
-        this.fedoraHost = fedoraHost;
-        this.fedoraPort = fedoraPort;
-        this.triplestorePort = triplestorePort;
-        this.repository = new FedoraRepositoryImpl("http://" + fedoraHost + ":" + fedoraPort + "/rest");
+    /**
+     * Assumes default settings as set in <a href="https://github.com/fcrepo4-exts/fcrepo4-vagrant">fcrepo4-vagrant</a>
+     * project:
+     *   <ul>
+     *       <li>Fedora: http://localhost:8080/fcrepo</li>
+     *       <li>Fuseki: http://localhost:8080/fuseki, databse: "test"</li>
+     *   </ul>
+     */
+    public FedoraTemplate(){
+        this.fedoraHost = "localhost";
+        this.fedoraPort = 8080;
+        this.fedoraPath = "/fcrepo";
+        this.triplestoreHost = "localhost";
+        this.triplestorePort = 8080;
+        this.triplestorePath = "/fuseki";
+        this.triplestoreDb = "test";
     }
 
+    public FedoraTemplate(String fedoraHost, int fedoraPort, String fedoraPath, 
+                          String triplestoreHost, int triplestorePort, String triplestorePath, String triplestoreDb) {
+        this.fedoraHost = fedoraHost;
+        this.fedoraPort = fedoraPort;
+        this.fedoraPath = fedoraPath;
+        this.triplestoreHost = triplestoreHost;
+        this.triplestorePort = triplestorePort;
+        this.triplestorePath = triplestorePath;
+        this.triplestoreDb = triplestoreDb;
+    }
 
     public FedoraRepository getRepository() {
         return repository;
@@ -62,6 +90,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        initClientRepository();
 
         if (fedoraConverter == null) {
             // get the default FedoraConverter
@@ -71,6 +100,18 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         registerPersistenceExceptionTranslator();
     }
 
+    private void initClientRepository(){
+
+        // build client repository URL
+        String fedoraUrl = new URIBuilder()
+                .setScheme("http")
+                .setHost(fedoraHost)
+                .setPort(fedoraPort)
+                .setPath(fedoraPath+"/rest").toString();
+        repository = new FedoraRepositoryImpl(fedoraUrl);
+        
+    }
+    
     @Override
     public FedoraConverter getConverter() {
         return fedoraConverter;
@@ -79,7 +120,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     @Override
     public <T> void save(T bean) {
         FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
-        fedoraConverter.updateIndex(fedoraObject);
+//        fedoraConverter.updateIndex(fedoraObject);
         fedoraConverter.write(bean, fedoraObject);
     }
 
@@ -120,8 +161,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     public <T> List<T> query(String query, Class<T> beanType){
         throw new UnsupportedOperationException();
     }
-
-
 
     private void registerPersistenceExceptionTranslator() {
         if (applicationContext instanceof ConfigurableApplicationContext) {

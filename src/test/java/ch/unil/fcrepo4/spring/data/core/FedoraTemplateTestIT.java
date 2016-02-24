@@ -1,6 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
+import ch.unil.fcrepo4.spring.data.core.mapping.FedoraObjectPersistentEntity;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Created;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Path;
@@ -8,6 +9,7 @@ import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
 import ch.unil.fcrepo4.spring.data.repository.Vehicle;
 import ch.unil.fcrepo4.spring.data.repository.VehicleDescription;
 import com.hp.hpl.jena.graph.NodeFactory;
+import org.assertj.core.api.Assertions;
 import org.fcrepo.client.FedoraException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,13 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.ByteArrayInputStream;
+import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.List;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
 
@@ -36,14 +37,9 @@ public class FedoraTemplateTestIT {
     @PropertySource("classpath:fcrepo4.properties")
     static class TestConfig {
 
-        @Autowired
-        private Environment env;
-
         @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate(env.getProperty("fedora.host"),
-                    env.getProperty("fedora.port", Integer.class),
-                    env.getProperty("triplestore.port", Integer.class));
+            return new FedoraTemplate();
         }
 
     }
@@ -51,15 +47,14 @@ public class FedoraTemplateTestIT {
     @Autowired
     private FedoraTemplate fedoraTemplate;
 
-
     @FedoraObject
-    public static class Bean1 {
+    public static class Bean2 {
 
         @Path
         long id;
 
         @Created
-        Date created;
+        ZonedDateTime created;
 
         @Property
         int number = 3;
@@ -67,39 +62,36 @@ public class FedoraTemplateTestIT {
         @Property
         String foo = "bar";
 
-
     }
 
 
     @Test
-    public void testSaveBean1() throws Exception {
+    public void testSave() throws Exception {
         RdfDatatypeConverter rdfDatatypeConverter = fedoraTemplate.getConverter().getRdfDatatypeConverter();
         long id = System.currentTimeMillis();
-        Bean1 bean = new Bean1();
+        Bean2 bean = new Bean2();
         bean.id = id;
         fedoraTemplate.save(bean);
-        org.fcrepo.client.FedoraObject fo = fedoraTemplate.getRepository().getObject("/bean1/" + id);
+        String namespace = ((FedoraObjectPersistentEntity<?>) fedoraTemplate.getConverter().getMappingContext().getPersistentEntity(Bean2.class))
+                .getNamespace();
+        org.fcrepo.client.FedoraObject fo = fedoraTemplate.getRepository().getObject("/" + namespace + "/" + id);
         assertThat(fo.getProperties()).contains(NodeFactory.createURI("info:fedora/test/number"),
                 rdfDatatypeConverter.encodeLiteralValue(3));
         assertThat(fo.getProperties()).contains(NodeFactory.createURI("info:fedora/test/foo"),
                 rdfDatatypeConverter.encodeLiteralValue("bar"));
     }
 
-/*
     @Test
-    public void testLoadBean1() throws Exception {
-        DateTime before = DateTime.now();
+    public void testSaveAndLoad() throws Exception {
         long id = System.currentTimeMillis();
-        Bean1 write = new Bean1();
+        Bean2 write = new Bean2();
         write.id = id;
         fedoraTemplate.save(write);
-        Bean1 read = fedoraTemplate.load(id, Bean1.class);
-        assertThat(read.number).isEqualTo(3);
-        assertThat(read.foo).isEqualTo("bar");
-        assertThat(read.created).isNotNull();
-        Assertions.assertThat(new DateTime(read.created.getTime())).isAfter(before);
+        Bean2 read = fedoraTemplate.load(id, Bean2.class);
+        System.out.println(read);
+        Assertions.assertThat(read.foo).isEqualTo("bar");
+        System.out.println(read.created);
     }
-*/
 
     @Test
     public void testSaveWithDatastream() throws Exception {
@@ -112,7 +104,5 @@ public class FedoraTemplateTestIT {
 
     @Test
     public void testQuery() throws Exception {
-        List<Vehicle> descriptions = fedoraTemplate.query("select a.* from [nt:resource] as a", Vehicle.class);
-        System.out.println(descriptions.size());
     }
 }

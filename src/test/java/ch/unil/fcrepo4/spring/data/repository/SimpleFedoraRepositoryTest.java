@@ -36,7 +36,7 @@ public class SimpleFedoraRepositoryTest {
 
         @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return spy(new FedoraTemplate("anything", 1, 2));
+            return spy(new FedoraTemplate());
         }
 
     }

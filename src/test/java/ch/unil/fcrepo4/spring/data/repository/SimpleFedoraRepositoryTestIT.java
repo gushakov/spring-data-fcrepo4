@@ -35,9 +35,7 @@ public class SimpleFedoraRepositoryTestIT {
 
         @Bean
         public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate(env.getProperty("fedora.host"),
-                    env.getProperty("fedora.port", Integer.class),
-                    env.getProperty("triplestore.port", Integer.class));
+            return new FedoraTemplate();
         }
 
     }
@@ -62,8 +60,8 @@ public class SimpleFedoraRepositoryTestIT {
     }
 
     @Test
-    public void testInsert() throws Exception {
-//        vehicleRepo.save(new Vehicle(1L, "Ford", "light green", 1000, 6.5f));
+    public void testSaveAll() throws Exception {
+
     }
 
     @Test
@@ -80,61 +78,4 @@ public class SimpleFedoraRepositoryTestIT {
         assertThat(vehicles.get(0)).hasMake("Citroën");
     }
 
-    /*
-    @Test
-    public void testFindByMilesGreaterThan() throws Exception {
-        List<Vehicle> vehicles = vehicleRepo.findByMilesGreaterThan(14000);
-        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).withMilesGreaterThan(14000)
-                .extracting("id").containsOnly(2L, 4L);
-    }
-
-    @Test
-    public void testFindByMakeAndColor() throws Exception {
-        List<Vehicle> vehicles = vehicleRepo.findByMakeAndColor("Ford", "light green");
-        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
-        assertThat(vehicles.get(0))
-                .hasMake("Ford")
-                .hasColor("light green");
-    }
-
-    @Test
-    public void testFindByColorLike() throws Exception {
-        List<Vehicle> vehicles = vehicleRepo.findByColorLike("green");
-        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
-        assertThat(vehicles.get(0)).hasColorLike("green");
-    }
-
-    @Test
-    public void testFindByMakeOrColor() throws Exception {
-        List<Vehicle> vehicles = vehicleRepo.findByMakeOrColorLike("Ford", "red");
-        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).extracting("id").containsOnly(1L, 2L, 3L, 8L);
-    }
-
-    @Test
-    public void testFindByCreatedGreaterThan() throws Exception {
-        List<Vehicle> vehicles = vehicleRepo.findByCreatedGreaterThan(new DateTime(0L).toDate());
-        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
-    }
-
-    @Test
-    public void testFindByMilesGreaterThanPage() throws Exception {
-        Page<Vehicle> firstPage = vehicleRepo.findByMilesGreaterThan(0, new FedoraPageRequest(0, 4));
-        assertThat(firstPage.getNumberOfElements()).isEqualTo(4);
-        assertThat(firstPage.isFirst()).isTrue();
-        assertThat(firstPage.hasNext()).isTrue();
-        Page<Vehicle> secondPage = vehicleRepo.findByMilesGreaterThan(0, firstPage.nextPageable());
-        assertThat(secondPage.getNumberOfElements()).isEqualTo(4);
-        assertThat(secondPage.isFirst()).isFalse();
-        assertThat(secondPage.hasNext()).isTrue();
-        Page<Vehicle> thirdPage = vehicleRepo.findByMilesGreaterThan(0, secondPage.nextPageable());
-        assertThat(thirdPage.getNumberOfElements()).isEqualTo(0);
-        assertThat(thirdPage.isFirst()).isFalse();
-        assertThat(thirdPage.hasNext()).isFalse();
-    }
-
-    @Test
-    public void testFindAllByPage() throws Exception {
-        assertThat(vehicleRepo.findAll(new FedoraPageRequest(0, Integer.MAX_VALUE)).getNumberOfElements())
-                .isEqualTo(8);
-    }*/
 }
