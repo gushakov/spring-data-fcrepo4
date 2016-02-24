@@ -431,8 +431,7 @@
                                 <systemProperties>
                                     <fcrepo.port>${fedora.servlet.port}</fcrepo.port>
                                     <fuseki.port>${triplestore.servlet.port}</fuseki.port>
-                                    <fuseki.dynamic.test.port>${triplestore.servlet.port}
-                                    </fuseki.dynamic.test.port>
+                                    <fuseki.dynamic.test.port>${triplestore.servlet.port}</fuseki.dynamic.test.port>
                                 </systemProperties>
                             </container>
                             <configuration>
@@ -491,9 +490,6 @@ See fuseki configuration at
     <profiles>
         <profile>
             <id>travis-tests</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
             <properties>
                 <indexer.start.mode>start</indexer.start.mode>
             </properties>
@@ -504,9 +500,6 @@ See fuseki configuration at
             <properties>
                 <indexer.start.mode>run</indexer.start.mode>
             </properties>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
         </profile>
     </profiles>
 
