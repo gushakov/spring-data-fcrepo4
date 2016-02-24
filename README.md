@@ -2,30 +2,25 @@
 
 [![Build status](https://travis-ci.org/gushakov/spring-data-fcrepo4.svg?branch=master)](https://travis-ci.org/gushakov/spring-data-fcrepo4)
 
-Spring Data module for Fedora Commons Repository (version 4.x) allowing for CRUD operations and query using annotated POJO beans.
+### Description
 
-*This is just a proof-of-concept implementation and still largely work in progress.*
+This project aims at providing a Spring Data module for Fedora Commons Repository. The module should allow to execute CRUD operations
+and query against the Fedora repository using (domain) annotated Java objects.
 
-**Partially implemented:**
+**List of features availability**
 
-* ID to JCR path mapping
-* Mapping of resource properties (`created`, etc.)
-* Mapping of simple properties (not collections)
-* Custom RDF to Java mapper (based on XSD types)
-* Datastream (binary) object persistence
-* Lazy-load of datastreams
-* Spring Data enabled repository implementation (work in progress...)
-* Paged queries (work in progress...)
-
-**To be done:**
-
-* Enable custom extensions to Java to RDF converter
-* RELS-EXT type relationships with lazy-load
-* Transaction support
-* Named queries
-* Fixity checks support
-* Support versions
-* Javadoc
+|Feature|Status|Comment|
+|---|---|---|
+|ID to JCR node path mapping|OK|See [PathCreator](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/mapping/PathCreator.java).|
+|Mapping of resource properties (`created`, etc.)|Partially done|See [ZonedDateTimeRdfDatatype](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ZonedDateTimeRdfDatatype.java).|
+|Simple properties mapping|Partially done|Need to test CRUD and queries with `boolean`, `double`, etc.|
+|Extensible custom RDF to Java converter|OK|See [ExtendedXsdDatatypeConverter](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ExtendedXsdDatatypeConverter.java).|
+|Datastream (binary) object persistence|OK|Needs some work.|
+|Lazy-load of datastreams and relations|Partially done|For datastreams, for now.|
+|Spring data repository abstraction|Partially done|See [SimpleFedoraRepository](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/repository/support/SimpleFedoraRepository.java).|
+|Paged queries|Not yet||
+|Relationships mapping|Not yet||
+|Collection properties mapping|Not yet||
 
 ### Acknowledgements
 
@@ -43,14 +38,9 @@ is the main object responsible for executing CRUD and query operations against F
 This is an example of configuring `FedoraTemplate` using Spring Java configuration. It just requires a hostname and a port of Fedora installation.
 
 ```java
-@Autowired
-private Environment env;
-
 @Bean
-        public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate(env.getProperty("fedora.host"),
-                    env.getProperty("fedora.port", Integer.class));
-
+public FedoraTemplate fedoraTemplate() throws FedoraException {
+	return new FedoraTemplate(/* config omitted */);
 }
 ```
 
@@ -89,56 +79,16 @@ fedoraTemplate.save(vehicle);
 Vehicle anotherVehicle = fedoraTemplate.load(1L, Vehicle.class);
 ```
 
-Assuming the Fedora instance is running under `http://localhost:9090/rest`, a set of corresponding [FeodoraResources](https://github.com/fcrepo4-labs/fcrepo4-client/blob/master/fcrepo-client/src/main/java/org/fcrepo/client/FedoraResource.java)
-will be created at the backend with the corresponding JCR properties (shown here as decoded RDF graph for clarity).
+Assuming the Fedora instance is running under `http://localhost:8080/fcrepo/rest/vehicle/1`, a set of corresponding resources will be created at the backend with the corresponding RDF properties (shown here as decoded RDF graph for clarity).
 
 ```turtle
-<http://localhost:9090/rest/vehicle/1>
+<http://localhost:8080/fcrepo/rest/vehicle/1>
 	<!-- default resource properties are omitted -->
 	<info:fedora/test/color>        "Green"^^<http://www.w3.org/2001/XMLSchema#string> ;
 	<info:fedora/test/consumption>  "6.5"^^<http://www.w3.org/2001/XMLSchema#float> ;
 	<info:fedora/test/make>         "Ford"^^<http://www.w3.org/2001/XMLSchema#string> ;
 	<info:fedora/test/miles>        "15000"^^<http://www.w3.org/2001/XMLSchema#int> .
 ```
-
-### PathCreator
-
-The mandatory `Path` annotation may specify a custom implementation of [PathCreator](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/mapping/PathCreator.java)
-interface to customize how JCR paths are created for the resources mapped to the instances of a bean. For example, if `pathCreator` is specified as follows
-
-```java
-public class CustomPathCreator<T> implements PathCreator<T, Long> {
-    @Override
-    public String createPath(String namespace, Class<T> beanType, Class<Long> pathPropType, String pathPropName, Long pathPropValue) {
-        String value = pathPropValue.toString();
-        String part1 = value.substring(0, 3);
-        String part2 = value.substring(3, 6);
-        String part3 = value.substring(6);
-        return "/" + namespace + "/" + part1 + "/" + part2 + "/" + part3;
-    }
-
-    @Override
-    public Long parsePath(String namespace, Class<T> beanType, Class<Long> pathPropType, String pathPropName, String path) {
-        return Long.parseLong(StringUtils.removeStart(StringUtils.remove(path, "/"), namespace));
-    }
-}
-
-// and the bean
-
-@FedoraObject(namespace = "custom")
-public class Bean {
-
-    @Path(pathCreator = CustomPathCreator.class)
-    private long id;
-
-    public Bean4(long id) {
-        this.id = id;
-    }
-
-}
-```
-
-then the bean `new Bean(123456789L)` will be mapped to a resource with `/custom/123/456/789` path.
 
 ### Spring Data Repository
 
@@ -165,7 +115,10 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 @PropertySource("classpath:fcrepo4.properties")
 @EnableFedoraRepositories
 public static class AppConfig {
-	// Fedora template bean declaration is omitted
+	@Bean
+    public FedoraTemplate fedoraTemplate() throws FedoraException {
+    	return new FedoraTemplate(/* config omitted */);
+    }
 }
 
 // use the the Autowired instance of VehicleCrudRepository like this
@@ -189,17 +142,16 @@ WHERE
 A relationship between object and a (binary) datastream can be declared as follows
 
 ```java
-@Datastream(mimetype="image/png")
 class VehiclePicture {
 
-    @DsContent
+    @Binary(mimetype="image/jpg")
     private InputStream picture;
 }
 
 @FedoraObject
 class Vehicle {
 
-    // PNG datastream
+    @Datastream
     private VehiclePicture picture;
 
 }
@@ -219,13 +171,14 @@ with the corresponding annotations. For example, if one wants to access `http://
 properties of the persisted resource, then the corresponding attribute of the bean should be annotated as following:
 
 ```java
+@FedoraObject
 class Vehicle {
     @Created
     private ZonedDateTime createdDate;
 }
 ```
 
-This module will automatically perform some useful conversions, i.e. to `ZonedDateTime` from the `created` timestamp if needed.
+The module will automatically perform some useful conversions, i.e. to `ZonedDateTime` from the `created` timestamp if needed.
 
 ### Java to RDF type conversion
 
