@@ -120,7 +120,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     @Override
     public <T> void save(T bean) {
         FedoraObject fedoraObject = fedoraConverter.getFedoraObject(bean);
-//        fedoraConverter.updateIndex(fedoraObject);
         fedoraConverter.write(bean, fedoraObject);
     }
 

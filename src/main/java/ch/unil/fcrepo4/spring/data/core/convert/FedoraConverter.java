@@ -35,6 +35,4 @@ public interface FedoraConverter extends EntityReader<Object, FedoraResource>, E
     <T, ID> String getFedoraObjectPath(ID id, Class<T> entityClass);
 
     boolean exists(String path);
-
-//    void updateIndex(FedoraResource fedoraResource);
 }

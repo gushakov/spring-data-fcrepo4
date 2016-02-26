@@ -53,9 +53,7 @@ public class SimpleFedoraRepositoryTest {
         doAnswer(invocation -> {
             FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle\n" +
-                            "WHERE\n" +
-                            "  { ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/make> \"Ford\"^^<http://www.w3.org/2001/XMLSchema#string>}\n");
+                    .isEqualTo("");
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(FedoraQuery.class), any());
 
@@ -67,15 +65,23 @@ public class SimpleFedoraRepositoryTest {
         doAnswer(invocation -> {
             FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle\n" +
-                            "WHERE\n" +
-                            "  { ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/miles> ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles\n" +
-                            "    FILTER ( ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles > \"1000\"^^<http://www.w3.org/2001/XMLSchema#int> )\n" +
-                            "  }\n");
+                    .isEqualTo("");
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(FedoraQuery.class), any());
 
         vehicleRepo.findByMilesGreaterThan(1000);
+    }
+
+    @Test
+    public void testFindByDescriptionType() throws Exception {
+        doAnswer(invocation -> {
+            FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
+            assertThat(query.toString())
+                    .isEqualTo("");
+            return Collections.emptyList();
+        }).when(mockFedoraTemplate).query(any(FedoraQuery.class), any());
+
+        vehicleRepo.findByDescription_Type("full");
     }
 
 }

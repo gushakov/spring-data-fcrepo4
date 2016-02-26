@@ -1,12 +1,26 @@
 package ch.unil.fcrepo4.utils;
 
+import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.query.DatasetAccessor;
+import com.hp.hpl.jena.query.DatasetAccessorFactory;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
+import org.fcrepo.client.FedoraException;
+import org.fcrepo.client.FedoraObject;
+import org.fcrepo.client.FedoraRepository;
+import org.fcrepo.client.FedoraResource;
+import org.fcrepo.client.impl.FedoraObjectImpl;
+import org.fcrepo.client.impl.FedoraRepositoryImpl;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -61,6 +75,45 @@ public class Utils {
             }
         }
         return filter;
+    }
+
+    // based on code from http://pinesong.ghost.io/how-to-upload-rdf-file-to-jena-fuseki-server-using-java-code/
+
+    public static long reloadDefaultGraphFromFile(String dataServiceUri, String filename) throws IOException {
+        Model model = ModelFactory.createDefaultModel();
+        model.read(new ClassPathResource(filename).getURL().toString());
+        DatasetAccessor datasetAccessor = DatasetAccessorFactory.createHTTP(dataServiceUri);
+        datasetAccessor.deleteDefault();
+        datasetAccessor.putModel(model);
+        return model.size();
+    }
+
+    public static long reloadDefaultGraphFromFedora(String fcrepoUrl, String rootPath, String dataServiceUrl) throws IOException, FedoraException {
+        FedoraRepository fedoraRepository = new FedoraRepositoryImpl(fcrepoUrl);
+        if (fedoraRepository.exists(rootPath)){
+            FedoraObjectImpl fedoraObject = (FedoraObjectImpl) fedoraRepository.getObject(rootPath);
+            Graph graph = fedoraObject.getGraph();
+            addTriples(graph, fedoraObject.getChildren(null));
+            Model model = ModelFactory.createModelForGraph(graph);
+            DatasetAccessor datasetAccessor = DatasetAccessorFactory.createHTTP(dataServiceUrl);
+            datasetAccessor.deleteDefault();
+            datasetAccessor.putModel(model);
+            return model.size();
+        }
+        return -1;
+    }
+
+    private static void addTriples(Graph graph, Collection<FedoraResource> fedoraResources) throws FedoraException {
+        if (fedoraResources.isEmpty()) {
+            return;
+        }
+
+        for (FedoraResource resource : fedoraResources) {
+            Utils.triplesStream(resource.getProperties()).forEach(graph::add);
+            if (resource instanceof FedoraObject) {
+                addTriples(graph, ((FedoraObject) resource).getChildren(null));
+            }
+        }
     }
 
 }

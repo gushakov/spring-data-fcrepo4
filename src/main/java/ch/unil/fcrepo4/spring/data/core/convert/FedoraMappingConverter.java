@@ -14,6 +14,9 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -221,25 +224,15 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
     }
 
-/*
-    @Override
-    public void updateIndex(FedoraResource fedoraResource) {
-        try {
-            String updateIndex = "INSERT DATA {<" + repository.getRepositoryUrl() + fedoraResource.getPath() + "> <" +
-                    RdfLexicon.INDEXING_NAMESPACE + "hasIndexingTransformation> \"default\" ; <" +
-                    RdfLexicon.RDF_NAMESPACE + "type> <" +
-                    RdfLexicon.INDEXING_NAMESPACE + "Indexable> .}";
-            logger.debug("Update (index): {}", updateIndex);
-            fedoraResource.updateProperties(updateIndex);
-        } catch (FedoraException e) {
-            throw new RuntimeException(e);
-        }
-    }
-*/
-
     private void writeSimpleProperties(Object bean, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
-        final List<String> updateProperties = new ArrayList<>();
+        final ElementTriplesBlock triples = new ElementTriplesBlock();
+
+        // add ocm class
+        triples.addTriple(new Triple(NodeFactory.createURI(""),
+                NodeFactory.createURI(Constants.OCM_URI_NAMESPACE + Constants.OCM_CLASS_PROPERTY),
+                rdfDatatypeConverter.encodeLiteralValue(entity.getType().getName())));
+
         entity.doWithSimplePersistentProperties(property -> {
             SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
             // do not write read-only properties
@@ -247,19 +240,19 @@ public class FedoraMappingConverter implements FedoraConverter {
                 Object propValue = propsAccessor.getProperty(property);
                 // ignore if property value is null
                 if (propValue != null) {
-                    updateProperties.add("<> <" + simpleProp.getUri() + "> "
-                            + rdfDatatypeConverter.serializeLiteralValue(propValue));
+                    triples.addTriple(new Triple(NodeFactory.createURI(""),
+                            NodeFactory.createURI(simpleProp.getUri()),
+                            rdfDatatypeConverter.encodeLiteralValue(propValue)));
+
                 }
             }
         });
-        if (updateProperties.size() > 0) {
-            String insert = "INSERT DATA { " + StringUtils.join(updateProperties, " . ") + " . }";
-            logger.debug("Update (properties): {}", insert);
-            try {
-                fedoraResource.updateProperties(insert);
-            } catch (FedoraException e) {
-                throw new RuntimeException(e);
-            }
+        String insert = "INSERT DATA { " + triples + " }";
+        logger.debug("Update (properties): {}", insert);
+        try {
+            fedoraResource.updateProperties(insert);
+        } catch (FedoraException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -270,7 +263,7 @@ public class FedoraMappingConverter implements FedoraConverter {
             try {
                 Node literal = Utils.getObjectLiteral(fedoraResource.getProperties(),
                         simpleProp.getUri());
-                if (literal != null){
+                if (literal != null) {
                     propsAccessor.setProperty(property, rdfDatatypeConverter.parseLiteralValue(literal.getLiteralLexicalForm(), property.getType()));
                 }
             } catch (FedoraException e) {
@@ -282,7 +275,7 @@ public class FedoraMappingConverter implements FedoraConverter {
     private void writeDatastreams(Object source, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {
         entity.doWithDatastreams(dsProp -> {
             Object dsBean = entity.getPropertyAccessor(source).getProperty(dsProp);
-            if (dsBean != null){
+            if (dsBean != null) {
                 // check if this is a dynamic proxy
                 if (dsBean instanceof DatastreamDynamicProxy) {
                     // then substitute target bean instead

@@ -1,32 +1,20 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.sparql.algebra.Op;
-import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
-import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
-import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
-import com.hp.hpl.jena.sparql.algebra.op.OpProject;
-import com.hp.hpl.jena.sparql.core.BasicPattern;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.expr.E_LessThan;
-import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.ExprVar;
-import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
+import ch.unil.fcrepo4.utils.Utils;
+import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Resource;
 import org.apache.http.client.utils.URIBuilder;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,9 +32,14 @@ public class SparqlQueryTestIT {
     public static class TestConfig {
     }
 
+    @Value("#{environment.getProperty('fedora.host')}")
+    private String fedoraHost;
 
-//    @Autowired
-//    private Environment env;
+    @Value("#{environment.getProperty('fedora.port')}")
+    private int fedoraPort;
+
+    @Value("#{environment.getProperty('fedora.path')}")
+    private String fedoraPath;
 
     @Value("#{environment.getProperty('triplestore.host')}")
     private String triplestoreHost;
@@ -60,46 +53,87 @@ public class SparqlQueryTestIT {
     @Value("#{environment.getProperty('triplestore.db')}")
     private String triplestoreDb;
 
+    private boolean doneOnce = false;
+
+    @Before
+    public void setUp() throws Exception {
+        if (!doneOnce){
+            Utils.reloadDefaultGraphFromFedora(getFedoraUrl(), "/vehicle", getDataServiceUrl());
+            doneOnce = true;
+        }
+    }
 
     @Test
     public void testAskQuery() throws Exception {
 
-        String queryUrl = new URIBuilder().setScheme("http")
-                .setHost(triplestoreHost)
-                .setPort(triplestorePort)
-                .setPath(triplestorePath+"/"+triplestoreDb+"/query").toString();
-
-        System.out.println(queryUrl);
-
-        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(queryUrl, "ASK {}")) {
+        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(getQueryServiceUrl(), "ASK {}")) {
             boolean result = queryExecution.execAsk();
             assertThat(result).isTrue();
         }
     }
 
     @Test
-    public void testAlgebra() throws Exception {
-        // from https://jena.apache.org/documentation/query/manipulating_sparql_using_arq.html
+    public void testSelectQuery() throws Exception {
 
-        // ?s ?p ?o .
-        Triple pattern =
-                Triple.create(Var.alloc("s"), Var.alloc("p"), Var.alloc("o"));
-        // ( ?s < 20 )
-        Expr e = new E_LessThan(new ExprVar("s"), new NodeValueInteger(20));
+        String sparqlQuery = "SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle\n" +
+                "WHERE\n" +
+                "  { ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/make> \"Ford\"^^<http://www.w3.org/2001/XMLSchema#string>}";
+        Query query = QueryFactory.create(sparqlQuery);
 
-        Op op;
-        BasicPattern pat = new BasicPattern();                 // Make a pattern
-        pat.add(pattern);                                      // Add our pattern match
-        op = new OpBGP(pat);                                   // Make a BGP from this pattern
-        System.out.println(op);
-        op = OpFilter.filter(e, op);                           // Filter that pattern with our expression
-        System.out.println(op);
-        op = new OpProject(op, Arrays.asList(Var.alloc("s"))); // Reduce to just ?s
-        System.out.println(op);
-        Query q = OpAsQuery.asQuery(op);                       // Convert to a query
-        q.setQuerySelectType();
+        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(getQueryServiceUrl(), query)) {
+            ResultSet results = queryExecution.execSelect();
+//            assertThat(results.hasNext());
+            assertThat(results).isNotNull();
+            while (results.hasNext()) {
+                List<String> resultVars = query.getResultVars();
+                Resource queryResultResource = getFirstAvailableResource(results.next(), resultVars);
+                if (queryResultResource == null) {
+                    throw new IllegalStateException("Query solution has no resource for variables " + Arrays.toString(resultVars.toArray(new String[resultVars.size()])));
+                }
+                System.out.println(queryResultResource.getURI());
+            }
+        }
+    }
 
-        System.out.println(q);
+    private Resource getFirstAvailableResource(QuerySolution querySolution, List<String> varNames) {
+        Resource resource = null;
+        for (String varName : varNames) {
+            resource = querySolution.getResource(varName);
+            if (resource != null) {
+                break;
+            }
+        }
+        return resource;
+    }
+
+    private String getFedoraUrl(){
+        String fedoraUrl = new URIBuilder().setScheme("http")
+                .setHost(fedoraHost)
+                .setPort(fedoraPort)
+                .setPath(fedoraPath+"/rest").toString();
+
+        System.out.println(fedoraUrl);
+        return fedoraUrl;
+    }
+
+    private String getQueryServiceUrl(){
+        String queryUrl = new URIBuilder().setScheme("http")
+                .setHost(triplestoreHost)
+                .setPort(triplestorePort)
+                .setPath(triplestorePath+"/"+triplestoreDb+"/query").toString();
+
+        System.out.println(queryUrl);
+        return queryUrl;
+    }
+
+    private String getDataServiceUrl(){
+        String dataUrl = new URIBuilder().setScheme("http")
+                .setHost(triplestoreHost)
+                .setPort(triplestorePort)
+                .setPath(triplestorePath+"/"+triplestoreDb+"/data").toString();
+
+        System.out.println(dataUrl);
+        return dataUrl;
     }
 
 }

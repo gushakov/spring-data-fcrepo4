@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -30,13 +31,21 @@ public class SimpleFedoraRepositoryTestIT {
     @EnableFedoraRepositories
     public static class TestConfig {
 
-        @Autowired
-        private Environment env;
-
+        //@formatter:off
         @Bean
-        public FedoraTemplate fedoraTemplate() throws FedoraException {
-            return new FedoraTemplate();
+        public FedoraTemplate fedoraTemplate(
+                @Value("#{environment.getProperty('fedora.host')}")         String fedoraHost,
+                @Value("#{environment.getProperty('fedora.port')}")         int fedoraPort,
+                @Value("#{environment.getProperty('fedora.path')}")         String fedoraPath,
+                @Value("#{environment.getProperty('triplestore.host')}")    String triplestoreHost,
+                @Value("#{environment.getProperty('triplestore.port')}")    int triplestorePort,
+                @Value("#{environment.getProperty('triplestore.path')}")    String triplestorePath,
+                @Value("#{environment.getProperty('triplestore.db')}")      String triplestoreDb
+        ) throws FedoraException {
+            return new FedoraTemplate(fedoraHost, fedoraPort, fedoraPath,
+                    triplestoreHost, triplestorePort, triplestorePath, triplestoreDb);
         }
+        //@formatter:on
 
     }
 

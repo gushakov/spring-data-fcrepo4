@@ -22,7 +22,7 @@ public class SparqlQuery implements FedoraQuery {
     private Query query;
 
     public SparqlQuery(Criteria criteria) {
-        Op op = new OpBGP(criteria.getBgp());
+        Op op = new OpBGP(criteria.buildBgp());
         for (Expr filter: criteria.getFilters()){
             op = OpFilter.filter(filter, op);
         }

@@ -40,7 +40,7 @@ public class FedoraSparqlQueryCreator extends AbstractQueryCreator<FedoraQuery, 
     @Override
     protected Criteria create(Part part, Iterator<Object> arguments) {
         PersistentPropertyPath<FedoraPersistentProperty> persistentPropertyPath = mappingContext.getPersistentPropertyPath(part.getProperty());
-        BgpCriteria bgpCriteria = new BgpCriteria(persistentPropertyPath, domainTypeInfo);
+        BgpCriteria bgpCriteria = new BgpCriteria(persistentPropertyPath, domainTypeInfo, rdfDatatypeConverter);
         processCriteriaForPart(persistentPropertyPath, bgpCriteria, part, arguments);
         return bgpCriteria;
     }

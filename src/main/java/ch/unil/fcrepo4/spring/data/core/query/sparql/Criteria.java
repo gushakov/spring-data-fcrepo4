@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface Criteria {
 
-    BasicPattern getBgp();
+    BasicPattern buildBgp();
 
     String getProjectionVariableName();
 
