@@ -88,32 +88,4 @@ public class Utils {
         return model.size();
     }
 
-    public static long reloadDefaultGraphFromFedora(String fcrepoUrl, String rootPath, String dataServiceUrl) throws IOException, FedoraException {
-        FedoraRepository fedoraRepository = new FedoraRepositoryImpl(fcrepoUrl);
-        if (fedoraRepository.exists(rootPath)){
-            FedoraObjectImpl fedoraObject = (FedoraObjectImpl) fedoraRepository.getObject(rootPath);
-            Graph graph = fedoraObject.getGraph();
-            addTriples(graph, fedoraObject.getChildren(null));
-            Model model = ModelFactory.createModelForGraph(graph);
-            DatasetAccessor datasetAccessor = DatasetAccessorFactory.createHTTP(dataServiceUrl);
-            datasetAccessor.deleteDefault();
-            datasetAccessor.putModel(model);
-            return model.size();
-        }
-        return -1;
-    }
-
-    private static void addTriples(Graph graph, Collection<FedoraResource> fedoraResources) throws FedoraException {
-        if (fedoraResources.isEmpty()) {
-            return;
-        }
-
-        for (FedoraResource resource : fedoraResources) {
-            Utils.triplesStream(resource.getProperties()).forEach(graph::add);
-            if (resource instanceof FedoraObject) {
-                addTriples(graph, ((FedoraObject) resource).getChildren(null));
-            }
-        }
-    }
-
 }

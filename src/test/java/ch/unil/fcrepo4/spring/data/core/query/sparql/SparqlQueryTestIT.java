@@ -53,16 +53,6 @@ public class SparqlQueryTestIT {
     @Value("#{environment.getProperty('triplestore.db')}")
     private String triplestoreDb;
 
-    private boolean doneOnce = false;
-
-    @Before
-    public void setUp() throws Exception {
-        if (!doneOnce){
-            Utils.reloadDefaultGraphFromFedora(getFedoraUrl(), "/vehicle", getDataServiceUrl());
-            doneOnce = true;
-        }
-    }
-
     @Test
     public void testAskQuery() throws Exception {
 

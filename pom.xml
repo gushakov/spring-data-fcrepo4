@@ -15,15 +15,17 @@
         <skipITs>true</skipITs>
 
         <fcrepo.path>/fcrepo</fcrepo.path>
-        <fcrepo.start.mode>start</fcrepo.start.mode>
         <fuseki.path>/fuseki</fuseki.path>
-        <fuseki.start.mode>run</fuseki.start.mode>
+        <fuseki.db>test</fuseki.db>
+        <toolbox.path>/toolbox</toolbox.path>
+        <tomcat.start.mode>run</tomcat.start.mode>
 
         <assertj.core.version>3.3.0</assertj.core.version>
         <byte.buddy.version>1.2.2</byte.buddy.version>
         <commons.collections4.version>4.1</commons.collections4.version>
         <fcrepo.client.version>4.4.0</fcrepo.client.version>
         <fcrepo.webapp.version>4.5.0</fcrepo.webapp.version>
+        <toolbox.version>4.4.1-SNAPSHOT</toolbox.version>
         <fuseki.version>2.3.0</fuseki.version>
         <junit.version>4.11</junit.version>
         <logback.version>1.1.3</logback.version>
@@ -146,28 +148,6 @@
             <version>${xml.apis.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!--
-        webapps for Cargo ITs
-        -->
-
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-fuseki-war</artifactId>
-            <version>${fuseki.version}</version>
-            <type>war</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.fcrepo</groupId>
-            <artifactId>fcrepo-webapp</artifactId>
-            <version>${fcrepo.webapp.version}</version>
-            <type>war</type>
-            <scope>test</scope>
-        </dependency>
-
-
     </dependencies>
 
     <build>
@@ -208,14 +188,38 @@
                 </configuration>
             </plugin>
 
-
-
         </plugins>
     </build>
 
     <profiles>
         <profile>
             <id>cargo-its</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-fuseki-war</artifactId>
+                    <version>${fuseki.version}</version>
+                    <type>war</type>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.fcrepo</groupId>
+                    <artifactId>fcrepo-webapp</artifactId>
+                    <version>${fcrepo.webapp.version}</version>
+                    <type>war</type>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.fcrepo.camel</groupId>
+                    <artifactId>fcrepo-camel-webapp</artifactId>
+                    <version>${toolbox.version}</version>
+                    <type>war</type>
+                    <scope>test</scope>
+                </dependency>
+
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -231,12 +235,9 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <portNames>
-                                        <portName>fcrepo.ajp.port</portName>
-                                        <portName>fcrepo.servlet.port</portName>
-                                        <portName>fcrepo.rmi.port</portName>
-                                        <portName>fuseki.ajp.port</portName>
-                                        <portName>fuseki.servlet.port</portName>
-                                        <portName>fuseki.rmi.port</portName>
+                                        <portName>tomcat.ajp.port</portName>
+                                        <portName>tomcat.servlet.port</portName>
+                                        <portName>tomcat.rmi.port</portName>
                                     </portNames>
                                 </configuration>
                             </execution>
@@ -299,7 +300,7 @@
                                 </configuration>
                             </execution>
                             <!--
-                            adds custom fedora-node-types.cnd file from test/etc to fcrepo-webapp's classpath
+                            adds custom fedora-node-types.cnd file from test/etc/fcrepo to fcrepo-webapp's classpath
                             -->
                             <execution>
                                 <id>copy-fedora-node-types</id>
@@ -312,7 +313,7 @@
                                     </outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>${basedir}/src/test/etc</directory>
+                                            <directory>${basedir}/src/test/etc/fcrepo</directory>
                                             <filtering>false</filtering>
                                             <includes>
                                                 <include>fedora-node-types.cnd</include>
@@ -346,19 +347,26 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>fcrepo-start</id>
+                                <id>tomcat-start</id>
                                 <goals>
-                                    <goal>${fcrepo.start.mode}</goal>
+                                    <goal>${tomcat.start.mode}</goal>
                                 </goals>
                                 <phase>pre-integration-test</phase>
                                 <configuration>
+                                    <container>
+                                        <systemProperties>
+                                            <FUSEKI_BASE>${project.build.directory}/etc/fuseki</FUSEKI_BASE>
+                                            <fcrepo.baseUrl>localhost:${tomcat.servlet.port}/${fcrepo.path}/rest</fcrepo.baseUrl>
+                                            <triplestore.baseUrl>localhost:${tomcat.servlet.port}/${fuseki.path}/${fuseki.db}/update</triplestore.baseUrl>
+                                        </systemProperties>
+                                    </container>
                                     <configuration>
                                         <properties>
-                                            <cargo.tomcat.ajp.port>${fcrepo.ajp.port}</cargo.tomcat.ajp.port>
-                                            <cargo.servlet.port>${fcrepo.servlet.port}</cargo.servlet.port>
-                                            <cargo.rmi.port>${fcrepo.rmi.port}</cargo.rmi.port>
+                                            <cargo.tomcat.ajp.port>${tomcat.ajp.port}</cargo.tomcat.ajp.port>
+                                            <cargo.servlet.port>${tomcat.servlet.port}</cargo.servlet.port>
+                                            <cargo.rmi.port>${tomcat.rmi.port}</cargo.rmi.port>
                                         </properties>
-                                        <home>${project.build.directory}/fcrepo</home>
+                                        <home>${project.build.directory}/tomcat</home>
                                     </configuration>
                                     <deployables>
                                         <deployable>
@@ -370,47 +378,6 @@
                                                 <context>${fcrepo.path}</context>
                                             </properties>
                                         </deployable>
-                                    </deployables>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>fcrepo-stop</id>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                                <phase>post-integration-test</phase>
-                                <configuration>
-                                    <configuration>
-                                        <properties>
-                                            <cargo.tomcat.ajp.port>${fcrepo.ajp.port}</cargo.tomcat.ajp.port>
-                                            <cargo.servlet.port>${fcrepo.servlet.port}</cargo.servlet.port>
-                                            <cargo.rmi.port>${fcrepo.rmi.port}</cargo.rmi.port>
-                                        </properties>
-                                        <home>${project.build.directory}/fcrepo</home>
-                                    </configuration>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>triplestore-start</id>
-                                <goals>
-                                    <goal>${fuseki.start.mode}</goal>
-                                </goals>
-                                <phase>pre-integration-test</phase>
-                                <configuration>
-                                    <container>
-                                        <systemProperties>
-                                            <FUSEKI_BASE>${project.build.directory}/etc/fuseki</FUSEKI_BASE>
-                                        </systemProperties>
-                                    </container>
-                                    <configuration>
-                                        <properties>
-                                            <cargo.tomcat.ajp.port>${fuseki.ajp.port}</cargo.tomcat.ajp.port>
-                                            <cargo.servlet.port>${fuseki.servlet.port}</cargo.servlet.port>
-                                            <cargo.rmi.port>${fuseki.rmi.port}</cargo.rmi.port>
-                                        </properties>
-                                        <home>${project.build.directory}/fuseki</home>
-                                    </configuration>
-                                    <deployables>
                                         <deployable>
                                             <groupId>org.apache.jena</groupId>
                                             <artifactId>jena-fuseki-war</artifactId>
@@ -419,11 +386,19 @@
                                                 <context>${fuseki.path}</context>
                                             </properties>
                                         </deployable>
+                                        <deployable>
+                                            <groupId>org.fcrepo.camel</groupId>
+                                            <artifactId>fcrepo-camel-webapp</artifactId>
+                                            <type>war</type>
+                                            <properties>
+                                                <context>${toolbox.path}</context>
+                                            </properties>
+                                        </deployable>
                                     </deployables>
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>triplestore-stop</id>
+                                <id>tomcat-stop</id>
                                 <goals>
                                     <goal>stop</goal>
                                 </goals>
@@ -431,11 +406,11 @@
                                 <configuration>
                                     <configuration>
                                         <properties>
-                                            <cargo.tomcat.ajp.port>${fuseki.ajp.port}</cargo.tomcat.ajp.port>
-                                            <cargo.servlet.port>${fuseki.servlet.port}</cargo.servlet.port>
-                                            <cargo.rmi.port>${fuseki.rmi.port}</cargo.rmi.port>
+                                            <cargo.tomcat.ajp.port>${tomcat.ajp.port}</cargo.tomcat.ajp.port>
+                                            <cargo.servlet.port>${tomcat.servlet.port}</cargo.servlet.port>
+                                            <cargo.rmi.port>${tomcat.rmi.port}</cargo.rmi.port>
                                         </properties>
-                                        <home>${project.build.directory}/fuseki</home>
+                                        <home>${project.build.directory}/tomcat</home>
                                     </configuration>
                                 </configuration>
                             </execution>
