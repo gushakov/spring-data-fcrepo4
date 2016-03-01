@@ -45,15 +45,15 @@ public class BgpCriteria implements Criteria {
 
             if (prop instanceof FedoraResourcePersistentProperty) {
                 FedoraResourcePersistentProperty property = (FedoraResourcePersistentProperty) prop;
-                this.triples.add(new Triple(NodeFactory.createVariable(getSubjectName(property)),
+                this.triples.add(new Triple(NodeFactory.createVariable(getPropertyOwnerVarName(property)),
                         NodeFactory.createURI(property.getUri()),
-                        NodeFactory.createVariable(getObjectName(property))));
+                        NodeFactory.createVariable(getPropertyVarName(property))));
             } else if (prop instanceof DatastreamPersistentProperty) {
                 DatastreamPersistentProperty property = (DatastreamPersistentProperty) prop;
                 this.ocmClasses.add(property.getTypeInformation().getType());
-                this.triples.add(new Triple(NodeFactory.createVariable(getSubjectName(property)),
+                this.triples.add(new Triple(NodeFactory.createVariable(getPropertyOwnerVarName(property)),
                         RdfLexicon.CONTAINS.asNode(),
-                        NodeFactory.createVariable(getSubjectName(property))));
+                        NodeFactory.createVariable(getPropertyTypeVarName(property))));
 
             } else {
                 throw new IllegalStateException("Cannot process property: " + prop);
@@ -65,19 +65,23 @@ public class BgpCriteria implements Criteria {
     public void substitutePropertyNodeValue(FedoraResourcePersistentProperty property, NodeValue nodeValue) {
         for (ListIterator<Triple> triplesIter = triples.listIterator(); triplesIter.hasNext(); ) {
             Triple triple = triplesIter.next();
-            if (triple.getSubject().getName().equals(getSubjectName(property))
+            if (triple.getSubject().getName().equals(getPropertyOwnerVarName(property))
                     && triple.getPredicate().getURI().equals(property.getUri())) {
                 triplesIter.set(new Triple(triple.getSubject(), triple.getPredicate(), nodeValue.asNode()));
             }
         }
     }
 
-    private String getSubjectName(FedoraPersistentProperty property) {
+    private String getPropertyOwnerVarName(FedoraPersistentProperty property) {
         return typeInfoToName(property.getOwner().getTypeInformation());
     }
 
-    private String getObjectName(FedoraPersistentProperty property){
-        return getSubjectName(property) + "_" + property.getField().getName();
+    private String getPropertyVarName(FedoraPersistentProperty property){
+        return getPropertyOwnerVarName(property) + "_" + property.getField().getName();
+    }
+
+    private String getPropertyTypeVarName(FedoraPersistentProperty property){
+        return typeInfoToName(property.getTypeInformation());
     }
 
     private String typeInfoToName(TypeInformation<?> typeInformation){
@@ -108,7 +112,7 @@ public class BgpCriteria implements Criteria {
 
     @Override
     public void addGreaterThanFilter(FedoraResourcePersistentProperty property, NodeValue nodeValue) {
-        filters.add(new E_GreaterThan(new ExprVar(getObjectName(property)), nodeValue));
+        filters.add(new E_GreaterThan(new ExprVar(getPropertyVarName(property)), nodeValue));
     }
 
     @Override

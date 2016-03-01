@@ -62,7 +62,7 @@ public class SparqlQueryTestIT {
         }
     }
 
-    @Test
+//    @Test
     public void testSelectQuery() throws Exception {
 
         String sparqlQuery = "SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle\n" +

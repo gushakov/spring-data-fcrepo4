@@ -9,6 +9,7 @@ import ch.unil.fcrepo4.spring.data.core.mapping.annotation.Property;
 import ch.unil.fcrepo4.spring.data.repository.Vehicle;
 import ch.unil.fcrepo4.spring.data.repository.VehicleDescription;
 import com.hp.hpl.jena.graph.NodeFactory;
+import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.fcrepo.client.FedoraException;
 import org.junit.Test;
@@ -23,7 +24,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.ByteArrayInputStream;
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
 
@@ -58,7 +58,7 @@ public class FedoraTemplateTestIT {
 
     @Autowired
     private FedoraTemplate fedoraTemplate;
-
+/*
     @FedoraObject
     public static class Bean2 {
 
@@ -115,6 +115,49 @@ public class FedoraTemplateTestIT {
     }
 
     @Test
-    public void testQuery() throws Exception {
+    public void testLoadWithDatastream() throws Exception {
+       Vehicle vehicle =  fedoraTemplate.load(1456747846857L, Vehicle.class);
+//        System.out.println(vehicle.getDescription().getType());
+        System.out.println(IOUtils.copy(vehicle.getDescription().getDesc(), System.out));
     }
+
+    @Test
+    public void testQuery() throws Exception {
+    }*/
+
+
+    @Test
+    public void testSaveNew() throws Exception {
+        Vehicle vehicle = new Vehicle(System.currentTimeMillis(), "Mazda", 100);
+        vehicle.setColor("light red");
+        fedoraTemplate.save(vehicle);
+    }
+
+    @Test
+    public void testLoadAndSave() throws Exception {
+        Vehicle vehicle = fedoraTemplate.load(1456842709609L, Vehicle.class);
+        vehicle.setDescription(new VehicleDescription(new ByteArrayInputStream("foobar".getBytes())));
+
+//        System.out.println(vehicle.getMiles());
+
+//        vehicle.setMake("Jeep");
+//        vehicle.setMiles(200);
+//        vehicle.setColor("dark orange");
+//        vehicle.setConsumption(3.5f);
+
+//        org.fcrepo.client.FedoraObject fedoraObject = fedoraTemplate.getRepository().getObject("/vehicle/1456820358330");
+//        fedoraObject.getProperties().forEachRemaining(System.out::println);
+
+//        vehicle.setMiles(1300);
+//
+        fedoraTemplate.save(vehicle);
+
+
+        /*System.out.println(vehicle.getMiles());
+        vehicle.setMiles(18000);
+        vehicle.setConsumption(6.5f);
+        vehicle.setColor("blue");
+        fedoraTemplate.save(vehicle);*/
+    }
+
 }

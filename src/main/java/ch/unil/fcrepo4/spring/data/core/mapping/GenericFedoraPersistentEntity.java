@@ -1,11 +1,13 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
+import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimplePropertyHandler;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.util.TypeInformation;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * @author gushakov
@@ -18,25 +20,17 @@ public class GenericFedoraPersistentEntity<T> extends BasicPersistentEntity<T, F
     }
 
     @Override
-    public FedoraPersistentProperty findPropertyForGetterOrSetter(Method getterOrSetter) {
-        final FedoraPersistentProperty found[] = new FedoraPersistentProperty[]{null};
-        doWithProperties((FedoraPersistentProperty property) -> {
-            if ((property.getGetter() != null && property.getGetter().getName().equals(getterOrSetter.getName()))
-                    || (property.getSetter() != null && property.getSetter().getName().equals(getterOrSetter.getName()))) {
-                found[0] = property;
-            }
-        });
-        return found[0];
+    public Optional<PersistentProperty<?>> findPropertyForGetterOrSetter(Method getterOrSetter) {
+        MethodMatchingPropertyFinder finder = new MethodMatchingPropertyFinder(getterOrSetter);
+        doWithProperties(finder);
+        return finder.getMatching();
     }
 
-
     @Override
-    public void doWithSimplePersistentProperties(SimplePropertyHandler simplePropertyHandler) {
-        doWithProperties((PersistentProperty<?> property) -> {
-            if (property instanceof SimpleFedoraResourcePersistentProperty) {
-                simplePropertyHandler.doWithPersistentProperty(property);
-            }
-        });
+    public Optional<Association<? extends PersistentProperty<?>>> findAssociationForGetterOrSetter(Method getterOrSetter) {
+        MethodMatchingAssociationFinder finder = new MethodMatchingAssociationFinder(getterOrSetter);
+        doWithAssociations(finder);
+        return finder.getMatching();
     }
 
 }

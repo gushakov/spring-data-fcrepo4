@@ -3,6 +3,9 @@ package ch.unil.fcrepo4.spring.data.core;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.fcrepo.client.FedoraException;
 import org.fcrepo.client.FedoraObject;
@@ -20,6 +23,8 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -147,14 +152,59 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     @Override
     public <T> List<T> query(FedoraQuery query, Class<T> beanType) {
-        throw new UnsupportedOperationException();
+        String queryUrl = new URIBuilder().setScheme("http")
+                .setHost(triplestoreHost)
+                .setPort(triplestorePort)
+                .setPath(triplestorePath+"/"+triplestoreDb+"/query").toString();
+
+        List<T> beans = new ArrayList<>();
+        Query sparqlQuery = QueryFactory.create(query.getSerialized());
+        logger.debug("Query: {}", query);
+        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService(queryUrl, sparqlQuery)) {
+            ResultSet results = queryExecution.execSelect();
+            while (results.hasNext()) {
+                List<String> resultVars = sparqlQuery.getResultVars();
+                Resource queryResultResource = getFirstAvailableResource(results.next(), resultVars);
+                if (queryResultResource == null) {
+                    throw new IllegalStateException("Query solution has no resource for variables " + Arrays.toString(resultVars.toArray(new String[resultVars.size()])));
+                }
+                String path = parsePathFromUri(queryResultResource.getURI());
+
+                System.out.println(path);
+
+                try {
+                    if (repository.exists(path)) {
+                        beans.add(fedoraConverter.read(beanType, repository.getObject(path)));
+                    } else {
+                        throw new IllegalStateException("Resource with path " + path + " was found in the triplestore but it does not exist in the repository");
+                    }
+                } catch (FedoraException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+       return beans;
+    }
+
+    private Resource getFirstAvailableResource(QuerySolution querySolution, List<String> varNames) {
+        Resource resource = null;
+        for (String varName : varNames) {
+            resource = querySolution.getResource(varName);
+            if (resource != null) {
+                break;
+            }
+        }
+        return resource;
+    }
+
+    private String parsePathFromUri(String uri) {
+        return StringUtils.removeStart(uri, repository.getRepositoryUrl());
     }
 
     @Override
     public <T> Page<T> queryForPage(FedoraQuery query, Class<T> beanType) {
         throw new UnsupportedOperationException();
     }
-
 
     // test, maybe move to operations
     public <T> List<T> query(String query, Class<T> beanType){
