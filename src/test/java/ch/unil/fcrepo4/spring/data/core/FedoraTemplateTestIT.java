@@ -129,14 +129,18 @@ public class FedoraTemplateTestIT {
     @Test
     public void testSaveNew() throws Exception {
         Vehicle vehicle = new Vehicle(System.currentTimeMillis(), "Mazda", 100);
+        vehicle.getColor();
         vehicle.setColor("light red");
         fedoraTemplate.save(vehicle);
     }
 
     @Test
     public void testLoadAndSave() throws Exception {
-        Vehicle vehicle = fedoraTemplate.load(1456842709609L, Vehicle.class);
-        vehicle.setDescription(new VehicleDescription(new ByteArrayInputStream("foobar".getBytes())));
+        Vehicle vehicle = fedoraTemplate.load(1456861959375L, Vehicle.class);
+
+        vehicle.setColor("orange");
+
+//        vehicle.setDescription(new VehicleDescription(new ByteArrayInputStream("foobar".getBytes())));
 
 //        System.out.println(vehicle.getMiles());
 
@@ -150,7 +154,7 @@ public class FedoraTemplateTestIT {
 
 //        vehicle.setMiles(1300);
 //
-        fedoraTemplate.save(vehicle);
+//        fedoraTemplate.save(vehicle);
 
 
         /*System.out.println(vehicle.getMiles());

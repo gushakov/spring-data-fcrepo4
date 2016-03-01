@@ -67,7 +67,24 @@ public class DynamicBeanProxyInterceptor {
         });
     }
 
+
+
     @RuntimeType
+    public Object interceptGetter(@Origin Method getter) {
+
+        logger.debug("Intercepted getter: {}", getter);
+
+        return null;
+
+    }
+
+    @RuntimeType
+    public void interceptSetter(@Origin Method setter, @AllArguments Object[] allArguments) {
+        logger.debug("Intercepted setter: {}", setter);
+    }
+
+    /*
+        @RuntimeType
     public Object intercept(@Origin Method getterOrSetter, @AllArguments Object[] allArguments) {
 
         logger.debug("Intercepted call {} with arguments {}", getterOrSetter, Arrays.toString(allArguments));
@@ -117,7 +134,7 @@ public class DynamicBeanProxyInterceptor {
             throw new RuntimeException(e);
         }
     }
-
+*/
 
     private boolean isSetter(Method getterOrSetter) {
         return getterOrSetter.getName().matches("^set\\p{Lu}.*$")
