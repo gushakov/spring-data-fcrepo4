@@ -34,15 +34,17 @@ public class TriplesCollectingPropertyHandler implements SimplePropertyAndValueH
 
     @Override
     public void doWithPersistentPropertyAndValue(PersistentProperty<?> property, Object value) {
-        if (property instanceof SimpleFedoraResourcePersistentProperty) {
-            SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
-            if (!simpleProp.isReadOnly()) {
-                Triple triple = new Triple(NodeFactory.createURI(""),
-                        NodeFactory.createURI(simpleProp.getUri()),
-                        rdfDatatypeConverter.encodeLiteralValue(value));
-                insertTriples.addTriple(triple);
-                deleteWhereTriples.addTriple(new Triple(triple.getSubject(), triple.getPredicate(),
-                        NodeFactory.createVariable(simpleProp.getName())));
+        if (value != null){
+            if (property instanceof SimpleFedoraResourcePersistentProperty) {
+                SimpleFedoraResourcePersistentProperty simpleProp = (SimpleFedoraResourcePersistentProperty) property;
+                if (!simpleProp.isReadOnly()) {
+                    Triple triple = new Triple(NodeFactory.createURI(""),
+                            NodeFactory.createURI(simpleProp.getUri()),
+                            rdfDatatypeConverter.encodeLiteralValue(value));
+                    insertTriples.addTriple(triple);
+                    deleteWhereTriples.addTriple(new Triple(triple.getSubject(), triple.getPredicate(),
+                            NodeFactory.createVariable(simpleProp.getName())));
+                }
             }
         }
     }

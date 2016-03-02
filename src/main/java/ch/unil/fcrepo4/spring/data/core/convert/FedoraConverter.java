@@ -2,6 +2,7 @@ package ch.unil.fcrepo4.spring.data.core.convert;
 
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentEntity;
+import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentEntity;
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
 import org.fcrepo.client.FedoraDatastream;
@@ -10,6 +11,8 @@ import org.fcrepo.client.FedoraResource;
 import org.springframework.data.convert.EntityConverter;
 import org.springframework.data.convert.EntityReader;
 import org.springframework.data.convert.EntityWriter;
+
+import java.io.InputStream;
 
 /**
  * @author gushakov
@@ -37,5 +40,9 @@ public interface FedoraConverter extends EntityReader<Object, FedoraResource>, E
 
     boolean exists(String path);
 
-    void readDatastreamContent(Object dsBean, DatastreamPersistentEntity<?> dsEntity, FedoraDatastream fedoraDatastream);
+    <T> String getDatastreamPath(T bean, DatastreamPersistentProperty dsProp);
+
+    <T> Object readDatastream(T bean, FedoraPersistentEntity<?> entity, DatastreamPersistentProperty dsProp);
+
+    InputStream readDatastreamContent(Object dsBean, DatastreamPersistentEntity<?> dsEntity, FedoraDatastream fedoraDatastream);
 }

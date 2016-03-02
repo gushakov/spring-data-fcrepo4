@@ -1,7 +1,10 @@
 package ch.unil.fcrepo4.spring.data.core.convert;
 
-import ch.unil.fcrepo4.spring.data.core.mapping.*;
-import net.bytebuddy.implementation.bind.annotation.AllArguments;
+import ch.unil.fcrepo4.spring.data.core.mapping.BinaryPersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentEntity;
+import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentEntity;
+import net.bytebuddy.implementation.bind.annotation.Argument;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.fcrepo.client.FedoraDatastream;
@@ -13,7 +16,6 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -43,102 +45,97 @@ public class DynamicBeanProxyInterceptor {
         this.updatedProperties = new HashSet<>();
     }
 
-    @RuntimeType
-    public FedoraPersistentEntity<?> __getBeanEntity() {
+    public Object __getBean() {
+        return bean;
+    }
+
+    public boolean __foobar(PersistentProperty toto){
+        return Boolean.TRUE;
+    }
+
+    public FedoraPersistentEntity __getBeanEntity() {
         return entity;
     }
 
-    @RuntimeType
     public PersistentPropertyAccessor __getPropertyAccessor() {
         return entity.getPropertyAccessor(bean);
     }
 
-    @RuntimeType
-    public void doWithProperties(SimplePropertyAndValueHandler propertyAndValueHandler, boolean withUpdatedPropertiesOnly) {
-        PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
-        entity.doWithProperties((PersistentProperty<?> property) -> {
-            if (withUpdatedPropertiesOnly) {
-                if (updatedProperties.contains(property)) {
-                    propertyAndValueHandler.doWithPersistentPropertyAndValue(property, propertyAccessor.getProperty(property));
-                }
-            } else {
-                propertyAndValueHandler.doWithPersistentPropertyAndValue(property, propertyAccessor.getProperty(property));
-            }
-        });
+    public boolean __isPropertyUpdated(PersistentProperty property) {
+        return property != null && updatedProperties.contains(property);
     }
-
-
 
     @RuntimeType
     public Object interceptGetter(@Origin Method getter) {
 
-        logger.debug("Intercepted getter: {}", getter);
+        // find the property of the bean we are trying to access
+        PersistentProperty<?> property = findProperty(getter);
+        if (property == null) {
+            throw new IllegalStateException("Persistent property is null for entity " + entity + " and method " + getter);
+        }
+
+        logger.debug("Intercepted getter: {} for property: {}", getter, property);
+
+        PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
+
+        // if there is a value for the property in the bean, just return it
+        Object value = propertyAccessor.getProperty(property);
+        if (value != null) {
+            return value;
+        }
+
+        // see if we are accessing a datastream
+        if (property instanceof DatastreamPersistentProperty) {
+            DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) property;
+            return fedoraConverter.readDatastream(bean, entity, dsProp);
+        }
+
+        // check if we are trying to access the binary content of a datastream
+        if (property instanceof BinaryPersistentProperty) {
+            return fedoraConverter.readDatastreamContent(bean, (DatastreamPersistentEntity<?>) entity, (FedoraDatastream) fedoraResource);
+        }
+
+        // TODO: implement case of a relation property
 
         return null;
 
+
     }
+
 
     @RuntimeType
-    public void interceptSetter(@Origin Method setter, @AllArguments Object[] allArguments) {
-        logger.debug("Intercepted setter: {}", setter);
+    public void interceptSetter(@Origin Method setter, @Argument(0) Object argument) {
+
+        // find the property of the bean we are trying to access
+        PersistentProperty<?> property = findProperty(setter);
+        if (property == null) {
+            throw new IllegalStateException("Persistent property is null for entity " + entity + " and method " + setter);
+        }
+
+        logger.debug("Intercepted setter: {} for property: {} with argument: {}", setter, property, argument);
+
+        // add property to the set of updated properties
+        updatedProperties.add(property);
+
+        PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
+        propertyAccessor.setProperty(property, argument);
+
     }
 
-    /*
-        @RuntimeType
-    public Object intercept(@Origin Method getterOrSetter, @AllArguments Object[] allArguments) {
 
-        logger.debug("Intercepted call {} with arguments {}", getterOrSetter, Arrays.toString(allArguments));
+    private PersistentProperty<?> findProperty(Method getterOrSetter) {
 
-        // check if we are accessing an inverse of an association
         Optional<Association<? extends PersistentProperty<?>>> assoc = entity.findAssociationForGetterOrSetter(getterOrSetter);
-
-        PersistentProperty<?> prop = null;
-
         if (assoc.isPresent()) {
-            prop = assoc.get().getInverse();
-
-            // check if this association is for a datastream
-            if (prop instanceof DatastreamPersistentProperty) {
-                DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) prop;
-
-                String dsPath = fedoraConverter.getFedoraObjectPath(bean) + "/" + dsProp.getName();
-
-                if (fedoraConverter.exists(dsPath)){
-                    Object dsBean =  fedoraConverter.read(dsProp.getType(), fedoraConverter.fetchDatastream(dsPath));
-                    entity.getPropertyAccessor(bean).setProperty(dsProp, dsBean);
-                }
-
-            }
-
-            // TODO: implement the case for relations
-        } else {
-            // check if we are trying to access the binary content of a datastream
-
-            Optional<PersistentProperty<?>> optional = entity.findPropertyForGetterOrSetter(getterOrSetter);
-
-            if (optional.isPresent()) {
-                prop = optional.get();
-                if (prop instanceof BinaryPersistentProperty) {
-                    fedoraConverter.readDatastreamContent(bean, (DatastreamPersistentEntity<?>) entity, (FedoraDatastream) fedoraResource);
-                }
-            }
+            return assoc.get().getInverse();
         }
 
-        if (prop != null && isSetter(getterOrSetter)) {
-            updatedProperties.add(prop);
+        Optional<PersistentProperty<?>> prop = entity.findPropertyForGetterOrSetter(getterOrSetter);
+        if (prop.isPresent()) {
+            return prop.get();
         }
 
-        try {
-            return getterOrSetter.invoke(bean, allArguments);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-*/
+        return null;
 
-    private boolean isSetter(Method getterOrSetter) {
-        return getterOrSetter.getName().matches("^set\\p{Lu}.*$")
-                && getterOrSetter.getParameterCount() == 1
-                && getterOrSetter.getReturnType().equals(void.class);
     }
 }

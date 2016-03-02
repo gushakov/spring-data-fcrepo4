@@ -44,11 +44,17 @@ public class DatastreamPersistentProperty extends GenericFedoraPersistentPropert
     }
 
     /**
-     * Name of the datastream as specified on {@code @Datastream} type annotation.
+     * Name of the datastream as specified on {@code @Datastream} type annotation or {@link #getName()} if the annotation
+     * does not specify the name.
      * @return datastream resource name
      */
     public String getDsName(){
-        return dsAnnot.name();
+        if(isDefaultDatastreamName()){
+            return getName();
+        }
+        else {
+            return dsAnnot.name();
+        }
     }
 
     public boolean isDefaultDatastreamName(){

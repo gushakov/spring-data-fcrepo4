@@ -170,7 +170,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                 }
                 String path = parsePathFromUri(queryResultResource.getURI());
 
-                System.out.println(path);
+                logger.debug("Found resource: {}", path);
 
                 try {
                     if (repository.exists(path)) {

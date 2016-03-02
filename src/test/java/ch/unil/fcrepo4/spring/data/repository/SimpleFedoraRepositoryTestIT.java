@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
 
@@ -78,6 +79,12 @@ public class SimpleFedoraRepositoryTestIT {
         List<Vehicle> vehicles = vehicleRepo.findByMake("Ford");
         ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
         assertThat(vehicles.get(0)).hasMake("Ford");
+    }
+
+    @Test
+    public void testFindByMilesGreaterThan() throws Exception {
+        System.out.println(vehicleRepo.findByMilesGreaterThan(10000)
+                .stream().filter(v -> v.getConsumption() < 5).count());
     }
 
     @Test

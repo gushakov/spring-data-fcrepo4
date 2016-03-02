@@ -10,7 +10,7 @@ import java.io.InputStream;
  */
 public class VehicleDescription {
 
-    @Binary(mimetype = "text/xml")
+    @Binary(mimetype = "text/plain")
     private InputStream desc;
 
     @Property
