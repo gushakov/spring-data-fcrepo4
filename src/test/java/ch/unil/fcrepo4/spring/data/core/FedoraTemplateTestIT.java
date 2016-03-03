@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
  * @author gushakov
@@ -31,13 +32,13 @@ public class FedoraTemplateTestIT {
         //@formatter:off
         @Bean
         public FedoraTemplate fedoraTemplate(
-                @Value("#{environment.getProperty('fedora.host')}")         String fedoraHost,
-                @Value("#{environment.getProperty('fedora.port')}")         int fedoraPort,
-                @Value("#{environment.getProperty('fedora.path')}")         String fedoraPath,
-                @Value("#{environment.getProperty('triplestore.host')}")    String triplestoreHost,
-                @Value("#{environment.getProperty('triplestore.port')}")    int triplestorePort,
-                @Value("#{environment.getProperty('triplestore.path')}")    String triplestorePath,
-                @Value("#{environment.getProperty('triplestore.db')}")      String triplestoreDb
+                @Value("#{environment.getProperty('fedora.host')}") String fedoraHost,
+                @Value("#{environment.getProperty('fedora.port')}") int fedoraPort,
+                @Value("#{environment.getProperty('fedora.path')}") String fedoraPath,
+                @Value("#{environment.getProperty('triplestore.host')}") String triplestoreHost,
+                @Value("#{environment.getProperty('triplestore.port')}") int triplestorePort,
+                @Value("#{environment.getProperty('triplestore.path')}") String triplestorePath,
+                @Value("#{environment.getProperty('triplestore.db')}") String triplestoreDb
         ) throws FedoraException {
             return new FedoraTemplate(fedoraHost, fedoraPort, fedoraPath,
                     triplestoreHost, triplestorePort, triplestorePath, triplestoreDb);
@@ -64,11 +65,20 @@ public class FedoraTemplateTestIT {
 
     @Test
     public void testLoadWithDataStreamAndSave() throws Exception {
-        Vehicle vehicle = fedoraTemplate.load(1456747846857L, Vehicle.class);
-        System.out.println(vehicle);
+        Vehicle vehicle = fedoraTemplate.load(1L, Vehicle.class);
+        //  System.out.println(vehicle);
 //        vehicle.getMake();
-        vehicle.setMake("hello");
-        fedoraTemplate.save(vehicle);
+        //     vehicle.setMake("hello");
+
+        try (InputStream is = new ByteArrayInputStream("this is a second test".getBytes())) {
+
+            //  VehicleDescription description = new VehicleDescription(is);
+            //      vehicle.setDescription(description);
+            vehicle.getDescription().setDesc(is);
+            fedoraTemplate.save(vehicle);
+        }
+
+
     }
 
 }

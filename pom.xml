@@ -341,6 +341,7 @@
                             </container>
                             <configuration>
                                 <properties>
+                                    <cargo.servlet.uriencoding>UTF-8</cargo.servlet.uriencoding>
                                     <cargo.jvmargs>-Dfile.encoding=UTF-8</cargo.jvmargs>
                                 </properties>
                             </configuration>
