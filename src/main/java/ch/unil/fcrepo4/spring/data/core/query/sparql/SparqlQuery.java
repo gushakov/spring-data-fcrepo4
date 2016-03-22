@@ -21,14 +21,36 @@ public class SparqlQuery implements FedoraQuery {
 
     private Query query;
 
+    private boolean paged = false;
+
+    private long offset = 0L;
+
+    private long limit = Long.MAX_VALUE;
+
     public SparqlQuery(Criteria criteria) {
+        this.query = buildQuery(criteria);
+    }
+
+    public SparqlQuery(Criteria criteria, long offset, long limit) {
+        this.offset = offset;
+        this.limit = limit;
+        paged = true;
+        this.query = buildQuery(criteria);
+    }
+
+    private Query buildQuery(Criteria criteria) {
         Op op = new OpBGP(criteria.buildBgp());
         for (Expr filter: criteria.getFilters()){
             op = OpFilter.filter(filter, op);
         }
         op = new OpProject(op, Collections.singletonList(Var.alloc(criteria.getProjectionVariableName())));
-        this.query = OpAsQuery.asQuery(op);
-        this.query.setQuerySelectType();
+        Query sparqlQuery = OpAsQuery.asQuery(op);
+        sparqlQuery.setQuerySelectType();
+        if (isPaged()){
+            sparqlQuery.setOffset(offset);
+            sparqlQuery.setLimit(limit);
+        }
+        return sparqlQuery;
     }
 
     @Override
@@ -38,17 +60,17 @@ public class SparqlQuery implements FedoraQuery {
 
     @Override
     public boolean isPaged() {
-        return false;
+        return paged;
     }
 
     @Override
-    public int getOffset() {
-        return 0;
+    public long getOffset() {
+        return offset;
     }
 
     @Override
-    public int getLimit() {
-        return 0;
+    public long getLimit() {
+        return limit;
     }
 
     @Override

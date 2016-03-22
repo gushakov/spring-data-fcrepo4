@@ -2,7 +2,9 @@ package ch.unil.fcrepo4.spring.data.core;
 
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import ch.unil.fcrepo4.spring.data.core.query.result.FedoraResultPage;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Resource;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +50,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     private int triplestorePort;
 
     private String triplestorePath;
-    
+
     private String triplestoreDb;
 
     private FedoraRepository repository;
@@ -57,13 +59,10 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     /**
      * Assumes default settings as set in <a href="https://github.com/fcrepo4-exts/fcrepo4-vagrant">fcrepo4-vagrant</a>
-     * project:
-     *   <ul>
-     *       <li>Fedora: http://localhost:8080/fcrepo</li>
-     *       <li>Fuseki: http://localhost:8080/fuseki, databse: "test"</li>
-     *   </ul>
+     * project: <ul> <li>Fedora: http://localhost:8080/fcrepo</li> <li>Fuseki: http://localhost:8080/fuseki, databse:
+     * "test"</li> </ul>
      */
-    public FedoraTemplate(){
+    public FedoraTemplate() {
         this.fedoraHost = "localhost";
         this.fedoraPort = 8080;
         this.fedoraPath = "/fcrepo";
@@ -73,7 +72,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         this.triplestoreDb = "test";
     }
 
-    public FedoraTemplate(String fedoraHost, int fedoraPort, String fedoraPath, 
+    public FedoraTemplate(String fedoraHost, int fedoraPort, String fedoraPath,
                           String triplestoreHost, int triplestorePort, String triplestorePath, String triplestoreDb) {
         this.fedoraHost = fedoraHost;
         this.fedoraPort = fedoraPort;
@@ -105,18 +104,18 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         registerPersistenceExceptionTranslator();
     }
 
-    private void initClientRepository(){
+    private void initClientRepository() {
 
         // build client repository URL
         String fedoraUrl = new URIBuilder()
                 .setScheme("http")
                 .setHost(fedoraHost)
                 .setPort(fedoraPort)
-                .setPath(fedoraPath+"/rest").toString();
+                .setPath(fedoraPath + "/rest").toString();
         repository = new FedoraRepositoryImpl(fedoraUrl);
-        
+
     }
-    
+
     @Override
     public FedoraConverter getConverter() {
         return fedoraConverter;
@@ -155,7 +154,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         String queryUrl = new URIBuilder().setScheme("http")
                 .setHost(triplestoreHost)
                 .setPort(triplestorePort)
-                .setPath(triplestorePath+"/"+triplestoreDb+"/query").toString();
+                .setPath(triplestorePath + "/" + triplestoreDb + "/query").toString();
 
         List<T> beans = new ArrayList<>();
         Query sparqlQuery = QueryFactory.create(query.getSerialized());
@@ -183,7 +182,12 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                 }
             }
         }
-       return beans;
+        return beans;
+    }
+
+    @Override
+    public <T> Page<T> queryForPage(FedoraQuery query, Class<T> beanType) {
+        return new FedoraResultPage<>(query(query, beanType), new FedoraPageRequest((int) query.getOffset(), (int) query.getLimit()));
     }
 
     private Resource getFirstAvailableResource(QuerySolution querySolution, List<String> varNames) {
@@ -199,16 +203,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private String parsePathFromUri(String uri) {
         return StringUtils.removeStart(uri, repository.getRepositoryUrl());
-    }
-
-    @Override
-    public <T> Page<T> queryForPage(FedoraQuery query, Class<T> beanType) {
-        throw new UnsupportedOperationException();
-    }
-
-    // test, maybe move to operations
-    public <T> List<T> query(String query, Class<T> beanType){
-        throw new UnsupportedOperationException();
     }
 
     private void registerPersistenceExceptionTranslator() {

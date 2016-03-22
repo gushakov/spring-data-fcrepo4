@@ -1,7 +1,9 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
+import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
+import org.assertj.core.api.Condition;
 import org.fcrepo.client.FedoraException;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,14 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author gushakov
@@ -92,6 +94,27 @@ public class SimpleFedoraRepositoryTestIT {
         List<Vehicle> vehicles = vehicleRepo.findByMake("Citroën");
         ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
         assertThat(vehicles.get(0)).hasMake("Citroën");
+    }
+
+    @Test
+    public void testFindByMilesGreaterThanWithPageable() throws Exception {
+        final Page<Vehicle> firstPage = vehicleRepo.findByMilesGreaterThan(100, new FedoraPageRequest(0, 3));
+        assertThat(firstPage.getNumber()).isEqualTo(0);
+        assertThat(firstPage.getNumberOfElements()).isEqualTo(3);
+        assertThat(firstPage.isFirst()).isTrue();
+        assertThat(firstPage.isLast()).isFalse();
+        assertThat((List<? extends Vehicle>) firstPage.getContent()).extracting("miles", Integer.class)
+                .have(new Condition<Integer>(){
+                    @Override
+                    public boolean matches(Integer miles) {
+                        return miles > 100;
+                    }
+                });
+        final Page<Vehicle> secondPage = vehicleRepo.findByMilesGreaterThan(100, firstPage.nextPageable());
+        assertThat(secondPage.getNumber()).isEqualTo(1);
+        assertThat(secondPage.getNumberOfElements()).isEqualTo(3);
+        assertThat(secondPage.isFirst()).isFalse();
+        assertThat(secondPage.isLast()).isFalse();
     }
 
 }

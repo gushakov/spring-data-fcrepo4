@@ -1,5 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
+import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
+import ch.unil.fcrepo4.spring.data.core.query.sparql.SparqlQuery;
 import ch.unil.fcrepo4.spring.data.repository.Vehicle;
 import ch.unil.fcrepo4.spring.data.repository.VehicleDescription;
 import ch.unil.fcrepo4.spring.data.repository.VehiclePicture;
@@ -52,7 +54,7 @@ public class FedoraTemplateTestIT {
 
     @Test
     public void testSaveWithDatastream() throws Exception {
-        Vehicle vehicle = new Vehicle(System.currentTimeMillis(), "toto", 10000);
+        Vehicle vehicle = new Vehicle(System.currentTimeMillis(), "Nice car", 10000);
         vehicle.setColor("dark blue");
         vehicle.setConsumption(6.7f);
         VehicleDescription description = new VehicleDescription(new ByteArrayInputStream("Lorem ipsum".getBytes()));
@@ -61,24 +63,6 @@ public class FedoraTemplateTestIT {
         VehiclePicture picture = new VehiclePicture(new ClassPathResource("picture.png").getInputStream());
         vehicle.setPicture(picture);
         fedoraTemplate.save(vehicle);
-    }
-
-    @Test
-    public void testLoadWithDataStreamAndSave() throws Exception {
-        Vehicle vehicle = fedoraTemplate.load(1L, Vehicle.class);
-        //  System.out.println(vehicle);
-//        vehicle.getMake();
-        //     vehicle.setMake("hello");
-
-        try (InputStream is = new ByteArrayInputStream("this is a second test".getBytes())) {
-
-            //  VehicleDescription description = new VehicleDescription(is);
-            //      vehicle.setDescription(description);
-            vehicle.getDescription().setDesc(is);
-            fedoraTemplate.save(vehicle);
-        }
-
-
     }
 
 }

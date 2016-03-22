@@ -7,6 +7,7 @@ import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import ch.unil.fcrepo4.spring.data.core.query.sparql.BgpCriteria;
 import ch.unil.fcrepo4.spring.data.core.query.sparql.Criteria;
 import ch.unil.fcrepo4.spring.data.core.query.sparql.SparqlQuery;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.context.PersistentPropertyPath;
@@ -57,7 +58,13 @@ public class FedoraSparqlQueryCreator extends AbstractQueryCreator<FedoraQuery, 
 
     @Override
     protected FedoraQuery complete(Criteria criteria, Sort sort) {
-        return new SparqlQuery(criteria);
+        final Pageable pageable = parameterAccessor.getPageable();
+        if (pageable != null) {
+            // paged query
+            return new SparqlQuery(criteria, pageable.getOffset(), pageable.getPageSize());
+        } else {
+            return new SparqlQuery(criteria);
+        }
     }
 
     private void processCriteriaForPart(PersistentPropertyPath<FedoraPersistentProperty> persistentPropertyPath,

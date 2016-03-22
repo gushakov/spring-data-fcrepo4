@@ -9,7 +9,7 @@ public interface FedoraQuery {
 
     boolean isPaged();
 
-    int getOffset();
+    long getOffset();
 
-    int getLimit();
+    long getLimit();
 }

@@ -30,8 +30,12 @@ public abstract class AbstractFedoraQuery implements RepositoryQuery {
 
         System.out.println(query);
 
-        return fedoraOperations.query(query, fedoraQueryMethod.getEntityInformation().getJavaType());
-
+        if (query.isPaged()){
+           return fedoraOperations.queryForPage(query, fedoraQueryMethod.getEntityInformation().getJavaType());
+        }
+        else {
+            return fedoraOperations.query(query, fedoraQueryMethod.getEntityInformation().getJavaType());
+        }
     }
 
     @Override
