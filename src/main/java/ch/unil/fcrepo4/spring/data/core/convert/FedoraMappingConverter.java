@@ -327,6 +327,11 @@ public class FedoraMappingConverter implements FedoraConverter {
     }
 
     @Override
+    public <T> String getFedoraObjectUrl(T bean) {
+        return repository.getRepositoryUrl() + getFedoraObjectPath(bean);
+    }
+
+    @Override
     public boolean exists(String path) {
         Assert.notNull(path);
         try {

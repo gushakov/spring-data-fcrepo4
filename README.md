@@ -4,23 +4,8 @@
 
 ### Description
 
-This project aims at providing a Spring Data module for Fedora Commons Repository. The module should allow to execute CRUD operations
-and query against the Fedora repository using (domain) annotated Java objects.
-
-**List of features availability**
-
-|Feature|Status|Comment|
-|---|---|---|
-|ID to JCR node path mapping|OK|See [PathCreator](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/mapping/PathCreator.java).|
-|Mapping of resource properties (`created`, etc.)|Partially done|See [ZonedDateTimeRdfDatatype](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ZonedDateTimeRdfDatatype.java).|
-|Simple properties mapping|Partially done|Need to test CRUD and queries with `boolean`, `double`, etc.|
-|Extensible custom RDF to Java converter|OK|See [ExtendedXsdDatatypeConverter](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/core/convert/rdf/ExtendedXsdDatatypeConverter.java).|
-|Datastream (binary) object persistence|OK|Needs some work.|
-|Lazy-load of datastreams and relations|Partially done|For datastreams, for now.|
-|Spring data repository abstraction|Partially done|See [SimpleFedoraRepository](https://github.com/gushakov/spring-data-fcrepo4/blob/master/src/main/java/ch/unil/fcrepo4/spring/data/repository/support/SimpleFedoraRepository.java).|
-|Paged queries|Not yet||
-|Relationships mapping|Not yet||
-|Collection properties mapping|Not yet||
+Spring Data Fedora is a proof-of-concept implementation of [Spring Data](http://projects.spring.io/spring-data/) for [Fedora](https://github.com/fcrepo4/fcrepo4).
+It provides Object Content Mapping (OCM) between simple annotated Java beans and Fedora resources. It also allows to query the external triplestore using Spring Data Repository API.
 
 ### Acknowledgements
 
@@ -79,7 +64,7 @@ fedoraTemplate.save(vehicle);
 Vehicle anotherVehicle = fedoraTemplate.load(1L, Vehicle.class);
 ```
 
-Assuming the Fedora instance is running under `http://localhost:8080/fcrepo/rest/vehicle/1`, a set of corresponding resources will be created at the backend with the corresponding RDF properties (shown here as decoded RDF graph for clarity).
+Assuming the Fedora instance is running under `http://localhost:8080/fcrepo/rest`, a set of corresponding resources will be created at the backend with the corresponding RDF properties (shown here as decoded RDF graph for clarity).
 
 ```turtle
 <http://localhost:8080/fcrepo/rest/vehicle/1>

@@ -69,6 +69,15 @@ public class FedoraMappingContextTest {
         long id = 1L;
     }
 
+    @FedoraObject
+    static class Bean6 {
+        @Path
+        long id = 1L;
+
+        @Property(uriNs = "http://another/namespace/uri/")
+        String foo = "bar";
+    }
+
 
     @Test
     public void testFedoraObjectProperties() throws Exception {
@@ -118,6 +127,16 @@ public class FedoraMappingContextTest {
         FedoraObjectPersistentEntity<?> entity = (FedoraObjectPersistentEntity<?>) context.getPersistentEntity(Bean1.class);
         assertThat(entity.isDefaultNamespace()).isTrue();
         assertThat(entity.getNamespace()).isEqualTo("bean1");
+    }
+
+    @Test
+    public void testPropertyUriNamespace() throws Exception {
+        FedoraMappingContext context = new FedoraMappingContext();
+        context.setInitialEntitySet(new HashSet<>(Collections.singleton(Bean6.class)));
+        context.initialize();
+        FedoraObjectPersistentEntity<?> entity = (FedoraObjectPersistentEntity<?>) context.getPersistentEntity(Bean6.class);
+        FedoraResourcePersistentProperty property = (FedoraResourcePersistentProperty) entity.getPersistentProperty("foo");
+        assertThat(property.getUri()).isEqualTo("http://another/namespace/uri/foo");
     }
 
 }

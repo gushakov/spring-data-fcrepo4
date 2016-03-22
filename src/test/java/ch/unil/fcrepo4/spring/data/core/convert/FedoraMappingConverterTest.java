@@ -29,6 +29,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalMatchers.and;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -121,7 +122,7 @@ public class FedoraMappingConverterTest {
     }
 
     @FedoraObject
-    static class Bean1 {
+    public static class Bean1 {
 
         @Path
         long id;
@@ -134,6 +135,60 @@ public class FedoraMappingConverterTest {
 
         @Property
         String foo;
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public Date getCreated() {
+            return created;
+        }
+
+        public void setCreated(Date created) {
+            this.created = created;
+        }
+
+        public int getNumber() {
+            return number;
+        }
+
+        public void setNumber(int number) {
+            this.number = number;
+        }
+
+        public String getFoo() {
+            return foo;
+        }
+
+        public void setFoo(String foo) {
+            this.foo = foo;
+        }
+
+        @Override
+        public String toString() {
+            return "Bean1 {id: " +
+                    id +
+                    ", created: " +
+                    created +
+                    ", number: " +
+                    number +
+                    ", foo: " +
+                    foo +
+                    "}";
+        }
+    }
+
+    @Test
+    public void testGetFedoraObjectUrl() throws Exception {
+        FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
+        Bean1 bean1 = new Bean1();
+        bean1.id = ID;
+        String url = mappingConverter.getFedoraObjectUrl(bean1);
+        assertThat(url).isEqualTo(REPO_URL + PATH);
     }
 
     @Test
@@ -146,9 +201,8 @@ public class FedoraMappingConverterTest {
         bean1.foo = FOO;
         mappingConverter.write(bean1, fedoraObject);
         verify(fedoraObject).updateProperties(and(
-                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "number> " + rdfDatatypeConverter.serializeLiteralValue(bean1.number)),
-                contains("<> <" + Constants.TEST_FEDORA_URI_NAMESPACE + "foo> " + rdfDatatypeConverter.serializeLiteralValue(bean1.foo))));
-
+                contains("<" + Constants.TEST_FEDORA_URI_NAMESPACE + "number>  " + rdfDatatypeConverter.serializeLiteralValue(bean1.number)),
+                contains("<" + Constants.TEST_FEDORA_URI_NAMESPACE + "foo>  " + rdfDatatypeConverter.serializeLiteralValue(bean1.foo))));
     }
 
     @Test
@@ -156,10 +210,11 @@ public class FedoraMappingConverterTest {
         FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
         org.fcrepo.client.FedoraObject fedoraObject = makeMockFedoraObject(PATH, FO_CREATED, NUMBER, FOO);
         Bean1 bean1 = mappingConverter.read(Bean1.class, fedoraObject);
-        assertThat(bean1.id).isEqualTo(ID);
-        assertThat(bean1.number).isEqualTo(NUMBER);
-        assertThat(bean1.foo).isEqualTo(FOO);
-        assertThat(bean1.created).hasTime(ZonedDateTime.parse(FO_CREATED).toInstant().toEpochMilli());
+        assertThat(bean1).isInstanceOf(DynamicBeanProxy.class);
+        assertThat(bean1.getId()).isEqualTo(ID);
+        assertThat(bean1.getNumber()).isEqualTo(NUMBER);
+        assertThat(bean1.getFoo()).isEqualTo(FOO);
+        assertThat(bean1.getCreated()).hasTime(ZonedDateTime.parse(FO_CREATED).toInstant().toEpochMilli());
     }
 
 }

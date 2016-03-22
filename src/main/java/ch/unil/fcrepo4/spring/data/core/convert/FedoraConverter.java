@@ -38,6 +38,8 @@ public interface FedoraConverter extends EntityReader<Object, FedoraResource>, E
 
     <T, ID> String getFedoraObjectPath(ID id, Class<T> entityClass);
 
+    <T> String getFedoraObjectUrl(T bean);
+
     boolean exists(String path);
 
     <T> String getDatastreamPath(T bean, DatastreamPersistentProperty dsProp);
