@@ -46,6 +46,9 @@ public class Vehicle {
     @Created
     private ZonedDateTime createdDate;
 
+    @Relation
+    private Owner owner;
+
     public Vehicle() {
     }
 
@@ -138,5 +141,13 @@ public class Vehicle {
 
     public void setCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Owner owner) {
+        this.owner = owner;
     }
 }

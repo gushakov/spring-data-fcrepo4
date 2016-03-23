@@ -13,6 +13,15 @@ public interface RdfDatatypeConverter {
 
     <T> Node encodeLiteralValue(T value);
 
+    /**
+     * Serializes given literal value to string using quoted form. For example: for {@code 123} will return {@code
+     * "123"^^<http://www.w3.org/2001/XMLSchema#int>}.
+     *
+     * @param value value to serialized
+     * @param <T>   any simple type
+     * @return value serialized as a quoted string
+     * @see Node#toString(boolean)
+     */
     <T> String serializeLiteralValue(T value);
 
     <T> T parseLiteralValue(String lexicalForm, Class<T> javaType);

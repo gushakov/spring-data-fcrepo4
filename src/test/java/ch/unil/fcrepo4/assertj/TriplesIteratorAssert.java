@@ -34,7 +34,7 @@ public class TriplesIteratorAssert extends IterableAssert<Triple> {
         return new NodesIterableAssert(subjects);
     }
 
-    public TriplesIteratorAssert contains(Node predicate, Node literalValue) {
+    public TriplesIteratorAssert containsPredicateWithObjectValue(String predicateUri, String serializedLiteralValue) {
         isNotNull();
         boolean found = false;
 
@@ -43,15 +43,37 @@ public class TriplesIteratorAssert extends IterableAssert<Triple> {
                     || !triple.getObject().isLiteral()) {
                 continue;
             }
-            if (triple.getPredicate().getURI().equals(predicate.getURI())
-                    && triple.getObject().getLiteralLexicalForm().equals(literalValue.getLiteralLexicalForm())
+            if (triple.getPredicate().getURI().equals(predicateUri)
+                    && triple.getObject().getLiteral().toString(true).equals(serializedLiteralValue)
                     ) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            failWithMessage("Cannot find triple with predicate %s and literal value %s", predicate, literalValue);
+            failWithMessage("Cannot find triple with predicate URI %s and serialized literal value %s", predicateUri, serializedLiteralValue);
+        }
+        return this;
+    }
+
+    public TriplesIteratorAssert containsPredicateWithObjectUri(String predicateUri, String objectUri) {
+        isNotNull();
+        boolean found = false;
+
+        for (Triple triple : actual) {
+            if (!triple.getPredicate().isURI()
+                    || !triple.getObject().isURI()) {
+                continue;
+            }
+            if (triple.getPredicate().getURI().equals(predicateUri)
+                    && triple.getObject().getURI().equals(objectUri)
+                    ) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            failWithMessage("Cannot find triple with predicate URI %s and object URI %s", predicateUri, objectUri);
         }
         return this;
     }

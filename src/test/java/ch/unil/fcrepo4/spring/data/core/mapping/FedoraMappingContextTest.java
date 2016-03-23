@@ -78,6 +78,23 @@ public class FedoraMappingContextTest {
         String foo = "bar";
     }
 
+    @FedoraObject
+    static class Bean7 {
+        @Path
+        long id = 1L;
+
+    }
+
+    @FedoraObject
+    static class Bean8 {
+        @Path
+        long id = 1L;
+
+        @Relation
+        Bean7 bean7 = new Bean7();
+
+    }
+
 
     @Test
     public void testFedoraObjectProperties() throws Exception {
@@ -137,6 +154,16 @@ public class FedoraMappingContextTest {
         FedoraObjectPersistentEntity<?> entity = (FedoraObjectPersistentEntity<?>) context.getPersistentEntity(Bean6.class);
         FedoraResourcePersistentProperty property = (FedoraResourcePersistentProperty) entity.getPersistentProperty("foo");
         assertThat(property.getUri()).isEqualTo("http://another/namespace/uri/foo");
+    }
+
+    @Test
+    public void testRelation() throws Exception {
+        FedoraMappingContext context = new FedoraMappingContext();
+        context.setInitialEntitySet(new HashSet<>(Collections.singleton(Bean8.class)));
+        context.initialize();
+        FedoraPersistentEntity<?> entity = context.getPersistentEntity(Bean8.class);
+        final FedoraPersistentProperty bean7 = entity.getPersistentProperty("bean7");
+        assertThat(bean7).isInstanceOf(FedoraRelationPersistentProperty.class);
     }
 
 }

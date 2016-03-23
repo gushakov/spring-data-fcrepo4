@@ -37,36 +37,40 @@ public class FedoraMappingContext extends AbstractMappingContext<GenericFedoraPe
         final FedoraPersistentProperty prop;
 
         if (field != null && field.getAnnotation(Path.class) != null) {
-            logger.debug("Found " + Path.class.getSimpleName() +
-                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+            logger.debug("Found {} annotated property on field <{}> of entity {}", Path.class.getSimpleName(),
+                    field.getName(), owner.getType().getName());
             prop = new PathPersistentProperty(field, descriptor, owner, simpleTypeHolder);
-        }  else if (field != null && field.getAnnotation(Created.class) != null) {
-            logger.debug("Found " + Created.class.getSimpleName() +
-                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+        } else if (field != null && field.getAnnotation(Created.class) != null) {
+            logger.debug("Found {} annotated property on field <{}> of entity {}", Created.class.getSimpleName(),
+                    field.getName(), owner.getType().getName());
             prop = new CreatedPersistentProperty(field, descriptor, owner, simpleTypeHolder);
         } else if (field != null && field.getAnnotation(Binary.class) != null) {
-            logger.debug("Found " + Binary.class.getSimpleName() +
-                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+            logger.debug("Found {} annotated property on field <{}> of entity {}", Binary.class.getSimpleName(),
+                    field.getName(), owner.getType().getName());
             prop = new BinaryPersistentProperty(field, descriptor, owner, simpleTypeHolder);
         } else if (field != null && field.getAnnotation(Property.class) != null
                 && simpleTypeHolder.isSimpleType(field.getType())) {
-            logger.debug("Found " + Property.class.getSimpleName() +
-                    " annotated property on field <{}> of entity {}", field.getName(), owner.getType().getName());
+            logger.debug("Found {} annotated property on field <{}> of entity {}", Property.class.getSimpleName(),
+                    field.getName(), owner.getType().getName());
             prop = new SimpleFedoraResourcePersistentProperty(field, descriptor, owner, simpleTypeHolder);
         } else if (field != null && field.getAnnotation(Datastream.class) != null) {
-            logger.debug("Found association: Fedora object to Datastream, field <{}> of entity {}", field.getName(), owner.getType().getName());
+            logger.debug("Found association of type {}, field <{}> of entity {}", Datastream.class.getSimpleName(),
+                    field.getName(), owner.getType().getName());
             prop = new DatastreamPersistentProperty(field, descriptor, owner, simpleTypeHolder, (DatastreamPersistentEntity) getPersistentEntity(field.getType()));
-        }
-        else {
-             // all other properties are transient
+        } else if (field != null && field.getAnnotation(Relation.class) != null) {
+            logger.debug("Found association of type {}, field <{}> of entity {}", Relation.class.getSimpleName(),
+                    field.getName(), owner.getType().getName());
+            prop = new RelationPersistentProperty(field, descriptor, owner, simpleTypeHolder);
+        } else {
+            // all other properties are transient
             prop = new TransientPersistentProperty(field, descriptor, owner, simpleTypeHolder);
         }
 
         return prop;
     }
 
-    private boolean hasBinary(TypeInformation<?> typeInformation){
-       return Stream.of(typeInformation.getType().getDeclaredFields())
+    private boolean hasBinary(TypeInformation<?> typeInformation) {
+        return Stream.of(typeInformation.getType().getDeclaredFields())
                 .filter(field -> field.getAnnotation(Binary.class) != null).findAny().isPresent();
     }
 

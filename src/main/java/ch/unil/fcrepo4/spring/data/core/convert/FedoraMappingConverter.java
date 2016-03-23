@@ -102,21 +102,21 @@ public class FedoraMappingConverter implements FedoraConverter {
 
     @Override
     public void write(Object bean, FedoraResource fedoraResource) {
-        writeSimpleProperties(bean, fedoraResource);
-
         writeAssociations(bean);
+
+        writeProperties(bean, fedoraResource);
     }
 
-    private void writeSimpleProperties(Object bean, FedoraResource fedoraResource) {
+    private void writeProperties(Object bean, FedoraResource fedoraResource) {
         if (bean instanceof DynamicBeanProxy) {
-            writeSimplePropertiesForProxy((DynamicBeanProxy) bean, fedoraResource);
+            writePropertiesForProxy((DynamicBeanProxy) bean, fedoraResource);
         } else {
-            writeSimplePropertiesForBean(bean, fedoraResource);
+            writePropertiesForBean(bean, fedoraResource);
         }
     }
 
-    private void writeSimplePropertiesForProxy(DynamicBeanProxy beanProxy, FedoraResource fedoraResource) {
-        TriplesCollectingPropertyHandler triplesCollector = new TriplesCollectingPropertyHandler(beanProxy.__getPropertyAccessor(), rdfDatatypeConverter);
+    private void writePropertiesForProxy(DynamicBeanProxy beanProxy, FedoraResource fedoraResource) {
+        TriplesCollectingPropertyHandler triplesCollector = new TriplesCollectingPropertyHandler(beanProxy.__getPropertyAccessor(), this);
         beanProxy.__getBeanEntity().doWithProperties((SimplePropertyHandler) property -> {
             if (beanProxy.__isPropertyUpdated(property)) {
                 triplesCollector.doWithPersistentProperty(property);
@@ -125,42 +125,46 @@ public class FedoraMappingConverter implements FedoraConverter {
         ElementTriplesBlock insertTriples = triplesCollector.getInsertTriples();
         ElementTriplesBlock deleteWhereTriples = triplesCollector.getDeleteWhereTriples();
         if (!insertTriples.isEmpty()) {
-            try {
-                // delete all the updated properties first
-                String delete = "DELETE { " + deleteWhereTriples + " }\n" +
-                        "INSERT { }\n" +
-                        "WHERE { " + deleteWhereTriples + "}";
-                logger.debug("SPARQL (delete): {}", delete);
-                fedoraResource.updateProperties(delete);
-                // insert new values for updated properties
-                String insert = "INSERT DATA { " + insertTriples + " }";
-                logger.debug("SPARQL (insert): {}", insert);
-                fedoraResource.updateProperties(insert);
-            } catch (FedoraException e) {
-                throw new MappingException("Cannot update properties of the resource " + fedoraResource);
-            }
+            updateTriples(deleteWhereTriples, insertTriples, fedoraResource);
         }
     }
 
-    private void writeSimplePropertiesForBean(Object bean, FedoraResource fedoraResource) {
+    private void writePropertiesForBean(Object bean, FedoraResource fedoraResource) {
         FedoraPersistentEntity<?> entity = mappingContext.getPersistentEntity(bean.getClass());
         PersistentPropertyAccessor propsAccessor = entity.getPropertyAccessor(bean);
-        TriplesCollectingPropertyHandler triplesCollector = new TriplesCollectingPropertyHandler(propsAccessor, rdfDatatypeConverter);
+        TriplesCollectingPropertyHandler triplesCollector = new TriplesCollectingPropertyHandler(propsAccessor, this);
         ElementTriplesBlock insertTriples = triplesCollector.getInsertTriples();
         // add ocm class name for the new bean
         insertTriples.addTriple(0, new Triple(NodeFactory.createURI(""),
                 NodeFactory.createURI(Constants.OCM_URI_NAMESPACE + Constants.OCM_CLASS_PROPERTY),
                 rdfDatatypeConverter.encodeLiteralValue(entity.getType().getName())));
+
+        // add triples for simple properties
         entity.doWithProperties(triplesCollector);
 
-        try {
-            String insert = "INSERT DATA { " + insertTriples + " }";
-            logger.debug("SPARQL (insert): {}", insert);
-            fedoraResource.updateProperties(insert);
-        } catch (FedoraException e) {
-            throw new MappingException("Cannot update properties of the resource " + fedoraResource);
-        }
+        // add triples for relations
+        entity.doWithAssociations(triplesCollector);
+
+        ElementTriplesBlock deleteWhereTriples = triplesCollector.getDeleteWhereTriples();
+        updateTriples(deleteWhereTriples, insertTriples, fedoraResource);
     }
+
+   private void updateTriples(ElementTriplesBlock deleteWhereTriples, ElementTriplesBlock insertTriples, FedoraResource fedoraResource) {
+       try {
+           // delete all the updated properties first
+           String delete = "DELETE { " + deleteWhereTriples + " }\n" +
+                   "INSERT { }\n" +
+                   "WHERE { " + deleteWhereTriples + "}";
+           logger.debug("SPARQL (delete): {}", delete);
+           fedoraResource.updateProperties(delete);
+           // insert new values for updated properties
+           String insert = "INSERT DATA { " + insertTriples + " }";
+           logger.debug("SPARQL (insert): {}", insert);
+           fedoraResource.updateProperties(insert);
+       } catch (FedoraException e) {
+           throw new MappingException("Cannot update properties of the resource " + fedoraResource, e);
+       }
+   }
 
     private void writeAssociations(Object bean) {
         if (bean instanceof DynamicBeanProxy) {
@@ -192,6 +196,9 @@ public class FedoraMappingConverter implements FedoraConverter {
         }
 
         if (property instanceof DatastreamPersistentProperty) {
+
+            // write datastream association
+
             DatastreamPersistentProperty dsProp = (DatastreamPersistentProperty) property;
 
             Object dsBean = propertyAccessor.getProperty(dsProp);
@@ -200,7 +207,16 @@ public class FedoraMappingConverter implements FedoraConverter {
                 DatastreamPersistentEntity<?> dsEntity = (DatastreamPersistentEntity<?>) mappingContext.getPersistentEntity(dsProp.getType());
                 String dsPath = getDatastreamPath(bean, dsProp);
                 FedoraResource datastream = createDatastream(dsBean, dsEntity, dsPath);
-                writeSimpleProperties(dsBean, datastream);
+                writeProperties(dsBean, datastream);
+            }
+        }
+        else if (property instanceof RelationPersistentProperty) {
+
+            // write relation association
+            RelationPersistentProperty relProp = (RelationPersistentProperty) property;
+            Object relBean = propertyAccessor.getProperty(relProp);
+            if (relBean != null){
+                write(relBean, getFedoraObject(relBean));
             }
         }
     }

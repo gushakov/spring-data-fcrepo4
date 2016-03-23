@@ -1,11 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
-import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
-import ch.unil.fcrepo4.spring.data.core.query.sparql.SparqlQuery;
-import ch.unil.fcrepo4.spring.data.repository.Vehicle;
-import ch.unil.fcrepo4.spring.data.repository.VehicleDescription;
-import ch.unil.fcrepo4.spring.data.repository.VehiclePicture;
-import org.fcrepo.client.FedoraException;
+import ch.unil.fcrepo4.spring.data.repository.*;
+import org.fcrepo.client.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +14,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+
+import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
+import static ch.unil.fcrepo4.spring.data.core.Constants.TEST_FEDORA_URI_NAMESPACE;
 
 /**
  * @author gushakov
@@ -63,6 +61,39 @@ public class FedoraTemplateTestIT {
         VehiclePicture picture = new VehiclePicture(new ClassPathResource("picture.png").getInputStream());
         vehicle.setPicture(picture);
         fedoraTemplate.save(vehicle);
+    }
+
+    @Test
+    public void testName() throws Exception {
+        System.out.println(fedoraTemplate.getConverter().getRdfDatatypeConverter().encodeLiteralValue(12345).getLiteralLexicalForm());
+        System.out.println(fedoraTemplate.getConverter().getRdfDatatypeConverter().serializeLiteralValue(12345));
+    }
+
+    @Test
+    public void testSaveWithRelation() throws Exception {
+        final long vehicleId = System.currentTimeMillis();
+        Vehicle vehicle = new Vehicle(vehicleId, "Ford Mustang", 3000);
+        final long ownerId = System.currentTimeMillis() + 1;
+        Owner owner = new Owner(ownerId, "Lucky Luke");
+        final long addressId = System.currentTimeMillis() + 2;
+        Address address = new Address(addressId, "Main St. 123");
+        owner.setAddress(address);
+        vehicle.setOwner(owner);
+        fedoraTemplate.save(vehicle);
+
+        final org.fcrepo.client.FedoraRepository repository = fedoraTemplate.getRepository();
+        final FedoraObject vehicleFo = repository.getObject("/vehicle/" + vehicleId);
+        final String repoUrl = repository.getRepositoryUrl();
+        assertThat(vehicleFo.getProperties())
+                .containsPredicateWithObjectUri(TEST_FEDORA_URI_NAMESPACE + "owner",
+                        repoUrl + "/owner/" + ownerId);
+
+        owner.setFullName("Mickey Mouse");
+        address.setZipCode(12345);
+        fedoraTemplate.save(vehicle);
+        final FedoraObject addressFo = repository.getObject("/address/" + addressId);
+        assertThat(addressFo.getProperties()).containsPredicateWithObjectValue(TEST_FEDORA_URI_NAMESPACE + "zipCode",
+                fedoraTemplate.getConverter().getRdfDatatypeConverter().serializeLiteralValue(12345));
     }
 
 }

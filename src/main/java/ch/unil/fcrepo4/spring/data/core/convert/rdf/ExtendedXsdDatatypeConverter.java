@@ -2,7 +2,6 @@ package ch.unil.fcrepo4.spring.data.core.convert.rdf;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
@@ -46,9 +45,7 @@ public class ExtendedXsdDatatypeConverter implements RdfDatatypeConverter {
 
     @Override
     public <T> String serializeLiteralValue(T value) {
-        RDFDatatype rdfDatatype = delegateRdfMapper.getTypeByValue(value);
-        Assert.notNull(rdfDatatype, "No RDF datatype registered for value of type " + value.getClass());
-        return "\"" + rdfDatatype.unparse(value) + "\"^^<" + rdfDatatype.getURI() + ">";
+        return encodeLiteralValue(value).toString(true);
     }
 
     @Override
@@ -70,7 +67,7 @@ public class ExtendedXsdDatatypeConverter implements RdfDatatypeConverter {
     public <T> NodeValue encodeExpressionValue(T value) {
         RDFDatatype rdfDatatype = delegateRdfMapper.getTypeByValue(value);
         Assert.notNull(rdfDatatype, "No RDF datatype registered for value of type " + value.getClass());
-        return NodeValue.makeNode(rdfDatatype.unparse(value), (XSDDatatype) rdfDatatype);
+        return NodeValue.makeNode(rdfDatatype.unparse(value), rdfDatatype);
     }
 
 }
