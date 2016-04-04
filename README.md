@@ -23,9 +23,9 @@ that `skipITs` option is set to `false` in `pom.xml`.
 This will automatically download and start a Tomcat server using [Cargo Maven plugin](https://codehaus-cargo.github.io/cargo/Maven2+plugin.html).
 The build will install three webapps in the Tomcat.
 
-    * `fcrepo-webapp` - Fedora repository webapp
-    * `fuseki` - Fuseki (external) triplestore
-    * `fcrepo-camel-webapp` - a Camel route executing `fcrepo-indexing-triplestore` packaged in a webapp
+* `fcrepo-webapp` - Fedora repository webapp
+* `fuseki` - Fuseki (external) triplestore
+* `fcrepo-camel-webapp` - a Camel route executing `fcrepo-indexing-triplestore` packaged in a webapp
 
 See [this](https://github.com/gushakov/fcrepo-camel-webapp) for more details on how to install `fcrepo-camel-webapp` locally.
 
