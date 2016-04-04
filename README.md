@@ -5,7 +5,7 @@
 ### Description
 
 Spring Data Fedora is a proof-of-concept implementation of [Spring Data](http://projects.spring.io/spring-data/) for [Fedora](https://github.com/fcrepo4/fcrepo4).
-It provides Object Content Mapping (OCM) between simple annotated Java beans and Fedora resources. It also allows to query the external triplestore using Spring Data Repository API.
+It provides Object Content Mapping (OCM) between annotated Java beans and Fedora resources. It also allows to query the external triplestore using Spring Data Repository API.
 
 ### Acknowledgements
 
@@ -14,6 +14,20 @@ This project is heavily based on the code from the following projects (including
  * [fcrepo4-client](https://github.com/fcrepo4-labs/fcrepo4-client)
 
  * [spring-data-solr](https://github.com/spring-projects/spring-data-solr)
+
+### Notes on integration testing
+
+In order to run integration tests one must activate `cargo-its` Maven profile and execute `verify` command. Make sure
+that `skipITs` option is set to `false` in `pom.xml`.
+
+This will automatically download and start a Tomcat server using [Cargo Maven plugin](https://codehaus-cargo.github.io/cargo/Maven2+plugin.html).
+The build will install three webapps in the Tomcat.
+
+    * `fcrepo-webapp` - Fedora repository webapp
+    * `fuseki` - Fuseki (external) triplestore
+    * `fcrepo-camel-webapp` - a Camel route executing `fcrepo-indexing-triplestore` packaged in a webapp
+
+See [this](https://github.com/gushakov/fcrepo-camel-webapp) for more details on how to install `fcrepo-camel-webapp` locally.
 
 ### FedoraTemplate
 

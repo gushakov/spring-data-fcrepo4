@@ -213,6 +213,11 @@
                     <scope>test</scope>
                 </dependency>
 
+                <!--
+                this webapp needs to be installed locally first
+                see https://github.com/gushakov/fcrepo-camel-webapp
+                -->
+
                 <dependency>
                     <groupId>org.fcrepo.camel</groupId>
                     <artifactId>fcrepo-camel-webapp</artifactId>
