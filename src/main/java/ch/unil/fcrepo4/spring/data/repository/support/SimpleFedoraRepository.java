@@ -94,7 +94,8 @@ public class SimpleFedoraRepository<T, ID extends Serializable> implements Fedor
 
     @Override
     public void delete(ID id) {
-
+        Assert.notNull(id, "ID property cannot be null");
+        fedoraOperations.delete(id, getEntityClass());
     }
 
     @Override

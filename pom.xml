@@ -11,22 +11,23 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <skipTests>true</skipTests>
-        <skipITs>true</skipITs>
+        <skipTests>false</skipTests>
+        <skipITs>false</skipITs>
 
         <fcrepo.path>/fcrepo</fcrepo.path>
         <fuseki.path>/fuseki</fuseki.path>
         <fuseki.db>test</fuseki.db>
-        <toolbox.path>/toolbox</toolbox.path>
         <tomcat.start.mode>run</tomcat.start.mode>
 
         <assertj.core.version>3.3.0</assertj.core.version>
         <byte.buddy.version>1.2.2</byte.buddy.version>
         <commons.collections4.version>4.1</commons.collections4.version>
+
         <fcrepo.client.version>4.4.0</fcrepo.client.version>
+        <fcrepo.camel.webapp.version>4.4.1-SNAPSHOT</fcrepo.camel.webapp.version>
         <fcrepo.webapp.version>4.5.0</fcrepo.webapp.version>
-        <toolbox.version>4.4.1-SNAPSHOT</toolbox.version>
         <fuseki.version>2.3.0</fuseki.version>
+
         <junit.version>4.11</junit.version>
         <logback.version>1.1.3</logback.version>
         <mockito.version>1.10.8</mockito.version>
@@ -148,6 +149,7 @@
             <version>${xml.apis.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -214,7 +216,7 @@
                 <dependency>
                     <groupId>org.fcrepo.camel</groupId>
                     <artifactId>fcrepo-camel-webapp</artifactId>
-                    <version>${toolbox.version}</version>
+                    <version>${fcrepo.camel.webapp.version}</version>
                     <type>war</type>
                     <scope>test</scope>
                 </dependency>
@@ -357,8 +359,11 @@
                                     <container>
                                         <systemProperties>
                                             <FUSEKI_BASE>${project.build.directory}/etc/fuseki</FUSEKI_BASE>
-                                            <fcrepo.baseUrl>localhost:${tomcat.servlet.port}/${fcrepo.path}/rest</fcrepo.baseUrl>
-                                            <triplestore.baseUrl>localhost:${tomcat.servlet.port}/${fuseki.path}/${fuseki.db}/update</triplestore.baseUrl>
+                                            <fcrepo.base.url>localhost:${tomcat.servlet.port}/${fcrepo.path}/rest
+                                            </fcrepo.base.url>
+                                            <fcrepo.audit.triplestore.baseUrl>
+                                                localhost:${tomcat.servlet.port}/${fuseki.path}/${fuseki.db}/update
+                                            </fcrepo.audit.triplestore.baseUrl>
                                         </systemProperties>
                                     </container>
                                     <configuration>
@@ -391,9 +396,6 @@
                                             <groupId>org.fcrepo.camel</groupId>
                                             <artifactId>fcrepo-camel-webapp</artifactId>
                                             <type>war</type>
-                                            <properties>
-                                                <context>${toolbox.path}</context>
-                                            </properties>
                                         </deployable>
                                     </deployables>
                                 </configuration>

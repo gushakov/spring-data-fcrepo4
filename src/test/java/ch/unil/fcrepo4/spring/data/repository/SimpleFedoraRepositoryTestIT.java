@@ -5,7 +5,6 @@ import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.assertj.core.api.Condition;
 import org.fcrepo.client.FedoraException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +55,51 @@ public class SimpleFedoraRepositoryTestIT {
     @Autowired
     private VehicleCrudRepository vehicleRepo;
 
-    @Before
-    public void setUp() throws Exception {
+    @Test
+    public void testFindByMake() throws Exception {
+        try {
+            vehicleRepo.save(new Vehicle(1L, "Ford", "light green", 1000, 6.5f));
+            Thread.sleep(500L);
+            List<Vehicle> vehicles = vehicleRepo.findByMake("Ford");
+            ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
+            assertThat(vehicles.get(0)).hasMake("Ford");
+        } finally {
+            vehicleRepo.delete(1L);
+        }
+    }
 
-        if (!vehicleRepo.exists(1L)) {
+    @Test
+    public void testFindByMakeWithAccents() throws Exception {
+        try {
+            vehicleRepo.save(new Vehicle(1L, "Citroën", "silver", 1000, 4.0f));
+            Thread.sleep(1000L);
+            List<Vehicle> vehicles = vehicleRepo.findByMake("Citroën");
+            ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
+            assertThat(vehicles.get(0)).hasMake("Citroën");
+        } finally {
+//            vehicleRepo.delete(1L);
+        }
+    }
+
+    @Test
+    public void testFindByMilesGreaterThan() throws Exception {
+        vehicleRepo.save(new Vehicle(1L, "Ford", "light green", 1000, 6.5f));
+        vehicleRepo.save(new Vehicle(2L, "Toyota", "red", 15000, 4.5f));
+        vehicleRepo.save(new Vehicle(3L, "Ferrari", "red", 10000, 7.5f));
+        Thread.sleep(1000L);
+        try {
+            assertThat((List<? extends Vehicle>) vehicleRepo.findByMilesGreaterThan(10000))
+                    .extracting("id").containsOnly(2L);
+        } finally {
+            vehicleRepo.delete(1L);
+            vehicleRepo.delete(2L);
+            vehicleRepo.delete(3L);
+        }
+    }
+
+    @Test
+    public void testFindByMilesGreaterThanWithPageable() throws Exception {
+        try {
             vehicleRepo.save(new Vehicle(1L, "Ford", "light green", 1000, 6.5f));
             vehicleRepo.save(new Vehicle(2L, "Toyota", "red", 15000, 4.5f));
             vehicleRepo.save(new Vehicle(3L, "Ferrari", "red", 10000, 7.5f));
@@ -68,53 +108,34 @@ public class SimpleFedoraRepositoryTestIT {
             vehicleRepo.save(new Vehicle(6L, "Lexus", "light brown", 3000, 7.0f));
             vehicleRepo.save(new Vehicle(7L, "Citroën", "silver", 1000, 4.0f));
             vehicleRepo.save(new Vehicle(8L, "Dodge", "red", 1500, 6.0f));
+            Thread.sleep(500L);
+            final Page<Vehicle> firstPage = vehicleRepo.findByMilesGreaterThan(100, new FedoraPageRequest(0, 3));
+            assertThat(firstPage.getNumber()).isEqualTo(0);
+            assertThat(firstPage.getNumberOfElements()).isEqualTo(3);
+            assertThat(firstPage.isFirst()).isTrue();
+            assertThat(firstPage.isLast()).isFalse();
+            assertThat((List<? extends Vehicle>) firstPage.getContent()).extracting("miles", Integer.class)
+                    .have(new Condition<Integer>() {
+                        @Override
+                        public boolean matches(Integer miles) {
+                            return miles > 100;
+                        }
+                    });
+            final Page<Vehicle> secondPage = vehicleRepo.findByMilesGreaterThan(100, firstPage.nextPageable());
+            assertThat(secondPage.getNumber()).isEqualTo(1);
+            assertThat(secondPage.getNumberOfElements()).isEqualTo(3);
+            assertThat(secondPage.isFirst()).isFalse();
+            assertThat(secondPage.isLast()).isFalse();
+        } finally {
+            vehicleRepo.delete(1L);
+            vehicleRepo.delete(2L);
+            vehicleRepo.delete(3L);
+            vehicleRepo.delete(4L);
+            vehicleRepo.delete(5L);
+            vehicleRepo.delete(6L);
+            vehicleRepo.delete(7L);
+            vehicleRepo.delete(8L);
         }
-    }
-
-    @Test
-    public void testSaveAll() throws Exception {
-
-    }
-
-    @Test
-    public void testFindByMake() throws Exception {
-        List<Vehicle> vehicles = vehicleRepo.findByMake("Ford");
-        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
-        assertThat(vehicles.get(0)).hasMake("Ford");
-    }
-
-    @Test
-    public void testFindByMilesGreaterThan() throws Exception {
-        System.out.println(vehicleRepo.findByMilesGreaterThan(10000)
-                .stream().filter(v -> v.getConsumption() < 5).count());
-    }
-
-    @Test
-    public void testFindByMakeWithAccents() throws Exception {
-        List<Vehicle> vehicles = vehicleRepo.findByMake("Citroën");
-        ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
-        assertThat(vehicles.get(0)).hasMake("Citroën");
-    }
-
-    @Test
-    public void testFindByMilesGreaterThanWithPageable() throws Exception {
-        final Page<Vehicle> firstPage = vehicleRepo.findByMilesGreaterThan(100, new FedoraPageRequest(0, 3));
-        assertThat(firstPage.getNumber()).isEqualTo(0);
-        assertThat(firstPage.getNumberOfElements()).isEqualTo(3);
-        assertThat(firstPage.isFirst()).isTrue();
-        assertThat(firstPage.isLast()).isFalse();
-        assertThat((List<? extends Vehicle>) firstPage.getContent()).extracting("miles", Integer.class)
-                .have(new Condition<Integer>(){
-                    @Override
-                    public boolean matches(Integer miles) {
-                        return miles > 100;
-                    }
-                });
-        final Page<Vehicle> secondPage = vehicleRepo.findByMilesGreaterThan(100, firstPage.nextPageable());
-        assertThat(secondPage.getNumber()).isEqualTo(1);
-        assertThat(secondPage.getNumberOfElements()).isEqualTo(3);
-        assertThat(secondPage.isFirst()).isFalse();
-        assertThat(secondPage.isLast()).isFalse();
     }
 
 }

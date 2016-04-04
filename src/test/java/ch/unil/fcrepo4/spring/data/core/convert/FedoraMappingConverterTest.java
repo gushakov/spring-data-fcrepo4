@@ -13,6 +13,7 @@ import org.fcrepo.client.utils.HttpHelper;
 import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 
 import java.time.ZonedDateTime;
@@ -22,9 +23,14 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalMatchers.and;
+import static org.mockito.AdditionalMatchers.or;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -224,9 +230,10 @@ public class FedoraMappingConverterTest {
         bean1.setNumber(BEAN_1_NUMBER);
         bean1.setFoo(BEAN_1_FOO);
         mappingConverter.write(bean1, fedoraObject);
-        verify(fedoraObject).updateProperties(and(
-                contains("<" + Constants.TEST_FEDORA_URI_NAMESPACE + "number>  " + rdfDatatypeConverter.serializeLiteralValue(bean1.number)),
-                contains("<" + Constants.TEST_FEDORA_URI_NAMESPACE + "foo>  " + rdfDatatypeConverter.serializeLiteralValue(bean1.foo))));
+        verify(fedoraObject).updateProperties(
+                or(contains("DELETE"),
+                        and(contains("<" + Constants.TEST_FEDORA_URI_NAMESPACE + "number>  " + rdfDatatypeConverter.serializeLiteralValue(bean1.number)),
+                                contains("<" + Constants.TEST_FEDORA_URI_NAMESPACE + "foo>  " + rdfDatatypeConverter.serializeLiteralValue(bean1.foo)))));
     }
 
     @Test
