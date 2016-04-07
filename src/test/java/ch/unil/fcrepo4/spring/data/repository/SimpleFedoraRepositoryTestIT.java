@@ -77,7 +77,7 @@ public class SimpleFedoraRepositoryTestIT {
             ch.unil.fcrepo4.assertj.Assertions.assertThat(vehicles).isNotEmpty();
             assertThat(vehicles.get(0)).hasMake("Citroën");
         } finally {
-//            vehicleRepo.delete(1L);
+            vehicleRepo.delete(1L);
         }
     }
 
