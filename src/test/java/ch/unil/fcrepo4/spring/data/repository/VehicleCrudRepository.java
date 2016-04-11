@@ -35,4 +35,6 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     List<Vehicle> findByDescription_Type(String type);
 
+    List<Vehicle> findByOwner_FullName(String fullName);
+
 }

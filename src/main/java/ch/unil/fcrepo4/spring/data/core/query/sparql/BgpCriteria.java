@@ -2,9 +2,7 @@ package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
-import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
-import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
-import ch.unil.fcrepo4.spring.data.core.mapping.FedoraResourcePersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
@@ -56,6 +54,29 @@ public class BgpCriteria implements Criteria {
                         NodeFactory.createVariable(getPropertyTypeVarName(property))));
 
             } else {
+                System.out.println("-------");
+                System.out.println("-------");
+                System.out.println("-------");
+                System.out.println("-------");
+                System.out.println("-------");
+                System.out.println("-------");
+                System.out.println("-------");
+                System.out.println("-------");
+                System.out.println("-------");
+                RelationPersistentProperty property = (RelationPersistentProperty) prop;
+                this.ocmClasses.add(property.getTypeInformation().getType());
+
+                System.out.println(property.getTypeInformation().getType());
+                System.out.println(getPropertyOwnerVarName(property));
+                System.out.println(property.getUri());
+
+                System.out.println(property.getOwner() instanceof FedoraObjectPersistentEntity<?>);
+
+                FedoraObjectPersistentEntity<?> relEntity = (FedoraObjectPersistentEntity<?>) property.getOwner();
+
+                System.out.println(getPropertyVarName(property));
+                System.out.println(getPropertyTypeVarName(property));
+
                 throw new IllegalStateException("Cannot process property: " + prop);
             }
 

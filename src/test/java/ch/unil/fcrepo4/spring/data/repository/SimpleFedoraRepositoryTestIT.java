@@ -55,6 +55,9 @@ public class SimpleFedoraRepositoryTestIT {
     @Autowired
     private VehicleCrudRepository vehicleRepo;
 
+    @Autowired
+    private FedoraTemplate fedoraTemplate;
+
     @Test
     public void testFindByMake() throws Exception {
         try {
@@ -138,4 +141,24 @@ public class SimpleFedoraRepositoryTestIT {
         }
     }
 
+    @Test
+    public void testFindByOwnerFullName() throws Exception {
+        try {
+            /*
+           Owner owner = new Owner(1L, "George Smith");
+            Vehicle vehicle = new Vehicle(1L, "Ford", "light green", 1000, 6.5f);
+            vehicle.setOwner(owner);
+            vehicleRepo.save(vehicle);
+       */
+
+        //    vehicleRepo.findByOwner_FullName("George Smith");
+
+
+        }
+        finally {
+            //fedoraTemplate.delete(1L, Owner.class);
+            //vehicleRepo.delete(1L);
+        }
+
+    }
 }
