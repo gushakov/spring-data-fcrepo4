@@ -53,7 +53,7 @@ public class BgpCriteria implements Criteria {
                         RdfLexicon.CONTAINS.asNode(),
                         NodeFactory.createVariable(getPropertyTypeVarName(property))));
 
-            } else {
+            } else if (prop instanceof RelationPersistentProperty) {
                 System.out.println("-------");
                 System.out.println("-------");
                 System.out.println("-------");
@@ -66,18 +66,14 @@ public class BgpCriteria implements Criteria {
                 RelationPersistentProperty property = (RelationPersistentProperty) prop;
                 this.ocmClasses.add(property.getTypeInformation().getType());
 
-                System.out.println(property.getTypeInformation().getType());
-                System.out.println(getPropertyOwnerVarName(property));
-                System.out.println(property.getUri());
+                triples.add(new Triple(NodeFactory.createVariable(getPropertyOwnerVarName(property)),
+                        NodeFactory.createURI(property.getUri()),
+                        NodeFactory.createVariable(typeClassToName(property.getType()))));
 
-                System.out.println(property.getOwner() instanceof FedoraObjectPersistentEntity<?>);
-
-                FedoraObjectPersistentEntity<?> relEntity = (FedoraObjectPersistentEntity<?>) property.getOwner();
-
-                System.out.println(getPropertyVarName(property));
-                System.out.println(getPropertyTypeVarName(property));
-
+            }
+            else {
                 throw new IllegalStateException("Cannot process property: " + prop);
+
             }
 
         }

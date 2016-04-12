@@ -144,14 +144,14 @@ public class SimpleFedoraRepositoryTestIT {
     @Test
     public void testFindByOwnerFullName() throws Exception {
         try {
-            /*
-           Owner owner = new Owner(1L, "George Smith");
+
+           /*Owner owner = new Owner(1L, "George Smith");
             Vehicle vehicle = new Vehicle(1L, "Ford", "light green", 1000, 6.5f);
             vehicle.setOwner(owner);
-            vehicleRepo.save(vehicle);
-       */
+            vehicleRepo.save(vehicle);*/
 
-        //    vehicleRepo.findByOwner_FullName("George Smith");
+
+          vehicleRepo.findByOwner_FullName("George Smith");
 
 
         }
@@ -159,6 +159,27 @@ public class SimpleFedoraRepositoryTestIT {
             //fedoraTemplate.delete(1L, Owner.class);
             //vehicleRepo.delete(1L);
         }
+
+    }
+
+    @Test
+    public void testFindByOwnerAddress_ZipCode() throws Exception {
+        try {
+
+        Address address = new Address(2L, "123 Main St.", 12345);
+        Owner owner = new Owner(2L, "Joe Taylor");
+        owner.setAddress(address);
+        Vehicle vehicle = new Vehicle(2L, "Toyota", "gray", 1000, 6.5f);
+        vehicle.setOwner(owner);
+        vehicleRepo.save(vehicle);
+
+        }
+        finally {
+        //     fedoraTemplate.delete(2L, Address.class);
+        //    fedoraTemplate.delete(2L, Vehicle.class);
+        //    vehicleRepo.delete(2L);
+        }
+
 
     }
 }
