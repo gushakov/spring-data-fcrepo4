@@ -37,6 +37,10 @@ public interface VehicleCrudRepository extends FedoraCrudRepository<Vehicle, Lon
 
     List<Vehicle> findByOwner_FullName(String fullName);
 
-    List<Vehicle> findByOwner_Address_ZipCode(String zipCode);
+    List<Vehicle> findByOwner_Address_ZipCode(int zipCode);
+
+    List<Vehicle> findByMakeAndOwner_FullName(String make, String fullName);
+
+    List<Vehicle> findByOwner_FullNameAndOwner_Address_ZipCode(String fullName, int zipCode);
 
 }

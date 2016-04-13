@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class BgpCriteria implements Criteria {
 
-    private List<Triple> triples;
+    private Set<Triple> triples;
 
     private List<Expr> filters;
 
@@ -33,7 +33,8 @@ public class BgpCriteria implements Criteria {
     private Set<Class<?>> ocmClasses;
 
     public BgpCriteria(final PersistentPropertyPath<?> propertyPath, TypeInformation<?> domainTypeInfo, RdfDatatypeConverter rdfDatatypeConverter) {
-        this.triples = new ArrayList<>();
+        this.triples = new LinkedHashSet<>();
+
         this.rdfDatatypeConverter = rdfDatatypeConverter;
         this.ocmClasses = new HashSet<>(Collections.singleton(domainTypeInfo.getType()));
 
@@ -54,39 +55,32 @@ public class BgpCriteria implements Criteria {
                         NodeFactory.createVariable(getPropertyTypeVarName(property))));
 
             } else if (prop instanceof RelationPersistentProperty) {
-                System.out.println("-------");
-                System.out.println("-------");
-                System.out.println("-------");
-                System.out.println("-------");
-                System.out.println("-------");
-                System.out.println("-------");
-                System.out.println("-------");
-                System.out.println("-------");
-                System.out.println("-------");
                 RelationPersistentProperty property = (RelationPersistentProperty) prop;
                 this.ocmClasses.add(property.getTypeInformation().getType());
-
                 triples.add(new Triple(NodeFactory.createVariable(getPropertyOwnerVarName(property)),
                         NodeFactory.createURI(property.getUri()),
                         NodeFactory.createVariable(typeClassToName(property.getType()))));
-
             }
             else {
                 throw new IllegalStateException("Cannot process property: " + prop);
-
             }
 
         }
     }
 
+    @Override
     public void substitutePropertyNodeValue(FedoraResourcePersistentProperty property, NodeValue nodeValue) {
-        for (ListIterator<Triple> triplesIter = triples.listIterator(); triplesIter.hasNext(); ) {
-            Triple triple = triplesIter.next();
-            if (triple.getSubject().getName().equals(getPropertyOwnerVarName(property))
+        Set<Triple> done = new HashSet<>();
+        for (Triple triple : triples) {
+            if (triple.getSubject().getName().startsWith(getPropertyOwnerVarName(property))
                     && triple.getPredicate().getURI().equals(property.getUri())) {
-                triplesIter.set(new Triple(triple.getSubject(), triple.getPredicate(), nodeValue.asNode()));
+                done.add(new Triple(triple.getSubject(), triple.getPredicate(), nodeValue.asNode()));
+            } else {
+                done.add(triple);
             }
         }
+        triples.clear();
+        triples.addAll(done);
     }
 
     private String getPropertyOwnerVarName(FedoraPersistentProperty property) {
@@ -111,11 +105,9 @@ public class BgpCriteria implements Criteria {
 
     @Override
     public BasicPattern buildBgp() {
-        ocmClasses.stream().forEach(ocmClass -> {
-            triples.add(0, new Triple(NodeFactory.createVariable(typeClassToName(ocmClass)),
-                    NodeFactory.createURI(Constants.OCM_URI_NAMESPACE + Constants.OCM_CLASS_PROPERTY),
-                    rdfDatatypeConverter.encodeLiteralValue(ocmClass.getName())));
-        });
+        ocmClasses.stream().forEach(ocmClass -> triples.add(new Triple(NodeFactory.createVariable(typeClassToName(ocmClass)),
+                NodeFactory.createURI(Constants.OCM_URI_NAMESPACE + Constants.OCM_CLASS_PROPERTY),
+                rdfDatatypeConverter.encodeLiteralValue(ocmClass.getName()))));
 
         BasicPattern bgp = new BasicPattern();
         triples.stream().forEach(bgp::add);
@@ -135,6 +127,13 @@ public class BgpCriteria implements Criteria {
     @Override
     public List<Expr> getFilters() {
         return filters;
+    }
+
+    @Override
+    public Criteria and(Criteria otherCriteria) {
+        BasicPattern bgp = otherCriteria.buildBgp();
+        bgp.getList().stream().forEach(triples::add);
+        return this;
     }
 
     @Override

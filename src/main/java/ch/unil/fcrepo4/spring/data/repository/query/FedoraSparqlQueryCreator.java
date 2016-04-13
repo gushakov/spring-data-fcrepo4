@@ -41,14 +41,14 @@ public class FedoraSparqlQueryCreator extends AbstractQueryCreator<FedoraQuery, 
     @Override
     protected Criteria create(Part part, Iterator<Object> arguments) {
         PersistentPropertyPath<FedoraPersistentProperty> persistentPropertyPath = mappingContext.getPersistentPropertyPath(part.getProperty());
-        BgpCriteria bgpCriteria = new BgpCriteria(persistentPropertyPath, domainTypeInfo, rdfDatatypeConverter);
+        Criteria bgpCriteria = new BgpCriteria(persistentPropertyPath, domainTypeInfo, rdfDatatypeConverter);
         processCriteriaForPart(persistentPropertyPath, bgpCriteria, part, arguments);
         return bgpCriteria;
     }
 
     @Override
     protected Criteria and(Part part, Criteria base, Iterator<Object> iterator) {
-        throw new UnsupportedOperationException();
+        return base.and(create(part, iterator));
     }
 
     @Override
@@ -68,7 +68,7 @@ public class FedoraSparqlQueryCreator extends AbstractQueryCreator<FedoraQuery, 
     }
 
     private void processCriteriaForPart(PersistentPropertyPath<FedoraPersistentProperty> persistentPropertyPath,
-                                        BgpCriteria bgpCriteria, Part part, Iterator<Object> arguments) {
+                                        Criteria bgpCriteria, Part part, Iterator<Object> arguments) {
         switch (part.getType()) {
             case SIMPLE_PROPERTY:
                 bgpCriteria.substitutePropertyNodeValue((FedoraResourcePersistentProperty) persistentPropertyPath.getLeafProperty(),

@@ -12,6 +12,8 @@ import java.util.List;
  */
 public interface Criteria {
 
+    void substitutePropertyNodeValue(FedoraResourcePersistentProperty property, NodeValue nodeValue);
+
     BasicPattern buildBgp();
 
     String getProjectionVariableName();
@@ -19,4 +21,6 @@ public interface Criteria {
     void addGreaterThanFilter(FedoraResourcePersistentProperty property, NodeValue nodeValue);
 
     List<Expr> getFilters();
+
+    Criteria and(Criteria otherCriteria);
 }

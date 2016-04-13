@@ -2,6 +2,7 @@ package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
