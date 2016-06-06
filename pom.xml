@@ -23,7 +23,7 @@
         <byte.buddy.version>1.2.2</byte.buddy.version>
         <commons.collections4.version>4.1</commons.collections4.version>
 
-        <fcrepo.client.version>4.4.0</fcrepo.client.version>
+        <fcrepo.client.version>4.4.1-SNAPSHOT</fcrepo.client.version>
         <fcrepo.camel.webapp.version>4.5.0</fcrepo.camel.webapp.version>
         <fcrepo.webapp.version>4.5.0</fcrepo.webapp.version>
         <fuseki.version>2.3.0</fuseki.version>
@@ -434,5 +434,18 @@
             </build>
         </profile>
     </profiles>
+
+    <repositories>
+        <repository>
+            <id>snapshots-repository</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
