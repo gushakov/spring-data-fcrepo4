@@ -1,8 +1,6 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
-import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
-import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.fcrepo.client.FedoraException;
@@ -52,12 +50,10 @@ public class SimpleFedoraRepositoryTest {
     public void testFindByMake() throws Exception {
         doAnswer(invocation -> {
             FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
-            assertThat(query.toString())
-                    .isEqualTo("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle\n" +
-                            "WHERE\n" +
-                            "  { ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/make> \"Ford\"^^<http://www.w3.org/2001/XMLSchema#string> .\n" +
-                            "    ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.Vehicle\"^^<http://www.w3.org/2001/XMLSchema#string>\n" +
-                            "  }\n");
+            assertThat(query.toString()).contains("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle",
+                    "?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/make> \"Ford\"^^<http://www.w3.org/2001/XMLSchema#string> .",
+                    "?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.Vehicle\"^^<http://www.w3.org/2001/XMLSchema#string>");
+
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(FedoraQuery.class), any());
 
@@ -69,12 +65,12 @@ public class SimpleFedoraRepositoryTest {
         doAnswer(invocation -> {
             FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle\n" +
-                            "WHERE\n" +
-                            "  { ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/miles> ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles .\n" +
-                            "    ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.Vehicle\"^^<http://www.w3.org/2001/XMLSchema#string>\n" +
-                            "    FILTER ( ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles > \"1000\"^^<http://www.w3.org/2001/XMLSchema#int> )\n" +
-                            "  }\n");
+                    .contains("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle",
+                            "WHERE",
+                            "  { ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:fedora/test/miles> ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles .",
+                            "    ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.Vehicle\"^^<http://www.w3.org/2001/XMLSchema#string>",
+                            "    FILTER ( ?ch_unil_fcrepo4_spring_data_repository_Vehicle_miles > \"1000\"^^<http://www.w3.org/2001/XMLSchema#int> )",
+                            "  }");
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(FedoraQuery.class), any());
 
@@ -86,13 +82,13 @@ public class SimpleFedoraRepositoryTest {
         doAnswer(invocation -> {
             FedoraQuery query = (FedoraQuery) invocation.getArguments()[0];
             assertThat(query.toString())
-                    .isEqualTo("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle\n" +
-                            "WHERE\n" +
-                            "  { ?ch_unil_fcrepo4_spring_data_repository_VehicleDescription <info:fedora/test/type> \"full\"^^<http://www.w3.org/2001/XMLSchema#string> .\n" +
-                            "    ?ch_unil_fcrepo4_spring_data_repository_Vehicle <http://www.w3.org/ns/ldp#contains> ?ch_unil_fcrepo4_spring_data_repository_VehicleDescription .\n" +
-                            "    ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.Vehicle\"^^<http://www.w3.org/2001/XMLSchema#string> .\n" +
-                            "    ?ch_unil_fcrepo4_spring_data_repository_VehicleDescription <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.VehicleDescription\"^^<http://www.w3.org/2001/XMLSchema#string>\n" +
-                            "  }\n");
+                    .contains("SELECT  ?ch_unil_fcrepo4_spring_data_repository_Vehicle",
+                            "WHERE",
+                            "  { ?ch_unil_fcrepo4_spring_data_repository_VehicleDescription <info:fedora/test/type> \"full\"^^<http://www.w3.org/2001/XMLSchema#string> .",
+                            "    ?ch_unil_fcrepo4_spring_data_repository_Vehicle <http://www.w3.org/ns/ldp#contains> ?ch_unil_fcrepo4_spring_data_repository_VehicleDescription .",
+                            "    ?ch_unil_fcrepo4_spring_data_repository_Vehicle <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.Vehicle\"^^<http://www.w3.org/2001/XMLSchema#string> .",
+                            "    ?ch_unil_fcrepo4_spring_data_repository_VehicleDescription <info:data/ocm/class> \"ch.unil.fcrepo4.spring.data.repository.VehicleDescription\"^^<http://www.w3.org/2001/XMLSchema#string>",
+                            "  }");
             return Collections.emptyList();
         }).when(mockFedoraTemplate).query(any(FedoraQuery.class), any());
 
