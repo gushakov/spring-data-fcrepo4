@@ -168,7 +168,7 @@ public class SimpleFedoraRepositoryTestIT {
 
         } finally {
             fedoraTemplate.delete(1L, Owner.class);
-            vehicleRepo.delete(1L);
+            //vehicleRepo.delete(1L);
         }
 
     }
