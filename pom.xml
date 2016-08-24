@@ -95,7 +95,7 @@
         <dependency>
             <groupId>org.fcrepo.client</groupId>
             <artifactId>fcrepo-java-client</artifactId>
-            <version>0.1.2</version>
+            <version>0.2.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

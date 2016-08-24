@@ -1,13 +1,16 @@
 package ch.unil.fcrepo4.client;
 
+import com.hp.hpl.jena.graph.Triple;
 import org.fcrepo.client.FcrepoClient;
 
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * Leverages {@linkplain FcrepoClient} for accessing Fedora's REST API.
+ * Interface for communicating with Fedora repository.
  * <p/>
- * Based on {@code org.fcrepo.client.FedoraRepository} from deprecated {@code fcrepo4-client} project.
+ * Modeled after {@code org.fcrepo.client.FedoraRepository}.
  * @author gushakov
  */
 public interface FedoraClientRepository {
@@ -16,7 +19,23 @@ public interface FedoraClientRepository {
 
     boolean exists(String path) throws FedoraException;
 
-    FedoraResource createObject(String path) throws FedoraException;
+    FedoraDatastream getDatastream(String path) throws FedoraException;
 
-    FedoraResource createDatastream(String path, InputStream content, String contentType) throws FedoraException;
+    FedoraObject getObject(String path) throws FedoraException;
+
+    FedoraObject createObject(String path) throws FedoraException;
+
+    FedoraDatastream createDatastream(String path, FedoraContent fedoraContent) throws FedoraException;
+
+    InputStream fetchDatastreamContent(String path) throws FedoraException;
+
+    void updateDatastreamContent(String path, FedoraContent fedoraContent) throws FedoraException;
+
+    List<Triple> getProperties(String path) throws FedoraException;
+
+    void delete(String path) throws FedoraException;
+
+    void forceDelete(String path) throws FedoraException;
+
+    void updateProperties(String path, String sparqlUpdate) throws FedoraException;
 }

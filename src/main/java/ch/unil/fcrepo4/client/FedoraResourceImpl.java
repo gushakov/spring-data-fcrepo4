@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.client;
 
+import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Triple;
 import org.apache.commons.lang3.StringUtils;
 
@@ -7,32 +8,38 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Strait-forward implementation of {@linkplain FedoraResource} storing the path and the collection
- * of {@linkplain Triple}s describing a Fedora object.
+ * Default implementation of {@linkplain FedoraResource} which stores the path to a Fedora resource (node) as well as
+ * the reference to the shared instance of {@linkplain FedoraClientRepository}.
+ * <p>
+ * Modeled after {@code org.fcrepo.client.impl.FedoraResourceImpl}.
  *
  * @author gushakov
  */
 public class FedoraResourceImpl implements FedoraResource {
-    private String path;
+    protected FedoraClientRepository repository;
 
-    private List<Triple> triples;
+    protected String path;
 
-    public FedoraResourceImpl(String path, List<Triple> triples) {
-        this.path = path;
-        this.triples = triples;
+    protected List<Triple> triples;
+
+    public FedoraResourceImpl(FedoraClientRepository fedoraClientRepository, String path) {
+        this.repository = fedoraClientRepository;
+        this.path = Utils.normalize(path);
+    }
+
+    @Override
+    public void delete() throws FedoraException {
+        repository.delete(path);
+    }
+
+    @Override
+    public void forceDelete() throws FedoraException {
+        repository.forceDelete(path);
     }
 
     @Override
     public String getName() {
-        // find the last segment of the path
-        final String pathString = StringUtils.stripEnd(path, "/");
-        final String lastSegment = StringUtils.substringAfterLast(pathString, "/");
-        if (lastSegment.equals("")){
-            return pathString;
-        }
-        else {
-            return lastSegment;
-        }
+        return StringUtils.substringAfterLast(path, "/");
     }
 
     @Override
@@ -41,7 +48,16 @@ public class FedoraResourceImpl implements FedoraResource {
     }
 
     @Override
-    public Iterator<Triple> getProperties() {
+    public Iterator<Triple> getProperties() throws FedoraException {
+        if (triples == null) {
+            triples = repository.getProperties(path);
+        }
         return triples.iterator();
     }
+
+    @Override
+    public void updateProperties(String sparqlUpdate) throws FedoraException {
+        repository.updateProperties(path, sparqlUpdate);
+    }
+
 }

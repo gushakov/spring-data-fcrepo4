@@ -1,9 +1,10 @@
 package ch.unil.fcrepo4.client;
 
 /**
- * Root exception thrown if there were any problem executing REST calls to Fedora repository.
- * <p/>
- * Based on {@code org.fcrepo.client.FedoraException} from deprecated {@code fcrepo4-client} project.
+ * Root exception thrown if there were any problems communicating with the Fedora repository.
+ * <p>
+ * Modeled after {@code org.fcrepo.client.FedoraException}.
+ *
  * @author gushakov
  */
 public class FedoraException extends Exception {

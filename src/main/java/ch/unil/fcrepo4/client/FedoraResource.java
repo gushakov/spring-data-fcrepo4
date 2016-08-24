@@ -6,19 +6,22 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Encapsulates properties of a Fedora object: resource or datastream.
+ * Encapsulates information about a resource in Fedora repository. A resource can be an object (container) or a
+ * datastream (binary content).
  * <p>
- * Based on {@code org.fcrepo.client.FedoraResource} from the deprecated {@code fcrepo4-client} project.
- *
- * @author gushakov
- * @see <a href="https://github.com/fcrepo4-labs/fcrepo4-client">Fedora 4 Java Client</a>
+ * Modeled after {@code org.fcrepo.client.FedoraResource}.
  */
 public interface FedoraResource {
+
+    void delete() throws FedoraException;
+
+    void forceDelete() throws FedoraException;
 
     String getName();
 
     String getPath();
 
-    Iterator<Triple> getProperties();
+    Iterator<Triple> getProperties() throws FedoraException;
 
+    void updateProperties(String sparqlUpdate) throws FedoraException;
 }

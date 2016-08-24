@@ -14,7 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -80,12 +83,8 @@ public class Utils {
         return model.size();
     }
 
-    public static String concatenate(String base, String path) {
-        return concatenate(base, path, true);
-    }
-
-    public static String concatenate(String base, String path, boolean withEndSeparator) {
-        return StringUtils.stripEnd(base, "/") + "/" + StringUtils.strip(path, "/") + (withEndSeparator ? "/" : "");
+    public static String normalize(String... paths){
+        return "/" + Arrays.stream(paths).map(p -> StringUtils.strip(p, "/").replaceAll("/+", "/")).collect(Collectors.joining("/"));
     }
 
 }
