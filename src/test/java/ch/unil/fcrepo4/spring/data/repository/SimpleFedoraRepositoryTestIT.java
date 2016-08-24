@@ -1,11 +1,11 @@
 package ch.unil.fcrepo4.spring.data.repository;
 
+import ch.unil.fcrepo4.client.FedoraException;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.fcrepo.client.FedoraException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

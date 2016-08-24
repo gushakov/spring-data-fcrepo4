@@ -1,10 +1,10 @@
 package ch.unil.fcrepo4.client;
 
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.utils.UriBuilder;
 import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.impl.CollectionGraph;
 import org.apache.http.HttpStatus;
 import org.apache.jena.riot.Lang;
@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.List;
 
 /**
  * Default implementation of {@linkplain FedoraClientRepository} using {@linkplain FcrepoClient} REST client.
@@ -33,10 +32,13 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
 
     private String fedoraUrl;
 
+    private RdfDatatypeConverter rdfDatatypeConverter;
+
     private FcrepoClient fcrepoClient;
 
     public FedoraClientRepositoryImpl(String fedoraUrl) {
         this.fedoraUrl = fedoraUrl;
+        this.rdfDatatypeConverter = new ExtendedXsdDatatypeConverter();
         this.fcrepoClient = FcrepoClient.client().build();
         logger.info("Initialized Fedora repository client with URL: {}", fedoraUrl);
     }
@@ -44,6 +46,11 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
     @Override
     public String getRepositoryUrl() {
         return fedoraUrl;
+    }
+
+    @Override
+    public RdfDatatypeConverter getRdfDatatypeConverter() {
+        return rdfDatatypeConverter;
     }
 
     @Override
@@ -113,7 +120,7 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
     }
 
     @Override
-    public List<Triple> getProperties(String path) throws FedoraException {
+    public Graph getGraph(String path) throws FedoraException {
         Assert.hasText(path);
         final UriBuilder uriBuilder = new UriBuilder(fedoraUrl)
                 .appendPathSegment(path);
@@ -121,7 +128,7 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
         if (!path.endsWith(FcrepoConstants.FCR_METADATA)) {
             uriBuilder.appendPathSegment(FcrepoConstants.FCR_METADATA);
         }
-        return loadTriples(uriBuilder.build());
+        return loadGraph(uriBuilder.build());
     }
 
     @Override
@@ -151,7 +158,11 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
     public void updateProperties(String path, String sparqlUpdate) throws FedoraException {
         Assert.hasText(path);
         Assert.hasText(sparqlUpdate);
-        URI uri = new UriBuilder(fedoraUrl).appendPathSegment(path).build();
+        final UriBuilder uriBuilder = new UriBuilder(fedoraUrl).appendPathSegment(path);
+        if (!path.endsWith(FcrepoConstants.FCR_METADATA)){
+            uriBuilder.appendPathSegment(FcrepoConstants.FCR_METADATA);
+        }
+        URI uri = uriBuilder.build();
         try (FcrepoResponse response = fcrepoClient
                 .patch(uri)
                 .body(new ByteArrayInputStream(sparqlUpdate.getBytes("UTF-8")))
@@ -166,8 +177,8 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
         }
     }
 
-    private List<Triple> loadTriples(URI uri) throws FedoraException {
-        logger.debug("Loading triples for {}", uri);
+    private Graph loadGraph(URI uri) throws FedoraException {
+        logger.debug("Loading graph for resource {}", uri);
         try (FcrepoResponse response = fcrepoClient.get(uri)
                 .accept(FcrepoConstants.RDF_XML_MIMETYPE)
                 .perform()) {
@@ -178,7 +189,7 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
             }
             Graph graph = new CollectionGraph();
             RDFDataMgr.read(graph, response.getBody(), Lang.RDFXML);
-            return graph.find(Node.ANY, Node.ANY, Node.ANY).toList();
+            return graph;
         } catch (FcrepoOperationFailedException | IOException e) {
             throw new FedoraException(e);
         }

@@ -1,8 +1,12 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
+import ch.unil.fcrepo4.client.FcrepoConstants;
 import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
-import ch.unil.fcrepo4.spring.data.core.mapping.*;
+import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.mapping.FedoraResourcePersistentProperty;
+import ch.unil.fcrepo4.spring.data.core.mapping.RelationPersistentProperty;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
@@ -10,7 +14,6 @@ import com.hp.hpl.jena.sparql.expr.E_GreaterThan;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
-import org.fcrepo.kernel.api.RdfLexicon;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.context.PersistentPropertyPath;
 import org.springframework.data.util.TypeInformation;
@@ -51,7 +54,7 @@ public class BgpCriteria implements Criteria {
                 DatastreamPersistentProperty property = (DatastreamPersistentProperty) prop;
                 this.ocmClasses.add(property.getTypeInformation().getType());
                 this.triples.add(new Triple(NodeFactory.createVariable(getPropertyOwnerVarName(property)),
-                        RdfLexicon.CONTAINS.asNode(),
+                        FcrepoConstants.CONTAINS.asNode(),
                         NodeFactory.createVariable(getPropertyTypeVarName(property))));
 
             } else if (prop instanceof RelationPersistentProperty) {

@@ -1,30 +1,39 @@
 package ch.unil.fcrepo4.client;
 
+import ch.unil.fcrepo4.utils.UriBuilder;
 import ch.unil.fcrepo4.utils.Utils;
+import com.hp.hpl.jena.graph.Graph;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Optional;
 
 /**
  * Default implementation of {@linkplain FedoraResource} which stores the path to a Fedora resource (node) as well as
  * the reference to the shared instance of {@linkplain FedoraClientRepository}.
  * <p>
- * Modeled after {@code org.fcrepo.client.impl.FedoraResourceImpl}.
+ * Some code copied from {@code org.fcrepo.client.impl.FedoraResourceImpl}.
  *
  * @author gushakov
  */
 public class FedoraResourceImpl implements FedoraResource {
+
     protected FedoraClientRepository repository;
 
     protected String path;
 
-    protected List<Triple> triples;
+    protected Node subject;
+
+    protected Graph graph;
 
     public FedoraResourceImpl(FedoraClientRepository fedoraClientRepository, String path) {
         this.repository = fedoraClientRepository;
         this.path = Utils.normalize(path);
+        this.subject = NodeFactory.createURI(new UriBuilder(fedoraClientRepository.getRepositoryUrl()).appendPathSegment(path).build().toString());
     }
 
     @Override
@@ -48,11 +57,24 @@ public class FedoraResourceImpl implements FedoraResource {
     }
 
     @Override
-    public Iterator<Triple> getProperties() throws FedoraException {
-        if (triples == null) {
-            triples = repository.getProperties(path);
+    public Date getCreatedDate() throws FedoraException {
+        if (graph == null) {
+            graph = repository.getGraph(path);
         }
-        return triples.iterator();
+        final Optional<Triple> triple = graph.find(subject, FcrepoConstants.CREATED_DATE.asNode(), Node.ANY).toList().stream().findAny();
+        if (triple.isPresent()) {
+            return repository.getRdfDatatypeConverter().parseLiteralValue(triple.get().getObject().getLiteralValue().toString(),
+                    Date.class);
+        }
+        return null;
+    }
+
+    @Override
+    public Iterator<Triple> getProperties() throws FedoraException {
+        if (graph == null) {
+            graph = repository.getGraph(path);
+        }
+        return graph.find(Node.ANY, Node.ANY, Node.ANY).toList().iterator();
     }
 
     @Override

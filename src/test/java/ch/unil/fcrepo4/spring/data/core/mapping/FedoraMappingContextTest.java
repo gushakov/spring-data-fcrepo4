@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
+import ch.unil.fcrepo4.client.FcrepoConstants;
 import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
-import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Test;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
@@ -107,8 +107,8 @@ public class FedoraMappingContextTest {
         assertThat(entity1.getIdProperty()).isNotNull();
         GenericFedoraPersistentEntity<?> entity3 = context.getPersistentEntity(Bean3.class);
         CreatedPersistentProperty createdAtProperty = (CreatedPersistentProperty) entity3.getPersistentProperty("createdAt");
-        assertThat(createdAtProperty.getLocalName()).isEqualTo(RdfLexicon.CREATED_DATE.getLocalName());
-        assertThat(createdAtProperty.getUriNs()).isEqualTo(RdfLexicon.CREATED_DATE.getNameSpace());
+        assertThat(createdAtProperty.getLocalName()).isEqualTo(FcrepoConstants.CREATED_DATE.getLocalName());
+        assertThat(createdAtProperty.getUriNs()).isEqualTo(FcrepoConstants.CREATED_DATE.getNameSpace());
     }
 
     @Test

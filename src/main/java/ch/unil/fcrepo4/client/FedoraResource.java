@@ -2,8 +2,8 @@ package ch.unil.fcrepo4.client;
 
 import com.hp.hpl.jena.graph.Triple;
 
+import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Encapsulates information about a resource in Fedora repository. A resource can be an object (container) or a
@@ -20,6 +20,8 @@ public interface FedoraResource {
     String getName();
 
     String getPath();
+
+    Date getCreatedDate() throws FedoraException;
 
     Iterator<Triple> getProperties() throws FedoraException;
 

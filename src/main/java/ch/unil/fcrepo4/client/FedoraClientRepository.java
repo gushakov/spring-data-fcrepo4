@@ -1,11 +1,9 @@
 package ch.unil.fcrepo4.client;
 
-import com.hp.hpl.jena.graph.Triple;
-import org.fcrepo.client.FcrepoClient;
+import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
+import com.hp.hpl.jena.graph.Graph;
 
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Interface for communicating with Fedora repository.
@@ -16,6 +14,8 @@ import java.util.List;
 public interface FedoraClientRepository {
 
     String getRepositoryUrl();
+
+    RdfDatatypeConverter getRdfDatatypeConverter();
 
     boolean exists(String path) throws FedoraException;
 
@@ -31,7 +31,7 @@ public interface FedoraClientRepository {
 
     void updateDatastreamContent(String path, FedoraContent fedoraContent) throws FedoraException;
 
-    List<Triple> getProperties(String path) throws FedoraException;
+    Graph getGraph(String path) throws FedoraException;
 
     void delete(String path) throws FedoraException;
 
