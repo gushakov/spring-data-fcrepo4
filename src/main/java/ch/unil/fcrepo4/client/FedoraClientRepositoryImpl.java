@@ -101,8 +101,7 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
         final URI uri = new UriBuilder(fedoraUrl).appendPathSegment(path).build();
         FcrepoResponse response;
         try {
-            response = fcrepoClient.get(uri)
-                    .perform();
+            response = fcrepoClient.get(uri).perform();
         } catch (FcrepoOperationFailedException e) {
             throw new FedoraException(e);
         }
@@ -124,7 +123,6 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
         Assert.hasText(path);
         final UriBuilder uriBuilder = new UriBuilder(fedoraUrl)
                 .appendPathSegment(path);
-        // append fcr:metadata if needed
         if (!path.endsWith(FcrepoConstants.FCR_METADATA)) {
             uriBuilder.appendPathSegment(FcrepoConstants.FCR_METADATA);
         }
@@ -159,7 +157,7 @@ public class FedoraClientRepositoryImpl implements FedoraClientRepository {
         Assert.hasText(path);
         Assert.hasText(sparqlUpdate);
         final UriBuilder uriBuilder = new UriBuilder(fedoraUrl).appendPathSegment(path);
-        if (!path.endsWith(FcrepoConstants.FCR_METADATA)){
+        if (!path.endsWith(FcrepoConstants.FCR_METADATA)) {
             uriBuilder.appendPathSegment(FcrepoConstants.FCR_METADATA);
         }
         URI uri = uriBuilder.build();

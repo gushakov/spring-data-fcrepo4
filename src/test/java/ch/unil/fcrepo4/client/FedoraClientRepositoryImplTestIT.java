@@ -128,7 +128,6 @@ public class FedoraClientRepositoryImplTestIT {
         final String path = "/" + UUID.randomUUID().toString();
         repository.createObject(path);
         repository.forceDelete(path);
-        assertThat(repository.exists(path)).isFalse();
     }
 
     @Test

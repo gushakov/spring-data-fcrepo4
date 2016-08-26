@@ -4,6 +4,7 @@ import ch.unil.fcrepo4.client.FedoraException;
 import ch.unil.fcrepo4.spring.data.core.FedoraTemplate;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import ch.unil.fcrepo4.spring.data.repository.config.EnableFedoraRepositories;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

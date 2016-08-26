@@ -1,5 +1,6 @@
 package ch.unil.fcrepo4.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import java.nio.file.Path;
@@ -46,7 +47,7 @@ public class UriBuilderTest {
         final UriBuilder uriBuilder = new UriBuilder(baseUrl);
         final String path = "foobar/";
         uriBuilder.appendPathSegment(path);
-        assertThat(uriBuilder.build().toString()).isEqualTo(baseUrl + "/" + path);
+        assertThat(uriBuilder.build().toString()).isEqualTo(baseUrl + "/" + StringUtils.stripEnd(path, "/"));
     }
 
     @Test

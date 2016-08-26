@@ -93,7 +93,7 @@ public class FedoraTemplateTestIT {
             VehiclePicture picture = new VehiclePicture(new ClassPathResource("picture.png").getInputStream());
             vehicle.setPicture(picture);
             fedoraTemplate.save(vehicle);
-            /*final String descDsPath = "/vehicle/" + id + "/description";
+            final String descDsPath = "/vehicle/" + id + "/description";
             Assertions.assertThat(fcrepo.exists(descDsPath));
             FedoraDatastream descDs = fcrepo.getDatastream(descDsPath);
             StringWriter descSw = new StringWriter();
@@ -103,9 +103,9 @@ public class FedoraTemplateTestIT {
             Assertions.assertThat(descSw.toString()).isEqualTo("Lorem ipsum");
             assertThat(descDs.getProperties()).containsPredicateWithObjectValue(TEST_FEDORA_URI_NAMESPACE + "type",
                     rdfDatatypeConverter.serializeLiteralValue("full"));
-            Assertions.assertThat(fcrepo.exists("/vehicle/" + id + "/picture"));*/
+            Assertions.assertThat(fcrepo.exists("/vehicle/" + id + "/picture"));
         } finally {
-//            fedoraTemplate.delete(id, Vehicle.class);
+            fedoraTemplate.delete(id, Vehicle.class);
         }
     }
 
