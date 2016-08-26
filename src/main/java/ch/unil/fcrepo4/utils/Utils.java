@@ -1,6 +1,5 @@
 package ch.unil.fcrepo4.utils;
 
-import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.DatasetAccessor;
@@ -11,18 +10,14 @@ import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
-import org.fcrepo.client.FedoraException;
-import org.fcrepo.client.FedoraObject;
-import org.fcrepo.client.FedoraRepository;
-import org.fcrepo.client.FedoraResource;
-import org.fcrepo.client.impl.FedoraObjectImpl;
-import org.fcrepo.client.impl.FedoraRepositoryImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -86,6 +81,10 @@ public class Utils {
         datasetAccessor.deleteDefault();
         datasetAccessor.putModel(model);
         return model.size();
+    }
+
+    public static String normalize(String... paths){
+        return "/" + Arrays.stream(paths).map(p -> StringUtils.strip(p, "/").replaceAll("/+", "/")).collect(Collectors.joining("/"));
     }
 
 }

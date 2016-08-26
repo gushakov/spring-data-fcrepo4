@@ -1,6 +1,6 @@
 package ch.unil.fcrepo4.assertj;
 
-import org.fcrepo.client.FedoraResource;
+import ch.unil.fcrepo4.client.FedoraResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,7 +8,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;
-import static ch.unil.fcrepo4.assertj.TimeUtils.*;
+import static ch.unil.fcrepo4.assertj.TimeUtils.getUtcDate;
+import static ch.unil.fcrepo4.assertj.TimeUtils.getUtcInstant;
 import static org.mockito.Mockito.when;
 
 /**

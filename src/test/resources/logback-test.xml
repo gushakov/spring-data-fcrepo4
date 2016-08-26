@@ -9,9 +9,10 @@
 
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.data" level="DEBUG"/>
+    <logger name="org.fcrepo.client" level="DEBUG"/>
     <logger name="ch.unil.fcrepo4" level="DEBUG"/>
 
-    <root level="ERROR">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

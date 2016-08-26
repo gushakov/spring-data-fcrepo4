@@ -1,5 +1,9 @@
 package ch.unil.fcrepo4.spring.data.core;
 
+import ch.unil.fcrepo4.client.FedoraClientRepository;
+import ch.unil.fcrepo4.client.FedoraClientRepositoryImpl;
+import ch.unil.fcrepo4.client.FedoraException;
+import ch.unil.fcrepo4.client.FedoraObject;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
@@ -9,10 +13,6 @@ import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.fcrepo.client.FedoraException;
-import org.fcrepo.client.FedoraObject;
-import org.fcrepo.client.FedoraRepository;
-import org.fcrepo.client.impl.FedoraRepositoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -23,7 +23,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.domain.Page;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +52,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     private String triplestoreDb;
 
-    private FedoraRepository repository;
+    private FedoraClientRepository repository;
 
     private static final FedoraExceptionTranslator EXCEPTION_TRANSLATOR = new FedoraExceptionTranslator();
 
@@ -83,7 +82,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         this.triplestoreDb = triplestoreDb;
     }
 
-    public FedoraRepository getRepository() {
+    public FedoraClientRepository getRepository() {
         return repository;
     }
 
@@ -112,7 +111,7 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                 .setHost(fedoraHost)
                 .setPort(fedoraPort)
                 .setPath(fedoraPath + "/rest").toString();
-        repository = new FedoraRepositoryImpl(fedoraUrl);
+        repository = new FedoraClientRepositoryImpl(fedoraUrl);
 
     }
 
@@ -217,7 +216,12 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     private void handleException(Exception e) {
         RuntimeException wrapped = new RuntimeException(e);
         DataAccessException dae = EXCEPTION_TRANSLATOR.translateExceptionIfPossible(wrapped);
-        throw dae != null ? dae : wrapped;
+        if (dae != null){
+            throw dae;
+        }
+        else {
+            throw wrapped;
+        }
     }
 
 }

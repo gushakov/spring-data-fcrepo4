@@ -1,5 +1,8 @@
 package ch.unil.fcrepo4.spring.data.core.convert;
 
+import ch.unil.fcrepo4.client.FcrepoConstants;
+import ch.unil.fcrepo4.client.FedoraClientRepository;
+import ch.unil.fcrepo4.client.FedoraException;
 import ch.unil.fcrepo4.spring.data.core.Constants;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter;
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
@@ -7,13 +10,8 @@ import ch.unil.fcrepo4.spring.data.core.mapping.annotation.*;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
-import org.fcrepo.client.FedoraException;
-import org.fcrepo.client.FedoraRepository;
-import org.fcrepo.client.utils.HttpHelper;
-import org.fcrepo.kernel.api.RdfLexicon;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 
 import java.time.ZonedDateTime;
@@ -24,13 +22,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalMatchers.and;
 import static org.mockito.AdditionalMatchers.or;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -64,10 +58,7 @@ public class FedoraMappingConverterTest {
     private RdfDatatypeConverter rdfDatatypeConverter = new ExtendedXsdDatatypeConverter();
 
     @Mock
-    private FedoraRepository mockRepository;
-
-    @Mock
-    private HttpHelper mockHelper;
+    private FedoraClientRepository mockRepository;
 
     @Before
     public void setUp() throws Exception {
@@ -75,8 +66,8 @@ public class FedoraMappingConverterTest {
         doReturn(REPO_URL).when(mockRepository).getRepositoryUrl();
     }
 
-    private org.fcrepo.client.FedoraObject makeMockFedoraObject(String path, String created) throws FedoraException {
-        org.fcrepo.client.FedoraObject fo = mock(org.fcrepo.client.FedoraObject.class);
+    private ch.unil.fcrepo4.client.FedoraObject makeMockFedoraObject(String path, String created) throws FedoraException {
+        ch.unil.fcrepo4.client.FedoraObject fo = mock(ch.unil.fcrepo4.client.FedoraObject.class);
         Node uri = NodeFactory.createURI(REPO_URL + path);
         List<Triple> triples = makeResourceProperties(uri, created);
         when(fo.getPath()).thenReturn(path);
@@ -84,8 +75,8 @@ public class FedoraMappingConverterTest {
         return fo;
     }
 
-    private org.fcrepo.client.FedoraObject makeMockFedoraObject(String path, String created, int number, String foo) throws FedoraException {
-        org.fcrepo.client.FedoraObject fo = mock(org.fcrepo.client.FedoraObject.class);
+    private ch.unil.fcrepo4.client.FedoraObject makeMockFedoraObject(String path, String created, int number, String foo) throws FedoraException {
+        ch.unil.fcrepo4.client.FedoraObject fo = mock(ch.unil.fcrepo4.client.FedoraObject.class);
         Node uri = NodeFactory.createURI(REPO_URL + path);
         List<Triple> triples = makeResourceProperties(uri, created, number, foo);
         when(fo.getPath()).thenReturn(path);
@@ -96,7 +87,7 @@ public class FedoraMappingConverterTest {
     private List<Triple> makeResourceProperties(Node uri, String created) {
         List<Triple> triples = new ArrayList<>();
         triples.add(new Triple(uri,
-                NodeFactory.createURI(RdfLexicon.CREATED_DATE.getURI()),
+                NodeFactory.createURI(FcrepoConstants.CREATED_DATE.getURI()),
                 NodeFactory.createLiteral(created)));
         return triples;
     }
@@ -224,7 +215,7 @@ public class FedoraMappingConverterTest {
     @Test
     public void testWriteBean1() throws Exception {
         FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
-        org.fcrepo.client.FedoraObject fedoraObject = makeMockFedoraObject(BEAN_1_PATH, BEAN_1_FO_CREATED);
+        ch.unil.fcrepo4.client.FedoraObject fedoraObject = makeMockFedoraObject(BEAN_1_PATH, BEAN_1_FO_CREATED);
         Bean1 bean1 = new Bean1();
         bean1.setId(BEAN_1_ID);
         bean1.setNumber(BEAN_1_NUMBER);
@@ -239,7 +230,7 @@ public class FedoraMappingConverterTest {
     @Test
     public void testReadBean1() throws Exception {
         FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
-        org.fcrepo.client.FedoraObject fedoraObject = makeMockFedoraObject(BEAN_1_PATH, BEAN_1_FO_CREATED, BEAN_1_NUMBER, BEAN_1_FOO);
+        ch.unil.fcrepo4.client.FedoraObject fedoraObject = makeMockFedoraObject(BEAN_1_PATH, BEAN_1_FO_CREATED, BEAN_1_NUMBER, BEAN_1_FOO);
         Bean1 bean1 = mappingConverter.read(Bean1.class, fedoraObject);
         assertThat(bean1).isInstanceOf(DynamicBeanProxy.class);
         assertThat(bean1.getId()).isEqualTo(BEAN_1_ID);
@@ -255,7 +246,7 @@ public class FedoraMappingConverterTest {
         doReturn(makeMockFedoraObject(BEAN_2_PATH, BEAN_2_FO_CREATED)).when(mockRepository).createObject(BEAN_2_PATH);
 
         FedoraMappingConverter mappingConverter = new FedoraMappingConverter(mockRepository);
-        org.fcrepo.client.FedoraObject fedoraObject = makeMockFedoraObject(BEAN_3_PATH, BEAN_3_FO_CREATED);
+        ch.unil.fcrepo4.client.FedoraObject fedoraObject = makeMockFedoraObject(BEAN_3_PATH, BEAN_3_FO_CREATED);
         Bean2 bean2 = new Bean2();
         bean2.setId(BEAN_2_ID);
         Bean3 bean3 = new Bean3();

@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.spring.data.core;
 
+import ch.unil.fcrepo4.client.FedoraException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.fcrepo.client.FedoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;

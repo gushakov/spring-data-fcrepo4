@@ -1,8 +1,8 @@
 package ch.unil.fcrepo4.assertj;
 
+import ch.unil.fcrepo4.client.FedoraException;
+import ch.unil.fcrepo4.client.FedoraResource;
 import org.assertj.core.api.AbstractAssert;
-import org.fcrepo.client.FedoraException;
-import org.fcrepo.client.FedoraResource;
 
 import java.time.Instant;
 
