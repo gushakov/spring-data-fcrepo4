@@ -281,6 +281,15 @@
 
     <profiles>
         <profile>
+            <id>vagrant-its</id>
+            <properties>
+                <tomcat.ajp.port/>
+                <tomcat.servlet.port>8080</tomcat.servlet.port>
+                <tomcat.rmi.port/>
+            </properties>
+        </profile>
+
+        <profile>
             <id>cargo-its</id>
             <dependencies>
                 <dependency>
