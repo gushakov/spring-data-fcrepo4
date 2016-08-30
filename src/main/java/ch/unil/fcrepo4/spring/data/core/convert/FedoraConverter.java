@@ -32,7 +32,11 @@ public interface FedoraConverter extends EntityReader<Object, FedoraResource>, E
 
     <T, ID> FedoraObject getFedoraObject(ID id, Class<T> beanType);
 
-    FedoraDatastream fetchDatastream(String dsPath);
+    String getFedoraResourcePath(String url);
+
+    FedoraObject getFedoraObject(String fullPath);
+
+    FedoraDatastream getDatastream(String fullPath);
 
     <T> String getFedoraObjectPath(T bean);
 
@@ -47,4 +51,5 @@ public interface FedoraConverter extends EntityReader<Object, FedoraResource>, E
     <T> Object readDatastream(T bean, FedoraPersistentEntity<?> entity, DatastreamPersistentProperty dsProp);
 
     InputStream readDatastreamContent(Object dsBean, DatastreamPersistentEntity<?> dsEntity, FedoraDatastream fedoraDatastream);
+
 }

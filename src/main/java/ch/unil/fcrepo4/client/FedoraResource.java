@@ -21,6 +21,8 @@ public interface FedoraResource {
 
     String getPath();
 
+    String getPropertyLiteralValueOrUri(String predicateUri) throws FedoraException;
+
     Date getCreatedDate() throws FedoraException;
 
     Iterator<Triple> getProperties() throws FedoraException;

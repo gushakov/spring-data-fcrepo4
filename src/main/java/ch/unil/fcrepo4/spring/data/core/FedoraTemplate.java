@@ -9,10 +9,10 @@ import ch.unil.fcrepo4.spring.data.core.convert.FedoraMappingConverter;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraPageRequest;
 import ch.unil.fcrepo4.spring.data.core.query.FedoraQuery;
 import ch.unil.fcrepo4.spring.data.core.query.result.FedoraResultPage;
+import ch.unil.fcrepo4.utils.UriBuilder;
+import ch.unil.fcrepo4.utils.Utils;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Resource;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -106,11 +106,12 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     private void initClientRepository() {
 
         // build client repository URL
-        String fedoraUrl = new URIBuilder()
+        String fedoraUrl = new UriBuilder()
                 .setScheme("http")
                 .setHost(fedoraHost)
                 .setPort(fedoraPort)
-                .setPath(fedoraPath + "/rest").toString();
+                .setPath(Utils.normalize(fedoraPath, "rest"))
+                .build().toString();
         repository = new FedoraClientRepositoryImpl(fedoraUrl);
 
     }
@@ -150,10 +151,10 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
 
     @Override
     public <T> List<T> query(FedoraQuery query, Class<T> beanType) {
-        String queryUrl = new URIBuilder().setScheme("http")
+        String queryUrl = new UriBuilder().setScheme("http")
                 .setHost(triplestoreHost)
                 .setPort(triplestorePort)
-                .setPath(triplestorePath + "/" + triplestoreDb + "/query").toString();
+                .setPath(Utils.normalize(triplestorePath, triplestoreDb, "query")).build().toString();
 
         List<T> beans = new ArrayList<>();
         Query sparqlQuery = QueryFactory.create(query.getSerialized());
@@ -166,8 +167,8 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
                 if (queryResultResource == null) {
                     throw new IllegalStateException("Query solution has no resource for variables " + Arrays.toString(resultVars.toArray(new String[resultVars.size()])));
                 }
-                String path = parsePathFromUri(queryResultResource.getURI());
 
+                String path = Utils.relativePath(repository.getRepositoryUrl(), queryResultResource.getURI());
                 logger.debug("Found resource: {}", path);
 
                 try {
@@ -200,10 +201,6 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
         return resource;
     }
 
-    private String parsePathFromUri(String uri) {
-        return StringUtils.removeStart(uri, repository.getRepositoryUrl());
-    }
-
     private void registerPersistenceExceptionTranslator() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
             if (applicationContext.getBeansOfType(PersistenceExceptionTranslator.class).isEmpty()) {
@@ -216,10 +213,9 @@ public class FedoraTemplate implements FedoraOperations, InitializingBean, Appli
     private void handleException(Exception e) {
         RuntimeException wrapped = new RuntimeException(e);
         DataAccessException dae = EXCEPTION_TRANSLATOR.translateExceptionIfPossible(wrapped);
-        if (dae != null){
+        if (dae != null) {
             throw dae;
-        }
-        else {
+        } else {
             throw wrapped;
         }
     }

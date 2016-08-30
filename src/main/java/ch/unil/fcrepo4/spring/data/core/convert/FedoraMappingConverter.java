@@ -22,6 +22,7 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -82,28 +83,9 @@ public class FedoraMappingConverter implements FedoraConverter {
         return wrapInDynamicBeanProxy(bean, beanType, entity, fedoraResource);
     }
 
-    private <T> T wrapInDynamicBeanProxy(T bean, Class<T> beanType, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
-        try {
-            return new ByteBuddy()
-                    .subclass(beanType)
-                    .implement(DynamicBeanProxy.class)
-                    .method(ElementMatchers.isDeclaredBy(DynamicBeanProxy.class)
-                            .or(ElementMatchers.isGetter())
-                            .or(ElementMatchers.isSetter()))
-                    .intercept(MethodDelegation.to(new DynamicBeanProxyInterceptor(bean, entity, fedoraResource, this)))
-                    .make()
-                    .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
-                    .getLoaded()
-                    .newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new MappingException("Cannot create dynamic bean proxy for " + bean, e);
-        }
-    }
-
     @Override
     public void write(Object bean, FedoraResource fedoraResource) {
         writeAssociations(bean);
-
         writeProperties(bean, fedoraResource);
     }
 
@@ -126,6 +108,24 @@ public class FedoraMappingConverter implements FedoraConverter {
         ElementTriplesBlock deleteWhereTriples = triplesCollector.getDeleteWhereTriples();
         if (!insertTriples.isEmpty()) {
             updateTriples(deleteWhereTriples, insertTriples, fedoraResource);
+        }
+    }
+
+    private <T> T wrapInDynamicBeanProxy(T bean, Class<T> beanType, FedoraPersistentEntity<?> entity, FedoraResource fedoraResource) {
+        try {
+            return new ByteBuddy()
+                    .subclass(beanType)
+                    .implement(DynamicBeanProxy.class)
+                    .method(ElementMatchers.isDeclaredBy(DynamicBeanProxy.class)
+                            .or(ElementMatchers.isGetter())
+                            .or(ElementMatchers.isSetter()))
+                    .intercept(MethodDelegation.to(new DynamicBeanProxyInterceptor(bean, entity, fedoraResource, this)))
+                    .make()
+                    .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
+                    .getLoaded()
+                    .newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new MappingException("Cannot create dynamic bean proxy for " + bean, e);
         }
     }
 
@@ -170,7 +170,6 @@ public class FedoraMappingConverter implements FedoraConverter {
         if (bean instanceof DynamicBeanProxy) {
             DynamicBeanProxy beanProxy = (DynamicBeanProxy) bean;
             beanProxy.__getBeanEntity().doWithAssociations(
-
                     (SimpleAssociationHandler) association -> writeAssociation(beanProxy.__getPropertyAccessor().getBean(),
                             beanProxy.__getPropertyAccessor(), association)
 
@@ -266,9 +265,23 @@ public class FedoraMappingConverter implements FedoraConverter {
     }
 
     @Override
-    public FedoraDatastream fetchDatastream(String dsPath) {
+    public String getFedoraResourcePath(String url) {
+        return StringUtils.removeStart(url, fedoraClientRepository.getRepositoryUrl());
+    }
+
+    @Override
+    public FedoraObject getFedoraObject(String fullPath) {
         try {
-            return fedoraClientRepository.getDatastream(dsPath);
+            return fedoraClientRepository.getObject(fullPath);
+        } catch (FedoraException e) {
+            throw new MappingException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public FedoraDatastream getDatastream(String fullPath) {
+        try {
+            return fedoraClientRepository.getDatastream(fullPath);
         } catch (FedoraException e) {
             throw new MappingException(e.getMessage(), e);
         }
@@ -385,7 +398,7 @@ public class FedoraMappingConverter implements FedoraConverter {
 
         // check if datastream exists, read it into the bean if it does
         if (exists(dsPath)) {
-            Object dsBean = read(dsProp.getType(), fetchDatastream(dsPath));
+            Object dsBean = read(dsProp.getType(), getDatastream(dsPath));
             entity.getPropertyAccessor(bean).setProperty(dsProp, dsBean);
             return dsBean;
         }
@@ -403,7 +416,7 @@ public class FedoraMappingConverter implements FedoraConverter {
             // binary content might not have been loaded for the proxy
             try {
                 if (dsContent == null && fedoraClientRepository.exists(dsPath)) {
-                    dsContent = readDatastreamContent(dsBeanProxy.__getBean(), dsEntity, fetchDatastream(dsPath));
+                    dsContent = readDatastreamContent(dsBeanProxy.__getBean(), dsEntity, getDatastream(dsPath));
                 }
             } catch (FedoraException e) {
                 throw new MappingException(e.getMessage(), e);
@@ -448,6 +461,7 @@ public class FedoraMappingConverter implements FedoraConverter {
             throw new MappingException(e.getMessage(), e);
         }
     }
+
 
     @SuppressWarnings("unchecked")
     private void readPath(Object bean, FedoraObjectPersistentEntity<?> entity, FedoraObject fedoraObject) {

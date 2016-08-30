@@ -14,8 +14,6 @@ public class SimplePathCreator<T, ID> implements PathCreator<T, ID> {
                 || !(pathPropValue instanceof String)) {
             path += "/";
         }
-//        String path = (namespace != null && !namespace.matches("\\s*")) ? namespace : "";
-
         path += pathPropValue;
         return path;
     }

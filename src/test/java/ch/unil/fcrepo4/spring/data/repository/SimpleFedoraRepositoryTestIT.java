@@ -179,12 +179,12 @@ public class SimpleFedoraRepositoryTestIT {
     public void testFindByOwner_FullNameAndOwner_Address_ZipCode() throws Exception {
         try {
 
-            Address address = new Address(1L, "123 Main St.", 12345);
-            Owner owner = new Owner(1L, "Joe Taylor");
-            owner.setAddress(address);
-            Vehicle vehicle = new Vehicle(1L, "Toyota", "gray", 1000, 6.5f);
-            vehicle.setOwner(owner);
-            vehicleRepo.save(vehicle);
+            Address addressWrite = new Address(1L, "123 Main St.", 12345);
+            Owner ownerWrite = new Owner(1L, "Joe Taylor");
+            ownerWrite.setAddress(addressWrite);
+            Vehicle vehicleWrite = new Vehicle(1L, "Toyota", "gray", 1000, 6.5f);
+            vehicleWrite.setOwner(ownerWrite);
+            vehicleRepo.save(vehicleWrite);
 
             Thread.sleep(DELAY);
 
@@ -194,12 +194,50 @@ public class SimpleFedoraRepositoryTestIT {
             // properties returns nulls, need to explicitly use getters in assertions.
 
             Assertions.assertThat(vehicles).hasSize(1);
-//            System.out.println(vehicles.get(0).getOwner().getAddress().getStreet());
+            final Vehicle vehicleRead = vehicles.get(0);
+            final Owner ownerRead = vehicleRead.getOwner();
+            final Address addressRead = ownerRead.getAddress();
+            Assertions.assertThat(ownerRead.getFullName()).isEqualTo("Joe Taylor");
+            Assertions.assertThat(addressRead.getZipCode()).isEqualTo(12345);
         } finally {
             fedoraTemplate.delete(1L, Address.class);
             fedoraTemplate.delete(1L, Owner.class);
             vehicleRepo.delete(1L);
         }
 
+    }
+
+    @Test
+    public void testUpdateRelationProperty() throws Exception {
+        try {
+            final Vehicle vehicle = vehicleRepo.findOne(1L);
+//            vehicle.getOwner().getAddress().setZipCode(3333);
+//            vehicle.getOwner().setFullName("Joe Smith");
+//            vehicle.getOwner().getAddress().setZipCode(4444);
+            System.out.println(vehicle.getOwner());
+            System.out.println(vehicle.getOwner());
+            System.out.println(vehicle.getOwner());
+            System.out.println(vehicle.getOwner());
+            System.out.println(vehicle.getOwner());
+            System.out.println(vehicle.getOwner());
+            System.out.println(vehicle.getOwner().getAddress());
+//            vehicleRepo.save(vehicle);
+//            System.out.println(vehicle.getOwner().getFullName());
+//            System.out.println(vehicle.getOwner().getAddress().getStreet());
+//            System.out.println(vehicle.getOwner().getAddress().getZipCode());
+        } finally {
+        }
+
+    }
+
+    @Test
+    public void testName() throws Exception {
+        /*List<Vehicle> vehicles = vehicleRepo.findByOwner_FullNameAndOwner_Address_ZipCode("Joe Smith", 4444);
+        final Vehicle vehicle = vehicles.get(0);
+        vehicle.setMake("zzzzzzz");
+        vehicle.getOwner().setFullName("yyyyyyyyyyyyy");
+        vehicleRepo.save(vehicle);*/
+//        vehicleRepo.delete(1L);
+         vehicleRepo.findByMake("zzzzzzz");
     }
 }

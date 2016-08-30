@@ -57,6 +57,27 @@ public class FedoraResourceImpl implements FedoraResource {
     }
 
     @Override
+    public String getPropertyLiteralValueOrUri(String predicateUri) throws FedoraException {
+        if (graph == null) {
+            graph = repository.getGraph(path);
+        }
+        final Optional<Triple> triple = graph.find(subject, NodeFactory.createURI(predicateUri), Node.ANY).toList().stream().findAny();
+        if (triple.isPresent()) {
+            final Node object = triple.get().getObject();
+            if (object.isLiteral()){
+                return object.getLiteralValue().toString();
+            }
+            else if (object.isURI()){
+                return object.getURI();
+            }
+            else {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Date getCreatedDate() throws FedoraException {
         if (graph == null) {
             graph = repository.getGraph(path);

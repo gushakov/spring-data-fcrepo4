@@ -87,4 +87,8 @@ public class Utils {
         return "/" + Arrays.stream(paths).map(p -> StringUtils.strip(p, "/").replaceAll("/+", "/")).collect(Collectors.joining("/"));
     }
 
+    public static String relativePath(String base, String uri){
+        return normalize(StringUtils.removeStart(uri, base));
+    }
+
 }

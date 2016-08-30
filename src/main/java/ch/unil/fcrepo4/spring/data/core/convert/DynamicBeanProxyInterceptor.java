@@ -1,11 +1,10 @@
 package ch.unil.fcrepo4.spring.data.core.convert;
 
 import ch.unil.fcrepo4.client.FedoraDatastream;
+import ch.unil.fcrepo4.client.FedoraException;
+import ch.unil.fcrepo4.client.FedoraObject;
 import ch.unil.fcrepo4.client.FedoraResource;
-import ch.unil.fcrepo4.spring.data.core.mapping.BinaryPersistentProperty;
-import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentEntity;
-import ch.unil.fcrepo4.spring.data.core.mapping.DatastreamPersistentProperty;
-import ch.unil.fcrepo4.spring.data.core.mapping.FedoraPersistentEntity;
+import ch.unil.fcrepo4.spring.data.core.mapping.*;
 import net.bytebuddy.implementation.bind.annotation.Argument;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
@@ -49,10 +48,6 @@ public class DynamicBeanProxyInterceptor {
         return bean;
     }
 
-    public boolean __foobar(PersistentProperty toto){
-        return Boolean.TRUE;
-    }
-
     public FedoraPersistentEntity __getBeanEntity() {
         return entity;
     }
@@ -76,10 +71,9 @@ public class DynamicBeanProxyInterceptor {
 
         logger.debug("Intercepted getter: {} for property: {}", getter, property);
 
-        PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
 
         // if there is a value for the property in the bean, just return it
-        Object value = propertyAccessor.getProperty(property);
+        Object value = __getPropertyAccessor().getProperty(property);
         if (value != null) {
             return value;
         }
@@ -95,12 +89,23 @@ public class DynamicBeanProxyInterceptor {
             return fedoraConverter.readDatastreamContent(bean, (DatastreamPersistentEntity<?>) entity, (FedoraDatastream) fedoraResource);
         }
 
-        // TODO: implement case of a relation property
+        // read Fedora object for relation properties
+        if (property instanceof RelationPersistentProperty){
+            RelationPersistentProperty relProp = (RelationPersistentProperty) property;
+            try {
+                final String relUri = fedoraResource.getPropertyLiteralValueOrUri(relProp.getUri());
+                final FedoraObject relFedoraObject = fedoraConverter.getFedoraObject(fedoraConverter.getFedoraResourcePath(relUri));
+                final Object relBean = fedoraConverter.read(relProp.getType(), relFedoraObject);
+                __getPropertyAccessor().setProperty(relProp, relBean);
+                return relBean;
 
-        return null;
+            } catch (FedoraException e) {
+                throw new IllegalStateException(e);
+            }
+        }
 
+        throw new IllegalStateException("Cannot intercept getter for property of type " + property.getType());
     }
-
 
     @RuntimeType
     public void interceptSetter(@Origin Method setter, @Argument(0) Object argument) {
@@ -116,11 +121,9 @@ public class DynamicBeanProxyInterceptor {
         // add property to the set of updated properties
         updatedProperties.add(property);
 
-        PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
-        propertyAccessor.setProperty(property, argument);
+        __getPropertyAccessor().setProperty(property, argument);
 
     }
-
 
     private PersistentProperty<?> findProperty(Method getterOrSetter) {
 
