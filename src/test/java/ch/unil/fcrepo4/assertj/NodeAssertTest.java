@@ -1,8 +1,8 @@
 package ch.unil.fcrepo4.assertj;
 
 import ch.unil.fcrepo4.client.FcrepoConstants;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.junit.Test;
 
 import static ch.unil.fcrepo4.assertj.Assertions.assertThat;

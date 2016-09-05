@@ -1,7 +1,8 @@
 package ch.unil.fcrepo4.assertj;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
+
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.assertj.core.api.IterableAssert;
 
 import java.util.ArrayList;

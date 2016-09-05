@@ -1,9 +1,9 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
 import ch.unil.fcrepo4.spring.data.core.mapping.FedoraResourcePersistentProperty;
-import com.hp.hpl.jena.sparql.core.BasicPattern;
-import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.NodeValue;
 
 import java.util.List;
 

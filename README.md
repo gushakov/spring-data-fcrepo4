@@ -9,25 +9,13 @@ It provides Object Content Mapping (OCM) between annotated Java beans and Fedora
 
 ### Acknowledgements
 
-This project is heavily based on the code from the following projects (including configuration files: Maven, Travis CI, etc.)
+This project is based heavily on the code from the following projects (including configuration files: Maven, Travis CI, etc.)
 
- * [fcrepo4-client](https://github.com/fcrepo4-labs/fcrepo4-client)
+ * [fcrepo4-client](https://github.com/fcrepo4-labs/fcrepo4-client) (deprecated)
+
+ * [fcrepo-java-client](https://github.com/fcrepo4-exts/fcrepo-java-client)
 
  * [spring-data-solr](https://github.com/spring-projects/spring-data-solr)
-
-### Notes on integration testing
-
-In order to run integration tests one must activate `cargo-its` Maven profile and execute `verify` command. Make sure
-that `skipITs` option is set to `false` in `pom.xml`.
-
-This will automatically download and start a Tomcat server using [Cargo Maven plugin](https://codehaus-cargo.github.io/cargo/Maven2+plugin.html).
-The build will install three webapps in the Tomcat.
-
-* `fcrepo-webapp` - Fedora repository webapp
-* `fuseki` - Fuseki (external) triplestore
-* `fcrepo-camel-webapp` - a Camel route executing `fcrepo-indexing-triplestore` packaged in a webapp
-
-See [this](https://github.com/gushakov/fcrepo-camel-webapp) for more details on how to install `fcrepo-camel-webapp` locally.
 
 ### FedoraTemplate
 

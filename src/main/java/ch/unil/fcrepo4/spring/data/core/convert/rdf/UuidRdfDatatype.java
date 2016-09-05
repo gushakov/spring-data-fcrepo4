@@ -1,8 +1,9 @@
 package ch.unil.fcrepo4.spring.data.core.convert.rdf;
 
-import com.hp.hpl.jena.datatypes.BaseDatatype;
-import com.hp.hpl.jena.datatypes.DatatypeFormatException;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+
+import org.apache.jena.datatypes.BaseDatatype;
+import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 
 import java.util.UUID;
 

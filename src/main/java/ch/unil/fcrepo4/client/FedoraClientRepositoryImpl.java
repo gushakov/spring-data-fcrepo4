@@ -4,9 +4,9 @@ import ch.unil.fcrepo4.spring.data.core.convert.rdf.ExtendedXsdDatatypeConverter
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
 import ch.unil.fcrepo4.utils.UriBuilder;
 import ch.unil.fcrepo4.utils.Utils;
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.impl.CollectionGraph;
 import org.apache.http.HttpStatus;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.impl.CollectionGraph;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.fcrepo.client.FcrepoClient;

@@ -5,9 +5,13 @@
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix fuseki: <http://jena.apache.org/fuseki#> .
 
+[] ja:loadClass "org.apache.jena.tdb.TDB" .
+tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+tdb:GraphTDB    rdfs:subClassOf  ja:Model      .
+
 :service_tdb_all  a                   fuseki:Service ;
         rdfs:label                    "test" ;
-        fuseki:dataset                :tdb_dataset_readwrite ;
+        fuseki:dataset                :dataset ;
         fuseki:name                   "test" ;
         fuseki:serviceQuery           "query" , "sparql" ;
         fuseki:serviceReadGraphStore  "get" ;
@@ -16,6 +20,12 @@
         fuseki:serviceUpdate          "update" ;
         fuseki:serviceUpload          "upload" .
 
-:tdb_dataset_readwrite
-        a             tdb:DatasetTDB ;
-        tdb:location  "${project.build.directory}/etc/fuseki/databases/test_data" .
+
+
+:dataset a      ja:RDFDataset ;
+     ja:defaultGraph :graph ;
+     .
+
+:graph a ja:MemoryModel ;
+     ja:content [ja:externalContent <file:../data/vehicles.ttl> ] ;
+     .

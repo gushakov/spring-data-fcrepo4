@@ -1,8 +1,9 @@
 package ch.unil.fcrepo4.client;
 
-import com.hp.hpl.jena.rdf.model.Property;
 
-import static com.hp.hpl.jena.rdf.model.ResourceFactory.createProperty;
+import org.apache.jena.rdf.model.Property;
+
+import static org.apache.jena.rdf.model.ResourceFactory.createProperty;
 
 /**
  * Based on {@code org.fcrepo.kernel.api.RdfLexicon}.

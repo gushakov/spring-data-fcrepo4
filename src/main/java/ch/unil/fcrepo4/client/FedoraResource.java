@@ -1,6 +1,6 @@
 package ch.unil.fcrepo4.client;
 
-import com.hp.hpl.jena.graph.Triple;
+import org.apache.jena.graph.Triple;
 
 import java.util.Date;
 import java.util.Iterator;

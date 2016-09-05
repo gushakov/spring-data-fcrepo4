@@ -1,22 +1,21 @@
 package ch.unil.fcrepo4.utils;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.DatasetAccessor;
-import com.hp.hpl.jena.query.DatasetAccessorFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.syntax.Element;
-import com.hp.hpl.jena.sparql.syntax.ElementFilter;
-import com.hp.hpl.jena.sparql.syntax.ElementGroup;
-import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.DatasetAccessor;
+import org.apache.jena.query.DatasetAccessorFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementFilter;
+import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -52,20 +51,20 @@ public class Utils {
         return literal;
     }
 
-    public static ElementTriplesBlock getTriples(ElementGroup group){
+    public static ElementTriplesBlock getTriples(ElementGroup group) {
         ElementTriplesBlock triples = null;
-        for (Element element: group.getElements()){
-            if (element instanceof ElementTriplesBlock){
+        for (Element element : group.getElements()) {
+            if (element instanceof ElementTriplesBlock) {
                 triples = (ElementTriplesBlock) element;
             }
         }
         return triples;
     }
 
-    public static ElementFilter getFilter(ElementGroup group){
+    public static ElementFilter getFilter(ElementGroup group) {
         ElementFilter filter = null;
-        for (Element element: group.getElements()){
-            if (element instanceof ElementFilter){
+        for (Element element : group.getElements()) {
+            if (element instanceof ElementFilter) {
                 filter = (ElementFilter) element;
             }
         }
@@ -83,11 +82,11 @@ public class Utils {
         return model.size();
     }
 
-    public static String normalize(String... paths){
+    public static String normalize(String... paths) {
         return "/" + Arrays.stream(paths).map(p -> StringUtils.strip(p, "/").replaceAll("/+", "/")).collect(Collectors.joining("/"));
     }
 
-    public static String relativePath(String base, String uri){
+    public static String relativePath(String base, String uri) {
         return normalize(StringUtils.removeStart(uri, base));
     }
 

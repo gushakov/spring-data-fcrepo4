@@ -1,0 +1,731 @@
+<http://example.com/event/urn:uuid:7052317f-b24a-4649-a856-8fa0010b6d94>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:55Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/1>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:36:55.126Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:36:59.127Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "light green" ;
+        <info:fedora/test/consumption>  "6.5"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Ford" ;
+        <info:fedora/test/miles>        1000 .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/>
+        a       <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> , <http://fedora.info/definitions/v4/repository#RepositoryRoot> , <http://www.w3.org/ns/ldp#BasicContainer> ;
+        <http://fedora.info/definitions/v4/repository#hasTransactionProvider>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/fcr:tx> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:36:56.871Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> , "2016-09-05T11:37:01.755Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> , "2016-09-05T13:38:12.656Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true .
+
+<http://example.com/event/urn:uuid:7fe4edaf-a916-4041-aaa8-37c439738ac4>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:55Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:44114183-d8d2-4518-b5f3-86dd0c13b1c2>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:58Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:716fbc4f-a7a1-419f-89cd-663af47588c8>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:59Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:bbe40bb7-f97e-494d-a487-73ff1bf6c32f>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:59Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:9ea28349-7293-4588-8e9a-1ee3bdb3a119>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:59Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/2> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/2>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:36:59.291Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:36:59.933Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "red" ;
+        <info:fedora/test/consumption>  "4.5"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Toyota" ;
+        <info:fedora/test/miles>        15000 .
+
+<http://example.com/event/urn:uuid:7de697c6-50aa-4f2b-99c6-7f229efc249e>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:59Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/2> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:6b2cf21e-7d7d-4fc9-b49e-dc783ad011d6>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:36:59Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/2> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:2069db88-c78e-49cb-857b-1790178db0d3>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/3> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/3>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:37:00.053Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:37:00.346Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "red" ;
+        <info:fedora/test/consumption>  "7.5"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Ferrari" ;
+        <info:fedora/test/miles>        10000 .
+
+<http://example.com/event/urn:uuid:e97bd038-681c-4c26-b8aa-7f093a836bb2>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:242cc763-92f6-425c-945f-6f54635ae489>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/3> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:e4040b54-5f97-479c-9d98-4ec4d528e0e0>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/3> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:f5ecd827-7f98-49e2-acd8-4694514407fc>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:8f877928-64dc-4036-82d2-6cf27ddca918>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/4> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/4>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:37:00.444Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:37:00.662Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "blue" ;
+        <info:fedora/test/consumption>  "5.5"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Volkswagen" ;
+        <info:fedora/test/miles>        20000 .
+
+<http://example.com/event/urn:uuid:610224c5-59ec-47f2-8337-e99c6925e623>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/4> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:1cd3e966-0081-4a4e-8703-75cfa940f785>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/4> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:f658d6fa-0388-4be6-b22b-33676effff49>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:ca4cdcf6-20f5-4651-a41d-d160fc566036>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/5> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/5>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:37:00.76Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:37:01.002Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "green" ;
+        <info:fedora/test/consumption>  "5.0"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Honda" ;
+        <info:fedora/test/miles>        1500 .
+
+<http://example.com/event/urn:uuid:1333ba6c-6086-456f-af31-fda7a57cfef2>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/5> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:605e3759-de26-455d-af7f-ac8d45642e64>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/5> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:05dbc542-c96d-4e5f-9e2f-9398735da596>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:754e5410-06fb-43d4-a238-73a5bb45a400>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/6> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/6>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:37:01.133Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:37:01.339Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "light brown" ;
+        <info:fedora/test/consumption>  "7.0"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Lexus" ;
+        <info:fedora/test/miles>        3000 .
+
+<http://example.com/event/urn:uuid:809892f5-104f-42ed-9703-58561d74d9d6>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/6> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:f885b5f3-f89c-49db-b156-8305b17e613a>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/6> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:4e83f325-2b34-4ace-86ed-06a3a73b8b85>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/7> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/7>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:37:01.424Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:37:01.672Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "silver" ;
+        <info:fedora/test/consumption>  "4.0"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Citroën" ;
+        <info:fedora/test/miles>        1000 .
+
+<http://example.com/event/urn:uuid:4eb742a2-d1a6-4cee-ac42-71768ba380a8>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:c94d1981-9b72-42b0-85b5-81b4eadfa9bb>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/7> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:7aee184f-0cd1-4061-bd03-a98bb6c6573e>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/7> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:8c0e39f2-e8d4-4a6f-8282-a5f2e9dab66a>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:a04aa114-8913-473b-9410-9e492f9bf2f5>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/8> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/8>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T11:37:01.769Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T11:37:01.964Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "red" ;
+        <info:fedora/test/consumption>  "6.0"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Dodge" ;
+        <info:fedora/test/miles>        1500 .
+
+<http://example.com/event/urn:uuid:ed9c05c2-7561-4d67-a87e-1ee7617fe135>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/8> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:f2aae370-41ad-4628-b9e3-903c549ce562>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T11:37:01Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/8> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:16113981-92de-4389-9725-5de06945fd96>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/9> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/9>
+        a                               <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T13:38:12.412Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T13:38:13.913Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>           "ch.unil.fcrepo4.spring.data.repository.Vehicle" ;
+        <info:fedora/test/color>        "gray" ;
+        <info:fedora/test/consumption>  "6.5"^^<http://www.w3.org/2001/XMLSchema#float> ;
+        <info:fedora/test/make>         "Jeep" ;
+        <info:fedora/test/miles>        1000 ;
+        <info:fedora/test/owner>        <http://localhost:${tomcat.servlet.port}/fcrepo/rest/owner/1> .
+
+<http://example.com/event/urn:uuid:a65cbbb0-9cfc-43ea-a72c-743f7e7919e7>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:3b5ded5d-b224-4bd0-8761-c4cd9dba35ce>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:f04985da-041e-4dd3-9123-5d6b22d62797>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/owner/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/owner/1>
+        a                            <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T13:38:12.551Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T13:38:13.567Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>        "ch.unil.fcrepo4.spring.data.repository.Owner" ;
+        <info:fedora/test/address>   <http://localhost:${tomcat.servlet.port}/fcrepo/rest/address/1> ;
+        <info:fedora/test/fullName>  "Joe Taylor" .
+
+<http://example.com/event/urn:uuid:00507819-0687-4c27-b825-f5367fca2424>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/address/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://id.loc.gov/vocabulary/preservation/eventType/cre> .
+
+<http://localhost:${tomcat.servlet.port}/fcrepo/rest/address/1>
+        a                           <http://www.w3.org/ns/ldp#Container> , <http://fedora.info/definitions/v4/repository#Container> , <http://fedora.info/definitions/v4/repository#Resource> , <http://www.w3.org/ns/ldp#RDFSource> ;
+        <http://fedora.info/definitions/v4/repository#created>
+                "2016-09-05T13:38:12.698Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#createdBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#hasParent>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/> ;
+        <http://fedora.info/definitions/v4/repository#lastModified>
+                "2016-09-05T13:38:13.147Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://fedora.info/definitions/v4/repository#lastModifiedBy>
+                "bypassAdmin" ;
+        <http://fedora.info/definitions/v4/repository#writable>
+                true ;
+        <info:data/ocm/class>       "ch.unil.fcrepo4.spring.data.repository.Address" ;
+        <info:fedora/test/street>   "123 Main St." ;
+        <info:fedora/test/zipCode>  12345 .
+
+<http://example.com/event/urn:uuid:9a969d37-0c66-413b-9ac0-5c6a73e2ecb1>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:e397bf1a-6719-41a3-a2d4-d0124947084d>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/address/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:19eb4547-38d3-4706-b5cc-6e4b51f5914c>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/address/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:0bcba6d6-0ff5-4cd0-af61-a5d5ad671da6>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/owner/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:4d67d184-fb63-4cd4-ad61-15e219e16e26>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/address/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:7c97bdf6-50eb-4fe8-8306-d30f523bca72>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/owner/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:566106ee-88a2-43e5-8e10-a7a9d33258f2>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/9> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:091cca00-e77f-4df5-8353-a883f790a95f>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/vehicle/9> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .
+
+<http://example.com/event/urn:uuid:1d113487-3267-4193-b7f3-7f43c0a93ee3>
+        a       <http://www.w3.org/ns/prov#InstantaneousEvent> , <http://www.loc.gov/premis/rdf/v1#Event> , <http://fedora.info/definitions/v4/audit#InternalEvent> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventDateTime>
+                "2016-09-05T13:38:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedAgent>
+                "Apache-HttpClient/4.3.6 (java 1.5)" , "bypassAdmin" ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventRelatedObject>
+                <http://localhost:${tomcat.servlet.port}/fcrepo/rest/owner/1> ;
+        <http://www.loc.gov/premis/rdf/v1#hasEventType>
+                <http://fedora.info/definitions/v4/audit#metadataModification> .

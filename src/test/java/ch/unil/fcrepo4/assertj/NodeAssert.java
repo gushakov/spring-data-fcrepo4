@@ -1,6 +1,6 @@
 package ch.unil.fcrepo4.assertj;
 
-import com.hp.hpl.jena.graph.Node;
+import org.apache.jena.graph.Node;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.util.Objects;
 

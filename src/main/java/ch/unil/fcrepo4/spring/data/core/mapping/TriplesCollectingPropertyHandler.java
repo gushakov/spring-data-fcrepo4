@@ -1,10 +1,9 @@
 package ch.unil.fcrepo4.spring.data.core.mapping;
 
 import ch.unil.fcrepo4.spring.data.core.convert.FedoraConverter;
-import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.PersistentPropertyAccessor;

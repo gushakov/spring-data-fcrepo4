@@ -2,11 +2,11 @@ package ch.unil.fcrepo4.client;
 
 import ch.unil.fcrepo4.utils.UriBuilder;
 import ch.unil.fcrepo4.utils.Utils;
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
 
 import java.util.Date;
 import java.util.Iterator;

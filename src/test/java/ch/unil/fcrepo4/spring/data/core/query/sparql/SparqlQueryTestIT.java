@@ -1,10 +1,8 @@
 package ch.unil.fcrepo4.spring.data.core.query.sparql;
 
-import ch.unil.fcrepo4.utils.Utils;
-import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Resource;
 import org.apache.http.client.utils.URIBuilder;
-import org.junit.Before;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;

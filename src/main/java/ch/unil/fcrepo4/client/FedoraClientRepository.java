@@ -1,7 +1,7 @@
 package ch.unil.fcrepo4.client;
 
 import ch.unil.fcrepo4.spring.data.core.convert.rdf.RdfDatatypeConverter;
-import com.hp.hpl.jena.graph.Graph;
+import org.apache.jena.graph.Graph;
 
 import java.io.InputStream;
 

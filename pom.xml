@@ -17,18 +17,17 @@
         <fcrepo.path>/fcrepo</fcrepo.path>
         <fuseki.path>/fuseki</fuseki.path>
         <fuseki.db>test</fuseki.db>
-        <tomcat.start.mode>run</tomcat.start.mode>
+        <tomcat.start.mode>start</tomcat.start.mode>
 
         <assertj.core.version>3.3.0</assertj.core.version>
         <byte.buddy.version>1.2.2</byte.buddy.version>
         <commons.io.version>2.5</commons.io.version>
 
         <fcrepo.java.client.version>0.2.0</fcrepo.java.client.version>
-        <fcrepo.camel.webapp.version>4.5.0</fcrepo.camel.webapp.version>
-        <fcrepo.webapp.version>4.5.0</fcrepo.webapp.version>
-        <fuseki.version>2.3.0</fuseki.version>
+        <fcrepo.webapp.version>4.6.0</fcrepo.webapp.version>
+        <fuseki.version>2.3.1</fuseki.version>
 
-        <jena.arq.version>2.13.0</jena.arq.version>
+        <jena.arq.version>3.1.0</jena.arq.version>
 
         <junit.version>4.11</junit.version>
         <logback.version>1.1.3</logback.version>
@@ -219,9 +218,6 @@
                 <version>2.18.1</version>
                 <configuration>
                     <skipTests>${skipTests}</skipTests>
-                    <excludes>
-                        <exclude>**/SimpleFedoraRepositoryTest.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
 
@@ -229,6 +225,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.18.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <skipITs>${skipITs}</skipITs>
                 </configuration>
@@ -250,13 +253,6 @@
         <profile>
             <id>cargo-its</id>
             <dependencies>
-                <dependency>
-                    <groupId>org.apache.jena</groupId>
-                    <artifactId>jena-fuseki-war</artifactId>
-                    <version>${fuseki.version}</version>
-                    <type>war</type>
-                    <scope>test</scope>
-                </dependency>
 
                 <dependency>
                     <groupId>org.fcrepo</groupId>
@@ -266,15 +262,10 @@
                     <scope>test</scope>
                 </dependency>
 
-                <!--
-                this webapp needs to be installed locally first
-                see https://github.com/gushakov/fcrepo-camel-webapp
-                -->
-
                 <dependency>
-                    <groupId>org.fcrepo.camel</groupId>
-                    <artifactId>fcrepo-camel-webapp</artifactId>
-                    <version>${fcrepo.camel.webapp.version}</version>
+                    <groupId>org.apache.jena</groupId>
+                    <artifactId>jena-fuseki-war</artifactId>
+                    <version>${fuseki.version}</version>
                     <type>war</type>
                     <scope>test</scope>
                 </dependency>
@@ -417,17 +408,9 @@
                                     <container>
                                         <systemProperties>
                                             <FUSEKI_BASE>${project.build.directory}/etc/fuseki</FUSEKI_BASE>
-
-                                            <!--
-                                            these system properties will be substituted into application.properties
-                                            of fedora-camel-webapp
-                                            -->
-
-                                            <fcrepo.base.url>localhost:${tomcat.servlet.port}/${fcrepo.path}/rest
-                                            </fcrepo.base.url>
-                                            <triplestore.base.url>
-                                                localhost:${tomcat.servlet.port}/${fuseki.path}/${fuseki.db}/update
-                                            </triplestore.base.url>
+                                            <fcrepo.modeshape.configuration>
+                                                classpath:/config/minimal-default/repository.json
+                                            </fcrepo.modeshape.configuration>
                                         </systemProperties>
                                     </container>
                                     <configuration>
@@ -455,11 +438,6 @@
                                             <properties>
                                                 <context>${fuseki.path}</context>
                                             </properties>
-                                        </deployable>
-                                        <deployable>
-                                            <groupId>org.fcrepo.camel</groupId>
-                                            <artifactId>fcrepo-camel-webapp</artifactId>
-                                            <type>war</type>
                                         </deployable>
                                     </deployables>
                                 </configuration>

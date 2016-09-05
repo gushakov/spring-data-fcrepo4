@@ -2,8 +2,8 @@ package ch.unil.fcrepo4.assertj;
 
 import ch.unil.fcrepo4.client.FedoraResource;
 import ch.unil.fcrepo4.spring.data.repository.Vehicle;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 
 import java.io.InputStream;
 import java.util.Iterator;
