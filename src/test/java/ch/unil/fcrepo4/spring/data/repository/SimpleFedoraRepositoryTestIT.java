@@ -138,8 +138,9 @@ public class SimpleFedoraRepositoryTestIT {
     @Test
     public void testUpdateRelationProperty() throws Exception {
         Vehicle vehicle = vehicleRepo.findOne(9L);
-        vehicle.getOwner().getAddress().setZipCode(6789);
+        vehicle.getOwner().getAddress().setStreet("123 Center Avenue");
         vehicleRepo.save(vehicle);
-        assertThat(vehicleRepo.findOne(9L).getOwner().getAddress().getZipCode()).isEqualTo(6789);
+        assertThat(vehicleRepo.findOne(9L).getOwner().getAddress()
+                .getStreet()).isEqualTo("123 Center Avenue");
     }
 }

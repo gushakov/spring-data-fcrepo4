@@ -4,6 +4,8 @@ package ch.unil.fcrepo4.spring.data.core.convert.rdf;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -18,6 +20,8 @@ import java.util.Date;
  * @author gushakov
  */
 public class DateRdfDatatype extends BaseDatatype {
+
+    private static final Logger logger = LoggerFactory.getLogger(DateRdfDatatype.class);
 
     private static DateRdfDatatype instance;
 
@@ -46,7 +50,9 @@ public class DateRdfDatatype extends BaseDatatype {
     @Override
     public Object parse(String lexicalForm) throws DatatypeFormatException {
         try {
-            return Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(lexicalForm)));
+            logger.debug("Converting {} to Date instance", lexicalForm);
+            return Date.from(ZonedDateTime.from(DateTimeFormatter.ISO_ZONED_DATE_TIME
+                    .parse(lexicalForm)).toInstant());
         } catch (DateTimeParseException e) {
             throw new DatatypeFormatException(lexicalForm, instance, e.getMessage());
         }

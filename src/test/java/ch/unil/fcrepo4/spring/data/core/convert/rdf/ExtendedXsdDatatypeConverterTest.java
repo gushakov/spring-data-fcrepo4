@@ -4,9 +4,9 @@ import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
 import org.junit.Test;
 
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -55,4 +55,13 @@ public class ExtendedXsdDatatypeConverterTest {
                 .isEqualTo("9509aaf7-148b-44f2-9863-4f5a0ee62c6c");
     }
 
+
+    @Test
+    public void testZonedDateTime() throws Exception {
+        //2016-09-05T14:32:07.586Z[UTC]
+        ZonedDateTime.from(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse("2016-09-05T14:32:07.586Z[UTC]"));
+        ZonedDateTime.from(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse("2016-09-05T14:32:07.586Z"));
+        Date.from(ZonedDateTime.from(DateTimeFormatter.ISO_ZONED_DATE_TIME
+                .parse("2016-09-05T14:32:07.586Z")).toInstant());
+    }
 }
