@@ -23,8 +23,8 @@
         <byte.buddy.version>1.2.2</byte.buddy.version>
         <commons.io.version>2.5</commons.io.version>
 
-        <fcrepo.java.client.version>0.2.0</fcrepo.java.client.version>
-        <fcrepo.webapp.version>4.6.0</fcrepo.webapp.version>
+        <fcrepo.java.client.version>0.2.1</fcrepo.java.client.version>
+        <fcrepo.webapp.version>4.7.0</fcrepo.webapp.version>
         <fuseki.version>2.3.1</fuseki.version>
 
         <jena.arq.version>3.1.0</jena.arq.version>
@@ -252,6 +252,12 @@
         </profile>
 
         <profile>
+            <id>cargo-tomcat-run</id>
+            <properties>
+                <tomcat.start.mode>run</tomcat.start.mode>
+            </properties>
+        </profile>
+        <profile>
             <id>cargo-its</id>
             <dependencies>
 
@@ -410,7 +416,7 @@
                                         <systemProperties>
                                             <FUSEKI_BASE>${project.build.directory}/etc/fuseki</FUSEKI_BASE>
                                             <fcrepo.modeshape.configuration>
-                                                classpath:/config/minimal-default/repository.json
+                                                classpath:/config/file-simple/repository.json
                                             </fcrepo.modeshape.configuration>
                                         </systemProperties>
                                     </container>
